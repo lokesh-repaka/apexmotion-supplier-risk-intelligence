@@ -17,11 +17,11 @@
 | Metric | Current Count | Status |
 |---|---|---|
 | **Phase 1 Progress** | 6 / 6 Tasks Completed | Completed ✅ |
-| **Phase 2 Progress** | 3 / 5 Tasks Completed | In Progress 🔄 |
-| **Total Test Suites** | 9 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`, `test_localstack_bootstrap.py`, `test_redpanda_topics.py`) | PASSED ✅ |
-| **Total Test Cases** | 55 unit/golden tests | 100% Passing (0 failures) |
+| **Phase 2 Progress** | 4 / 5 Tasks Completed | In Progress 🔄 |
+| **Total Test Suites** | 10 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`, `test_localstack_bootstrap.py`, `test_redpanda_topics.py`, `test_neptune_emulation.py`) | PASSED ✅ |
+| **Total Test Cases** | 63 unit/golden tests | 100% Passing (0 failures) |
 | **Code Coverage (`src/`)** | **94%** statement coverage | Exceeds 80% DoD gate |
-| **Active Branch** | `feature/kafka-topic-setup` $\to$ `development` | Clean |
+| **Active Branch** | `feature/neptune-local-emulation` $\to$ `development` | Clean |
 
 ---
 
@@ -93,6 +93,12 @@
   - Auto-detection of local `rpk` CLI or running Docker container fallback (`apexmotion-redpanda`).
   - Idempotent topic existence checking and configurable broker address (`localhost:9092`).
   - 6 new unit tests (55 total).
+  - PR #8 merged into `development`.
+- **P2-4 · Neptune Local Emulation (`feature/neptune-local-emulation`)**: Completed ✅
+  - `docker-compose.yml`: Added `neptune` service running `tinkerpop/gremlin-server:3.7.0` on port 8182 with container name `apexmotion-neptune`, healthcheck, and persistent volume `neptune_data`.
+  - `scripts/neptune_seed.cypher`: Authored OpenCypher seed schema defining core nodes (`Supplier`, `Component`, `Assembly`, `Plant`, `Program`, `Contract`, `NewsEvent`, `GeopoliticalRisk`) and supply chain edges (`SUPPLIES`, `PART_OF_BOM`, `ASSEMBLED_AT`, `ALLOCATED_TO`, `TIER_1_OF`, `BOUND_BY`, `AFFECTS`, `THREATENS`), including NanoCore golden reference entities (`SUP-NC-882`, `MCU-X91`, `PLT-MUC-01`).
+  - `scripts/neptune_smoke_test.sh`: Created executable bash script with strict error handling (`set -euo pipefail`), supporting `--dry-run` offline verification and live HTTP `/openCypher` / Gremlin query execution against port 8182.
+  - 8 new unit tests in `tests/unit/test_neptune_emulation.py` (63 total passing tests across suite, 94% coverage).
 
 ---
 
@@ -117,9 +123,11 @@
    - Audit trail archived into S3 Object Lock in COMPLIANCE mode with 7-year retention.
 10. **Partitioned Event Ingestion**:
     - Real-time streams are pre-partitioned (3 partitions) to support high throughput (1.11M events/day) without consumer starvation.
+11. **Knowledge Graph Topology Isolation**:
+    - Graph database emulation operates on standard port 8182 within `apexmotion-network`, seed Cypher adheres strictly to golden multi-tier supply chain topology.
 
 ---
 
 ## 5. Next Planned Tasks
-- **P2-4**: Neptune local emulation (`docker-compose.yml` Gremlin Server integration).
-- **P2-5**: Makefile.
+- **P2-5**: Makefile (`make run-api`, `make run-worker`, `make run-frontend`, `make test`, `make lint`, `make seed`).
+- **P3-1**: SQLAlchemy 2 async models (`src/database/models.py`).

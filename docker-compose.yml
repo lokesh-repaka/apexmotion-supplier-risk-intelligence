@@ -120,6 +120,26 @@ services:
       - apexmotion-network
 
   # ----------------------------------------------------------------------------
+  # Neptune / Gremlin Server (Knowledge Graph Emulation)
+  # ----------------------------------------------------------------------------
+  neptune:
+    image: tinkerpop/gremlin-server:3.7.0
+    container_name: apexmotion-neptune
+    restart: unless-stopped
+    ports:
+      - "8182:8182"
+    volumes:
+      - neptune_data:/opt/gremlin-server/data
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z localhost 8182 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - apexmotion-network
+
+  # ----------------------------------------------------------------------------
   # Langfuse (LLM Observability Server)
   # ----------------------------------------------------------------------------
   langfuse:
@@ -151,6 +171,8 @@ volumes:
   redpanda_data:
     driver: local
   localstack_data:
+    driver: local
+  neptune_data:
     driver: local
 
 # ------------------------------------------------------------------------------

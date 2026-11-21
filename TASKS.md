@@ -35,7 +35,7 @@ Sub-tasks in the same phase that do not share files can be open at the same time
 |------|--------|--------|
 | P2-1 · `docker-compose.yml` — PostgreSQL, Redis, Redpanda (Kafka), LocalStack (S3 + KMS), Langfuse | `feature/docker-compose-local` | Completed ✅ |
 | P2-2 · LocalStack bootstrap script — creates S3 WORM bucket, KMS ECDSA key, and IAM role stubs | `feature/localstack-bootstrap` | Completed ✅ |
-| P2-3 · Redpanda (local Kafka) topic creation script — `supplier-events`, `risk-alerts`, `hitl-required`, `audit-events` | `feature/kafka-topic-setup` | Pending ❌ |
+| P2-3 · Redpanda (local Kafka) topic creation script — `supplier-events`, `risk-alerts`, `hitl-required`, `audit-events` | `feature/kafka-topic-setup` | Completed ✅ |
 | P2-4 · Neptune local emulation — Gremlin Server Docker image, seed Cypher schema, smoke-test OpenCypher query | `feature/neptune-local-emulation` | Pending ❌ |
 | P2-5 · Makefile — `make run-api`, `make run-worker`, `make run-frontend`, `make test`, `make lint`, `make seed` | `feature/makefile-dev-commands` | Pending ❌ |
 

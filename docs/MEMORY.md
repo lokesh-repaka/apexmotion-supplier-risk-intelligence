@@ -17,11 +17,11 @@
 | Metric | Current Count | Status |
 |---|---|---|
 | **Phase 1 Progress** | 6 / 6 Tasks Completed | Completed ✅ |
-| **Phase 2 Progress** | 2 / 5 Tasks Completed | In Progress 🔄 |
-| **Total Test Suites** | 8 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`, `test_localstack_bootstrap.py`) | PASSED ✅ |
-| **Total Test Cases** | 49 unit/golden tests | 100% Passing (0 failures) |
+| **Phase 2 Progress** | 3 / 5 Tasks Completed | In Progress 🔄 |
+| **Total Test Suites** | 9 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`, `test_localstack_bootstrap.py`, `test_redpanda_topics.py`) | PASSED ✅ |
+| **Total Test Cases** | 55 unit/golden tests | 100% Passing (0 failures) |
 | **Code Coverage (`src/`)** | **94%** statement coverage | Exceeds 80% DoD gate |
-| **Active Branch** | `feature/localstack-bootstrap` $\to$ `development` | Clean |
+| **Active Branch** | `feature/kafka-topic-setup` $\to$ `development` | Clean |
 
 ---
 
@@ -83,6 +83,16 @@
     - IAM role stubs (`apexmotion-api-role`, `apexmotion-worker-role`) with execution trust policies.
   - Idempotent execution and automatic mounting in `docker-compose.yml` (`/etc/localstack/init/ready.d/01-bootstrap.sh`).
   - 6 new unit tests (49 total).
+  - PR #7 merged into `development`.
+- **P2-3 · Redpanda Topic Creation Script (`feature/kafka-topic-setup`)**: Completed ✅
+  - `scripts/redpanda_topics.sh`: Automated topic setup for the 4 core streaming event bus topics:
+    - `supplier-events` (3 partitions, replication=1)
+    - `risk-alerts` (3 partitions, replication=1)
+    - `hitl-required` (3 partitions, replication=1)
+    - `audit-events` (3 partitions, replication=1)
+  - Auto-detection of local `rpk` CLI or running Docker container fallback (`apexmotion-redpanda`).
+  - Idempotent topic existence checking and configurable broker address (`localhost:9092`).
+  - 6 new unit tests (55 total).
 
 ---
 
@@ -105,10 +115,11 @@
    - Local backing stores operate on an isolated bridge network with memory bounding to guarantee reproducible local development without external cloud leakage.
 9. **WORM Immutability (BR-RULE-007)**:
    - Audit trail archived into S3 Object Lock in COMPLIANCE mode with 7-year retention.
+10. **Partitioned Event Ingestion**:
+    - Real-time streams are pre-partitioned (3 partitions) to support high throughput (1.11M events/day) without consumer starvation.
 
 ---
 
 ## 5. Next Planned Tasks
-- **P2-3**: Redpanda topic creation script (`scripts/redpanda_topics.sh`).
 - **P2-4**: Neptune local emulation (`docker-compose.yml` Gremlin Server integration).
 - **P2-5**: Makefile.

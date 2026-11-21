@@ -1,0 +1,160 @@
+# ==============================================================================
+# ApexMotion Supplier Risk Intelligence Platform — Local Development Compose
+# Declares local infrastructure backing stores:
+# - PostgreSQL 16 (Aurora PG emulation)
+# - Redis 7 (ElastiCache emulation)
+# - Redpanda (Apache Kafka / MSK single-node emulation)
+# - LocalStack (AWS S3 WORM + AWS KMS ECDSA emulation)
+# - Langfuse (LLM Tracing & Observability)
+# ==============================================================================
+
+name: apexmotion-dev
+
+services:
+  # ----------------------------------------------------------------------------
+  # PostgreSQL (Aurora PostgreSQL Emulation)
+  # ----------------------------------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    container_name: apexmotion-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: apexmotion
+      POSTGRES_USER: apexmotion_app
+      POSTGRES_PASSWORD: local_dev_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U apexmotion_app -d apexmotion"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    networks:
+      - apexmotion-network
+
+  # ----------------------------------------------------------------------------
+  # Redis (ElastiCache Cache Emulation)
+  # ----------------------------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: apexmotion-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 3s
+    networks:
+      - apexmotion-network
+
+  # ----------------------------------------------------------------------------
+  # Redpanda (Amazon MSK / Kafka API Compatible Message Broker)
+  # ----------------------------------------------------------------------------
+  redpanda:
+    image: docker.redpanda.com/redpandadata/redpanda:v23.3.10
+    container_name: apexmotion-redpanda
+    restart: unless-stopped
+    command:
+      - redpanda
+      - start
+      - --smp
+      - "1"
+      - --memory
+      - "1G"
+      - --reserve-memory
+      - "0M"
+      - --overprovisioned
+      - --node-id
+      - "0"
+      - --check=false
+      - --kafka-addr
+      - PLAINTEXT://0.0.0.0:29092,OUTSIDE://0.0.0.0:9092
+      - --advertise-kafka-addr
+      - PLAINTEXT://redpanda:29092,OUTSIDE://localhost:9092
+    ports:
+      - "9092:9092"
+      - "9644:9644"
+    volumes:
+      - redpanda_data:/var/lib/redpanda/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9644/v1/status/ready || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - apexmotion-network
+
+  # ----------------------------------------------------------------------------
+  # LocalStack (AWS S3 & AWS KMS Emulation)
+  # ----------------------------------------------------------------------------
+  localstack:
+    image: localstack/localstack:3.4
+    container_name: apexmotion-localstack
+    restart: unless-stopped
+    ports:
+      - "4566:4566"
+    environment:
+      SERVICES: s3,kms,iam
+      AWS_DEFAULT_REGION: eu-central-1
+      PERSISTENCE: 1
+    volumes:
+      - localstack_data:/var/lib/localstack
+      - /var/run/docker.sock:/var/run/docker.sock
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:4566/_localstack/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    networks:
+      - apexmotion-network
+
+  # ----------------------------------------------------------------------------
+  # Langfuse (LLM Observability Server)
+  # ----------------------------------------------------------------------------
+  langfuse:
+    image: ghcr.io/langfuse/langfuse:2
+    container_name: apexmotion-langfuse
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://apexmotion_app:local_dev_password@postgres:5432/apexmotion
+      NEXTAUTH_SECRET: local_dev_langfuse_secret_min_32_chars_long
+      SALT: local_dev_langfuse_salt_min_32_chars_long
+      NEXTAUTH_URL: http://localhost:3000
+      TELEMETRY_ENABLED: "false"
+    networks:
+      - apexmotion-network
+
+# ------------------------------------------------------------------------------
+# Persistent Storage Volumes
+# ------------------------------------------------------------------------------
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  redpanda_data:
+    driver: local
+  localstack_data:
+    driver: local
+
+# ------------------------------------------------------------------------------
+# Shared Container Network
+# ------------------------------------------------------------------------------
+networks:
+  apexmotion-network:
+    driver: bridge

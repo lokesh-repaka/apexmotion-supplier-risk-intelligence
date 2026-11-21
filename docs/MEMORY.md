@@ -16,11 +16,12 @@
 
 | Metric | Current Count | Status |
 |---|---|---|
-| **Phase 1 Progress** | 6 / 6 Tasks Completed | Completed ✅ (Phase 1 Complete) |
-| **Total Test Suites** | 6 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`) | PASSED ✅ |
-| **Total Test Cases** | 38 unit/golden tests | 100% Passing (0 failures) |
+| **Phase 1 Progress** | 6 / 6 Tasks Completed | Completed ✅ |
+| **Phase 2 Progress** | 1 / 5 Tasks Completed | In Progress 🔄 |
+| **Total Test Suites** | 7 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`) | PASSED ✅ |
+| **Total Test Cases** | 43 unit/golden tests | 100% Passing (0 failures) |
 | **Code Coverage (`src/`)** | **94%** statement coverage | Exceeds 80% DoD gate |
-| **Active Branch** | `feature/ci-github-actions` $\to$ `development` | Clean |
+| **Active Branch** | `feature/docker-compose-local` $\to$ `development` | Clean |
 
 ---
 
@@ -61,6 +62,18 @@
   - `Dockerfile.worker`: Background LangGraph event consumer container with non-root execution.
   - `.dockerignore`: Excluded git, virtualenvs, bytecode, test caches, and secret credentials.
   - 6 new unit tests (38 total).
+  - PR #5 merged into `development`.
+
+### Phase 2: Local Dev Environment
+- **P2-1 · Local Docker Compose (`feature/docker-compose-local`)**: Completed ✅
+  - `docker-compose.yml`: Declared 5 local backing stores matching `.env.example`:
+    - PostgreSQL 16 Alpine (`5432:5432`) with database healthcheck and persistent volume.
+    - Redis 7 Alpine (`6379:6379`) with ping healthcheck and persistent volume.
+    - Redpanda (`9092:9092`, `9644:9644`) with single-node flags and readiness probe.
+    - LocalStack (`4566:4566`) with S3 and KMS emulation services.
+    - Langfuse v2 (`3000:3000`) with PostgreSQL dependency health gating.
+  - Isolated bridge network `apexmotion-network` and 4 named persistent volumes.
+  - 5 new unit tests (43 total).
 
 ---
 
@@ -79,13 +92,13 @@
    - Liveness probes (`/health`) never perform network or database I/O, preventing cascading pod crashloops.
 7. **Least-Privilege Containers**:
    - Production Docker images strictly prohibit root execution, enforcing unprivileged `appuser` (UID 10001) runtime.
+8. **Local Dev Store Isolation**:
+   - Local backing stores operate on an isolated bridge network with memory bounding to guarantee reproducible local development without external cloud leakage.
 
 ---
 
 ## 5. Next Planned Tasks
-- **Phase 2 — Local Dev Environment**:
-  - **P2-1**: `docker-compose.yml` — PostgreSQL, Redis, Redpanda (Kafka), LocalStack (S3 + KMS), Langfuse.
-  - **P2-2**: LocalStack bootstrap script.
-  - **P2-3**: Redpanda topic creation script.
-  - **P2-4**: Neptune local emulation.
-  - **P2-5**: Makefile.
+- **P2-2**: LocalStack bootstrap script (`scripts/localstack_bootstrap.sh`).
+- **P2-3**: Redpanda topic creation script (`scripts/redpanda_topics.sh`).
+- **P2-4**: Neptune local emulation.
+- **P2-5**: Makefile.

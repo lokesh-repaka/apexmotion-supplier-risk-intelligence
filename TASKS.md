@@ -48,7 +48,7 @@ Sub-tasks in the same phase that do not share files can be open at the same time
 
 | Task | Branch | Status |
 |------|--------|--------|
-| P3-1 · SQLAlchemy 2 async models — `suppliers`, `risk_alerts`, `hitl_approvals`, `audit_logs`, `agent_runs` (`src/database/models.py`) | `feature/database-sqlalchemy-models` | Pending ❌ |
+| P3-1 · SQLAlchemy 2 async models — `suppliers`, `risk_alerts`, `hitl_approvals`, `audit_logs`, `agent_runs` (`src/database/models.py`) | `feature/database-sqlalchemy-models` | Completed ✅ |
 | P3-2 · Database schema DDL (`schema.sql`) and Alembic migration baseline | `feature/database-schema-migrations` | Pending ❌ |
 | P3-3 · Repository layer — async CRUD for all five tables (`src/database/repositories/`) | `feature/database-repository-layer` | Pending ❌ |
 | P3-4 · `hitl_approvals.token_hash` unique index — prevents replay attacks at the database level | `feature/database-token-hash-index` | Pending ❌ |

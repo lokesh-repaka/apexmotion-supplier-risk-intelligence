@@ -18,10 +18,11 @@
 |---|---|---|
 | **Phase 1 Progress** | 6 / 6 Tasks Completed | Completed ✅ |
 | **Phase 2 Progress** | 5 / 5 Tasks Completed | Completed ✅ |
-| **Total Test Suites** | 11 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`, `test_localstack_bootstrap.py`, `test_redpanda_topics.py`, `test_neptune_emulation.py`, `test_makefile.py`) | PASSED ✅ |
-| **Total Test Cases** | 69 unit/golden tests | 100% Passing (0 failures) |
-| **Code Coverage (`src/`)** | **94%** statement coverage | Exceeds 80% DoD gate |
-| **Active Branch** | `feature/makefile-dev-commands` $\to$ `development` | Clean |
+| **Phase 3 Progress** | 1 / 5 Tasks Completed | In Progress 🔄 |
+| **Total Test Suites** | 12 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`, `test_localstack_bootstrap.py`, `test_redpanda_topics.py`, `test_neptune_emulation.py`, `test_makefile.py`, `test_database_models.py`) | PASSED ✅ |
+| **Total Test Cases** | 77 unit/golden tests | 100% Passing (0 failures) |
+| **Code Coverage (`src/`)** | **95%** statement coverage | Exceeds 80% DoD gate |
+| **Active Branch** | `feature/database-sqlalchemy-models` $\to$ `development` | Clean |
 
 ---
 
@@ -104,6 +105,18 @@
   - `Makefile`: Centralized developer automation defining `run-api`, `run-worker`, `run-frontend`, `test`, `test-unit`, `test-golden`, `test-coverage`, `lint`, `format`, `type-check`, `seed`, `up`, `down`, and `clean`.
   - Enforced strict offline isolation flags (`USE_LOCALSTACK=true USE_MOCK_LLM=true USE_LOCAL_KAFKA=true`) within `test` and `test-coverage` targets.
   - 6 new unit tests in `tests/unit/test_makefile.py` (69 total passing tests across suite, 94% coverage).
+  - PR #10 merged into `development`.
+
+### Phase 3: Persistence Layer (Aurora PostgreSQL)
+- **P3-1 · SQLAlchemy 2.0 Async Models (`feature/database-sqlalchemy-models`)**: Completed ✅
+  - `src/database/models.py`: Implemented DeclarativeBase and 5 core operational models matching CLAUDE.md Section 9:
+    - `Supplier` (`suppliers`): UUID primary key, CheckConstraints on `tier` (1..3) and `risk_score` (0..1), unique `neptune_node_id`.
+    - `RiskAlert` (`risk_alerts`): CheckConstraint on `risk_level` (CRITICAL, HIGH, MEDIUM, LOW), `days_of_cover` (NUMERIC 8,2), `financial_exposure` (NUMERIC 14,2 Decimal precision).
+    - `HITLApproval` (`hitl_approvals`): `amount_usd` (NUMERIC 14,2), `spend_tier` CheckConstraint, unique index on `token_hash` for cryptographic anti-replay protection.
+    - `AuditLog` (`audit_logs`): Immutable forensic ledger with autoincrement ID, JSONB states, and before_update/before_delete event listeners strictly prohibiting mutation (BR-RULE-007).
+    - `AgentRun` (`agent_runs`): Multi-agent execution telemetry, token usage, duration, and Langfuse trace link.
+  - Cross-dialect portability: Native PostgreSQL types (`JSONB`, `ARRAY`) with fallback SQLite variants for offline unit testing.
+  - 8 new unit tests in `tests/unit/test_database_models.py` including async in-memory SQLite schema validation (77 total passing tests across suite, 95% statement coverage).
 
 ---
 
@@ -132,10 +145,12 @@
     - Graph database emulation operates on standard port 8182 within `apexmotion-network`, seed Cypher adheres strictly to golden multi-tier supply chain topology.
 12. **Standardized Command Automation**:
     - Developer operations governed through a canonical Makefile, eliminating configuration drift and enforcing offline test flags.
+13. **Relational Model Purity & Anti-Replay Security**:
+    - Aurora PostgreSQL models strictly enforce `NUMERIC(14,2)` for financial calculations, unique constraints on cryptographic `token_hash`, and programmatic append-only enforcement on audit logs.
 
 ---
 
 ## 5. Next Planned Tasks
 - **Phase 3 — Persistence Layer (Aurora PostgreSQL)**:
-  - **P3-1**: SQLAlchemy 2 async models — `suppliers`, `risk_alerts`, `hitl_approvals`, `audit_logs`, `agent_runs` (`src/database/models.py`).
   - **P3-2**: Database schema DDL (`schema.sql`) and Alembic migration baseline.
+  - **P3-3**: Repository layer — async CRUD for all five tables (`src/database/repositories/`).

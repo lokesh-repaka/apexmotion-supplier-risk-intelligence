@@ -1,6 +1,6 @@
 You have access to the project's authoritative documentation: `TASKS.md`, `CLAUDE.md`, `GEMINI.md`, `.agents/rules/`, and architecture specifications in `docs/` (`HLD_*.md`, `LLD_*.md`, `PRD_*.md`, `BRD_*.md`, `FRD_*.md`).
 
-Go ahead and complete **P3-1 · SQLAlchemy 2 async models (`src/database/models.py`)**, as defined in `TASKS.md`.
+Go ahead and complete **P3-2 · Database schema DDL (`schema.sql`) and Alembic migration baseline**, as defined in `TASKS.md`.
 
 ---
 

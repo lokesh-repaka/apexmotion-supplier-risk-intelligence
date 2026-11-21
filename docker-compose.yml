@@ -109,6 +109,7 @@ services:
     volumes:
       - localstack_data:/var/lib/localstack
       - /var/run/docker.sock:/var/run/docker.sock
+      - ./scripts/localstack_bootstrap.sh:/etc/localstack/init/ready.d/01-bootstrap.sh:ro
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:4566/_localstack/health || exit 1"]
       interval: 10s

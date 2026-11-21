@@ -1,6 +1,6 @@
 You have access to the project's authoritative documentation: `TASKS.md`, `CLAUDE.md`, `GEMINI.md`, `.agents/rules/`, and architecture specifications in `docs/` (`HLD_*.md`, `LLD_*.md`, `PRD_*.md`, `BRD_*.md`, `FRD_*.md`).
 
-Go ahead and complete **P1-3 · Structured JSON logging (`src/core/logging.py`)**, as defined in `TASKS.md`.
+Go ahead and complete **P1-4 · FastAPI app skeleton (`src/api/main.py`)**, as defined in `TASKS.md`.
 
 ---
 
@@ -115,14 +115,19 @@ Emit a structured review scorecard with prioritized, actionable feedback:
 ---
 
 ### 6. Housekeeping & Tracking
+* **Test Ledger:** Update `docs/TEST_CASES.xlsx` with any new test cases, IDs, and pass statuses.
+* **Security Ledger:** Update `docs/SECURITY_VULNERABILITIES.xlsx` with any audited findings, severity ratings, and remediation notes.
 * **Task Tracker:** In `TASKS.md`, mark the task as `Completed ✅` and update the phase progress.
 * **Cost & Token Audit:** Run the token governance tracker to verify context caching efficiency and subagent spend:
   ```bash
   python3 scripts/antigravity_usage/token_tracker.py
   ```
 * **Git Hygiene:** Verify `.gitignore` ignores all local caches (`.pytest_cache/`, `.ruff_cache/`, `.mypy_cache/`, `.venv/`).
+* **Honest Memory:** In `docs/MEMORY.md`, record the verified test counts and status under Honest Status.
 
 ---
+
+
 
 ### 7. GitHub PR & Terminal Merge (`gh`)
 * **Atomic Commit:** Stage and commit changes using conventional commits (the Antigravity pre-commit hook will auto-validate with `ruff` and `mypy`):

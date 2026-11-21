@@ -16,11 +16,11 @@
 
 | Metric | Current Count | Status |
 |---|---|---|
-| **Phase 1 Progress** | 3 / 6 Tasks Completed | In Progress 🔄 |
-| **Total Test Suites** | 3 (`test_project_structure.py`, `test_config.py`, `test_logging.py`) | PASSED ✅ |
-| **Total Test Cases** | 17 unit/golden tests | 100% Passing (0 failures) |
-| **Code Coverage (`src.core`)** | **99%** statement coverage | Exceeds 80% DoD gate |
-| **Active Branch** | `feature/core-structured-logging` $\to$ `development` | Clean |
+| **Phase 1 Progress** | 4 / 6 Tasks Completed | In Progress 🔄 |
+| **Total Test Suites** | 4 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`) | PASSED ✅ |
+| **Total Test Cases** | 25 unit/golden tests | 100% Passing (0 failures) |
+| **Code Coverage (`src/`)** | **95%** statement coverage | Exceeds 80% DoD gate |
+| **Active Branch** | `feature/api-app-skeleton` $\to$ `development` | Clean |
 
 ---
 
@@ -41,6 +41,13 @@
   - Distributed `trace_id` propagated via `contextvars`.
   - Automatic recursive PII redaction (emails, cards, phones, bearer tokens).
   - 99% statement coverage across 7 unit tests.
+  - PR #2 merged into `development`.
+- **P1-4 · FastAPI App Skeleton (`feature/api-app-skeleton`)**: Completed ✅
+  - `src/api/main.py`: FastAPI app instantiation, async lifespan context manager, CORS middleware.
+  - Request ID / Trace ID middleware propagating `X-Request-ID` and `X-Trace-ID` and binding contextvars.
+  - Standardized error envelopes conforming to CLAUDE.md Section 10 (`AppException`, `RequestValidationError`, `StarletteHTTPException`, `Exception`).
+  - Traceback masking on unhandled 500 exceptions to prevent internal credential disclosure.
+  - 92% coverage on `src/api/main.py`, 8 new unit tests (25 total).
 
 ---
 
@@ -53,10 +60,11 @@
    - Zero raw PII in application logs.
 4. **Offline Isolation**:
    - 100% of unit tests execute offline using local mock flags (`USE_LOCALSTACK=true`, `USE_MOCK_LLM=true`, `USE_LOCAL_KAFKA=true`).
+5. **Secure Error Envelopes**:
+   - Error responses adhere to `{"error": {"code": ..., "message": ..., "trace_id": ...}}` with zero internal stack traces leaking to clients.
 
 ---
 
 ## 5. Next Planned Tasks
-- **P1-4**: FastAPI app skeleton (`src/api/main.py`), lifespan, `request_id` middleware, CORS, global exception handler.
 - **P1-5**: Health routes (`GET /health`, `GET /health/ready`).
 - **P1-6**: GitHub Actions CI pipeline.

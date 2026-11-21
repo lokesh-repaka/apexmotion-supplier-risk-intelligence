@@ -1,0 +1,2732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ApexMotion · Supplier Risk Intelligence Platform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-base: #060911;
+      --bg-surface: #0c111d;
+      --bg-surface-elevated: #141b2d;
+      --bg-surface-hover: #1b243b;
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-medium: rgba(255, 255, 255, 0.15);
+      --border-accent: rgba(56, 189, 248, 0.35);
+
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+
+      --cyan-400: #38bdf8;
+      --cyan-500: #0ea5e9;
+      --rose-400: #fb7185;
+      --rose-500: #f43f5e;
+      --amber-400: #fbbf24;
+      --emerald-400: #34d399;
+      --emerald-500: #10b981;
+      --indigo-400: #818cf8;
+      --purple-400: #c084fc;
+
+      --sidebar-width: 260px;
+      --header-height: 60px;
+      --triad-height: 32px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-base);
+      color: var(--text-primary);
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      overflow-x: hidden;
+    }
+
+    code, .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* ========================================= */
+    /* LEFT SIDEBAR NAVIGATION                   */
+    /* ========================================= */
+    aside.sidebar {
+      width: var(--sidebar-width);
+      background: var(--bg-surface);
+      border-right: 1px solid var(--border-subtle);
+      height: 100vh;
+      position: fixed;
+      top: 0;
+      left: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      z-index: 100;
+    }
+
+    .brand-section {
+      padding: 16px 18px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .brand-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 9px;
+      background: linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 18px rgba(14, 165, 233, 0.4);
+      flex-shrink: 0;
+    }
+
+    .brand-icon svg {
+      width: 20px;
+      height: 20px;
+      fill: #ffffff;
+    }
+
+    .brand-name {
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: -0.3px;
+      color: #fff;
+    }
+
+    .brand-tier {
+      font-size: 10px;
+      color: var(--cyan-400);
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .nav-group {
+      padding: 14px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .nav-label {
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--text-muted);
+      padding: 8px 10px 4px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 9px 12px;
+      border-radius: 8px;
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      border: 1px solid transparent;
+      background: transparent;
+      width: 100%;
+      text-align: left;
+    }
+
+    .nav-item:hover {
+      color: #fff;
+      background: var(--bg-surface-elevated);
+    }
+
+    .nav-item.active {
+      color: var(--cyan-400);
+      background: rgba(14, 165, 233, 0.12);
+      border-color: rgba(14, 165, 233, 0.3);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .nav-item-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nav-item-left svg {
+      width: 17px;
+      height: 17px;
+      opacity: 0.85;
+    }
+
+    .nav-item.active .nav-item-left svg {
+      opacity: 1;
+      stroke: var(--cyan-400);
+    }
+
+    .nav-badge-pill {
+      background: var(--rose-500);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 2px 7px;
+      border-radius: 10px;
+    }
+
+    .nav-badge-cyan {
+      background: rgba(14, 165, 233, 0.2);
+      color: var(--cyan-400);
+      font-size: 10px;
+      font-weight: 800;
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-family: monospace;
+    }
+
+    /* Sidebar Footer / User Persona */
+    .sidebar-footer {
+      padding: 12px 14px;
+      border-top: 1px solid var(--border-subtle);
+      background: rgba(8, 12, 22, 0.7);
+    }
+
+    .persona-card {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .persona-avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #0284c7, #2563eb);
+      color: white;
+      font-size: 11px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .persona-meta {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      flex: 1;
+    }
+
+    .persona-name {
+      font-size: 12px;
+      font-weight: 700;
+      color: #fff;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+
+    .persona-dropdown {
+      background: transparent;
+      border: none;
+      color: var(--cyan-400);
+      font-size: 10px;
+      font-weight: 700;
+      outline: none;
+      cursor: pointer;
+      padding: 0;
+    }
+
+    /* ========================================= */
+    /* MAIN CONTENT WRAPPER                      */
+    /* ========================================= */
+    .app-main {
+      margin-left: var(--sidebar-width);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      min-height: 100vh;
+    }
+
+    /* Top Header Bar */
+    header.top-header {
+      height: var(--header-height);
+      background: rgba(12, 17, 29, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-subtle);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .breadcrumb span.current {
+      color: #fff;
+      font-weight: 700;
+    }
+
+    .incident-tag-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(244, 63, 94, 0.12);
+      border: 1px solid rgba(244, 63, 94, 0.35);
+      color: #fda4af;
+      padding: 3px 9px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .live-pulse-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--rose-500);
+      box-shadow: 0 0 8px var(--rose-500);
+      animation: pulseAnim 1.6s infinite;
+    }
+
+    @keyframes pulseAnim {
+      0% { transform: scale(0.9); opacity: 0.8; }
+      50% { transform: scale(1.3); opacity: 1; }
+      100% { transform: scale(0.9); opacity: 0.8; }
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .system-status-chip {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      color: #6ee7b7;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
+
+    .code-roadmap-trigger {
+      background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
+      color: #ffffff;
+      border: none;
+      padding: 6px 13px;
+      border-radius: 7px;
+      font-size: 12px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      cursor: pointer;
+      box-shadow: 0 2px 10px rgba(2, 132, 199, 0.3);
+      transition: all 0.2s;
+    }
+
+    .code-roadmap-trigger:hover {
+      filter: brightness(1.15);
+      transform: translateY(-1px);
+    }
+
+    /* PERSISTENT ARCHITECTURAL TRIAD BANNER */
+    .triad-banner {
+      background: linear-gradient(90deg, #0b1329 0%, #080f20 50%, #0b1329 100%);
+      border-bottom: 1px solid var(--border-subtle);
+      height: var(--triad-height);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .triad-pillar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .triad-pill-ai { color: var(--purple-400); }
+    .triad-pill-math { color: var(--emerald-400); }
+    .triad-pill-hitl { color: var(--amber-400); }
+
+    /* Content Container */
+    .content-viewport {
+      padding: 22px 24px;
+      flex: 1;
+      max-width: 1560px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    /* View Sections */
+    .view-panel {
+      display: none;
+      animation: tabFadeIn 0.2s ease-in-out;
+    }
+
+    .view-panel.active {
+      display: block;
+    }
+
+    @keyframes tabFadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Common Card Styles */
+    .panel-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.2);
+      margin-bottom: 20px;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .panel-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Stat KPI Cards */
+    .stat-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .stat-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 11px;
+      padding: 16px 18px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+    }
+
+    .stat-card::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+    }
+
+    .stat-card.red::after { background: var(--rose-500); }
+    .stat-card.amber::after { background: var(--amber-400); }
+    .stat-card.cyan::after { background: var(--cyan-400); }
+    .stat-card.green::after { background: var(--emerald-400); }
+
+    .stat-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+
+    .stat-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text-secondary);
+    }
+
+    .stat-icon {
+      width: 26px;
+      height: 26px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+    }
+
+    .stat-value {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+
+    .stat-caption {
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Hero Banner */
+    .hero-alert-banner {
+      background: linear-gradient(90deg, rgba(244, 63, 94, 0.12) 0%, rgba(14, 19, 32, 0.95) 100%);
+      border: 1px solid rgba(244, 63, 94, 0.35);
+      border-radius: 12px;
+      padding: 18px 22px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 6px 20px rgba(244, 63, 94, 0.08);
+    }
+
+    .hero-alert-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .hero-badge-circle {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      background: rgba(244, 63, 94, 0.2);
+      border: 1px solid var(--rose-500);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .hero-badge-circle svg {
+      width: 24px;
+      height: 24px;
+      stroke: var(--rose-400);
+    }
+
+    .hero-heading {
+      font-size: 16px;
+      font-weight: 800;
+      color: #ffffff;
+      margin-bottom: 4px;
+    }
+
+    .hero-subheading {
+      font-size: 12px;
+      color: #cbd5e1;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Buttons */
+    .btn-solid-primary {
+      background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+      color: #fff;
+      font-weight: 700;
+      font-size: 12px;
+      padding: 9px 16px;
+      border-radius: 7px;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      box-shadow: 0 3px 10px rgba(14, 165, 233, 0.3);
+      transition: all 0.2s;
+    }
+
+    .btn-solid-primary:hover {
+      filter: brightness(1.15);
+      transform: translateY(-1px);
+    }
+
+    .btn-outline {
+      background: var(--bg-surface-elevated);
+      color: var(--text-primary);
+      font-weight: 600;
+      font-size: 12px;
+      padding: 8px 14px;
+      border-radius: 7px;
+      border: 1px solid var(--border-medium);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-outline:hover {
+      background: var(--bg-surface-hover);
+    }
+
+    /* Flow Stepper Bar at bottom of screens */
+    .flow-nav-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 18px;
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 9px;
+      margin-top: 18px;
+    }
+
+    .flow-nav-left {
+      font-size: 12px;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Multi-column Layouts */
+    .dashboard-grid-2 {
+      display: grid;
+      grid-template-columns: 1.55fr 1fr;
+      gap: 20px;
+    }
+
+    /* Runway Gauge */
+    .runway-comparison-box {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .runway-bar-container {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-top: 12px;
+    }
+
+    .runway-track-row {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .runway-track-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+    }
+
+    .progress-track {
+      height: 12px;
+      border-radius: 6px;
+      background: #080c16;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: 6px;
+      transition: width 0.5s ease;
+    }
+
+    .gap-danger-zone {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      background: repeating-linear-gradient(
+        -45deg,
+        rgba(244, 63, 94, 0.4),
+        rgba(244, 63, 94, 0.4) 6px,
+        rgba(244, 63, 94, 0.7) 6px,
+        rgba(244, 63, 94, 0.7) 12px
+      );
+      border-radius: 4px;
+    }
+
+    /* Blast Radius Grid */
+    .blast-chips-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .blast-chip {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .blast-chip-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 7px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 14px;
+    }
+
+    .blast-chip-content {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .blast-chip-label {
+      font-size: 10px;
+      color: var(--text-muted);
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .blast-chip-val {
+      font-size: 12px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    /* Multi-plant burn table */
+    .mini-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    .mini-table th {
+      text-align: left;
+      padding: 8px 10px;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border-subtle);
+      font-size: 11px;
+      text-transform: uppercase;
+    }
+
+    .mini-table td {
+      padding: 8px 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      color: var(--text-secondary);
+    }
+
+    /* Signal Feed Cards */
+    .signal-card-box {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 9px;
+      padding: 14px 16px;
+      margin-bottom: 12px;
+      transition: all 0.15s ease;
+    }
+
+    .signal-card-box:hover, .signal-card-box.selected {
+      border-color: var(--cyan-400);
+      background: var(--bg-surface-hover);
+    }
+
+    .signal-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+
+    .signal-status-pill {
+      font-size: 10px;
+      font-weight: 800;
+      padding: 2px 7px;
+      border-radius: 5px;
+      text-transform: uppercase;
+    }
+
+    .signal-status-pill.crit {
+      background: rgba(244, 63, 94, 0.18);
+      color: #fda4af;
+      border: 1px solid rgba(244, 63, 94, 0.4);
+    }
+
+    .signal-status-pill.warn {
+      background: rgba(251, 191, 36, 0.18);
+      color: #fde68a;
+      border: 1px solid rgba(251, 191, 36, 0.4);
+    }
+
+    .signal-meta-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 10px;
+      padding-top: 8px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    /* 6-Step Stepper Pipeline */
+    .stepper-container {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+
+    .stepper-step {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 10px;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+
+    .stepper-step.completed {
+      border-color: var(--emerald-400);
+      background: rgba(16, 185, 129, 0.08);
+    }
+
+    .stepper-step.active {
+      border-color: var(--cyan-400);
+      box-shadow: 0 0 12px rgba(14, 165, 233, 0.3);
+    }
+
+    .step-num {
+      font-size: 9px;
+      font-weight: 800;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 2px;
+    }
+
+    .stepper-step.completed .step-num { color: var(--emerald-400); }
+    .stepper-step.active .step-num { color: var(--cyan-400); }
+
+    .step-name {
+      font-size: 11px;
+      font-weight: 700;
+      color: #fff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .step-latency {
+      font-size: 10px;
+      color: var(--text-secondary);
+      font-family: monospace;
+      margin-top: 2px;
+    }
+
+    /* Citation Tags */
+    .citation-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      color: #38bdf8;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 1px 6px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: monospace;
+      margin: 0 2px;
+      transition: all 0.15s;
+    }
+
+    .citation-tag:hover {
+      background: #0284c7;
+      color: #fff;
+    }
+
+    /* Scenario Cards (Epic 5) */
+    .scenario-cards-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .scenario-visual-card {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 11px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .scenario-visual-card:hover {
+      border-color: var(--cyan-400);
+      transform: translateY(-2px);
+    }
+
+    .scenario-visual-card.recommended {
+      border: 2px solid var(--cyan-400);
+      background: linear-gradient(180deg, rgba(14, 165, 233, 0.1) 0%, var(--bg-surface-elevated) 100%);
+      box-shadow: 0 0 24px rgba(14, 165, 233, 0.2);
+    }
+
+    .rec-top-badge {
+      position: absolute;
+      top: -9px;
+      right: 14px;
+      background: var(--cyan-500);
+      color: #032030;
+      font-size: 9px;
+      font-weight: 800;
+      padding: 2px 7px;
+      border-radius: 10px;
+    }
+
+    .scenario-cost-large {
+      font-size: 22px;
+      font-weight: 800;
+      color: #fff;
+      margin: 6px 0 10px;
+    }
+
+    .metric-pill-row {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 11px;
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 10px;
+      margin-bottom: 14px;
+    }
+
+    .metric-pill-item {
+      display: flex;
+      justify-content: space-between;
+      color: var(--text-secondary);
+    }
+
+    .metric-pill-item strong {
+      color: #fff;
+    }
+
+    /* Comparison Table (Epic 5) */
+    .compare-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      margin-top: 10px;
+    }
+
+    .compare-table th {
+      background: var(--bg-surface-elevated);
+      padding: 10px 12px;
+      text-align: left;
+      color: var(--text-muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .compare-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      color: var(--text-secondary);
+    }
+
+    /* Graph Canvas */
+    .graph-canvas-box {
+      width: 100%;
+      height: 460px;
+      background: radial-gradient(circle at center, #0f1629 0%, #070a14 100%);
+      border-radius: 11px;
+      border: 1px solid var(--border-subtle);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Modal Overlay */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-card {
+      background: #0f1627;
+      border: 1px solid var(--border-medium);
+      border-radius: 14px;
+      width: 90%;
+      max-width: 660px;
+      padding: 24px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    /* Spend Router Visual */
+    .spend-router-track {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin: 14px 0;
+    }
+
+    .spend-router-node {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 10px;
+      text-align: center;
+      font-size: 11px;
+    }
+
+    .spend-router-node.active-tier {
+      border-color: var(--amber-400);
+      background: rgba(251, 191, 36, 0.1);
+      box-shadow: 0 0 14px rgba(251, 191, 36, 0.25);
+    }
+
+    /* Floating Copilot */
+    .floating-copilot-btn {
+      position: fixed;
+      bottom: 22px;
+      right: 24px;
+      background: linear-gradient(135deg, #0284c7 0%, #6366f1 100%);
+      color: #fff;
+      border: none;
+      border-radius: 40px;
+      padding: 11px 18px;
+      font-size: 12px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      box-shadow: 0 4px 18px rgba(99, 102, 241, 0.4);
+      z-index: 90;
+      transition: all 0.2s;
+    }
+
+    .copilot-window {
+      position: fixed;
+      bottom: 80px;
+      right: 24px;
+      width: 390px;
+      height: 520px;
+      background: #0d1424;
+      border: 1px solid var(--border-medium);
+      border-radius: 14px;
+      display: none;
+      flex-direction: column;
+      z-index: 95;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+      overflow: hidden;
+    }
+
+    .copilot-window.open {
+      display: flex;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ============================================== -->
+  <!-- 1. LEFT SIDEBAR NAVIGATION                     -->
+  <!-- ============================================== -->
+  <aside class="sidebar">
+    <div>
+      <!-- Brand Header -->
+      <div class="brand-section">
+        <div class="brand-icon">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+          </svg>
+        </div>
+        <div>
+          <div class="brand-name">ApexMotion</div>
+          <div class="brand-tier">Risk Intelligence</div>
+        </div>
+      </div>
+
+      <!-- Navigation Links -->
+      <div class="nav-group">
+        <div class="nav-label">Operational Workspaces</div>
+
+        <button class="nav-item active" onclick="navigate('overview', this)">
+          <div class="nav-item-left">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+            Command Dashboard
+          </div>
+        </button>
+
+        <button class="nav-item" onclick="navigate('signals', this)">
+          <div class="nav-item-left">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+            Signals &amp; Alerts
+          </div>
+          <span class="nav-badge-pill">3 Live</span>
+        </button>
+
+        <button class="nav-item" onclick="navigate('incident', this)">
+          <div class="nav-item-left">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            Incident Workbench
+          </div>
+          <span class="nav-badge-cyan">SR-091</span>
+        </button>
+
+        <button class="nav-item" onclick="navigate('graph', this)">
+          <div class="nav-item-left">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+            Knowledge Graph
+          </div>
+        </button>
+
+        <button class="nav-item" onclick="navigate('simulator', this)">
+          <div class="nav-item-left">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+            Impact Simulator
+          </div>
+        </button>
+
+        <button class="nav-item" onclick="navigate('mitigation', this)">
+          <div class="nav-item-left">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            Mitigation &amp; HITL
+          </div>
+        </button>
+
+        <div class="nav-label" style="margin-top: 10px;">Audit &amp; Governance</div>
+
+        <button class="nav-item" onclick="navigate('audit', this)">
+          <div class="nav-item-left">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+            WORM Audit Ledger
+          </div>
+        </button>
+      </div>
+    </div>
+
+    <!-- User Persona Switcher at Bottom of Sidebar -->
+    <div class="sidebar-footer">
+      <div class="persona-card">
+        <div class="persona-avatar" id="avatarIcon">AC</div>
+        <div class="persona-meta">
+          <span class="persona-name" id="userNameLabel">Alex Chen</span>
+          <select class="persona-dropdown" id="userRoleSelect" onchange="switchPersona(this.value)">
+            <option value="analyst">Risk Analyst (Alex Chen)</option>
+            <option value="sourcing">Category Manager (Priya Sharma)</option>
+            <option value="plant">Munich Plant Director (Klaus Weber)</option>
+            <option value="vp">VP Global Supply Chain (Dr. Rostova)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============================================== -->
+  <!-- 2. MAIN APPLICATION CONTENT AREA               -->
+  <!-- ============================================== -->
+  <div class="app-main">
+    
+    <!-- Top Header -->
+    <header class="top-header">
+      <div class="header-left">
+        <div class="breadcrumb">
+          <span>ApexMotion</span>
+          <span>/</span>
+          <span class="current" id="breadcrumbCurrent">Command Dashboard</span>
+        </div>
+        <div class="incident-tag-indicator">
+          <span class="live-pulse-dot"></span>
+          <span>INCIDENT #SR-2026-091 · CRITICAL</span>
+        </div>
+      </div>
+
+      <div class="header-right">
+        <div class="system-status-chip">
+          <span style="display:inline-block; width:6px; height:6px; background:#10b981; border-radius:50%;"></span>
+          <span>NEPTUNE + SAP + KMS: ONLINE</span>
+        </div>
+
+        <button class="code-roadmap-trigger" onclick="openRoadmapModal()">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+          Backend Blueprint
+        </button>
+      </div>
+    </header>
+
+    <!-- PERSISTENT ARCHITECTURAL TRIAD BANNER (HLD §1.2 Separation Triad) -->
+    <div class="triad-banner">
+      <div class="triad-pillar">
+        <span style="color: var(--text-muted);">TRIAD OF SEPARATION:</span>
+        <span class="triad-pill-ai">● AI Decision Layer: Narrative Only (No Math)</span>
+      </div>
+      <div class="triad-pillar">
+        <span class="triad-pill-math">● Deterministic Engine: 100% C-Extension Math (Zero Hallucination)</span>
+      </div>
+      <div class="triad-pillar">
+        <span class="triad-pill-hitl">● Human Authority: Cryptographic ECDSA Token Gated</span>
+      </div>
+    </div>
+
+    <!-- Main Viewport -->
+    <div class="content-viewport">
+
+      <!-- ============================================ -->
+      <!-- VIEW 1: COMMAND DASHBOARD (Default)          -->
+      <!-- ============================================ -->
+      <section id="view-overview" class="view-panel active">
+        
+        <!-- Top KPI Stat Cards -->
+        <div class="stat-cards-grid">
+          <div class="stat-card red">
+            <div class="stat-header">
+              <span class="stat-title">Active Financial Exposure</span>
+              <div class="stat-icon" style="background: rgba(244,63,94,0.15); color: #fb7185;">$</div>
+            </div>
+            <div class="stat-value">$2,405,000</div>
+            <div class="stat-caption" style="color: #fb7185;">
+              <span>↑ 28.3h Assembly Stoppage Risk</span>
+            </div>
+          </div>
+
+          <div class="stat-card amber">
+            <div class="stat-header">
+              <span class="stat-title">Days of Cover (MCU-X91)</span>
+              <div class="stat-icon" style="background: rgba(251,191,36,0.15); color: #fbbf24;">⏱</div>
+            </div>
+            <div class="stat-value" id="kpiDocVal">7.7 Days</div>
+            <div class="stat-caption" style="color: #fde68a;">
+              <span>Inbound Maritime ETA: 9.0 Days</span>
+            </div>
+          </div>
+
+          <div class="stat-card cyan">
+            <div class="stat-header">
+              <span class="stat-title">Net Shortage Gap</span>
+              <div class="stat-icon" style="background: rgba(14,165,233,0.15); color: #38bdf8;">⚠️</div>
+            </div>
+            <div class="stat-value">-1.3 Days</div>
+            <div class="stat-caption" style="color: #38bdf8;">
+              <span>24,050 units deficit starts Day 8</span>
+            </div>
+          </div>
+
+          <div class="stat-card green">
+            <div class="stat-header">
+              <span class="stat-title">Detective SLA Latency</span>
+              <div class="stat-icon" style="background: rgba(16,185,129,0.15); color: #34d399;">⚡</div>
+            </div>
+            <div class="stat-value">47.0s</div>
+            <div class="stat-caption" style="color: #34d399;">
+              <span>Target ≤ 90s SLA (Passed)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- High-Impact Hero Alert Banner (NanoCore Incident) -->
+        <div class="hero-alert-banner">
+          <div class="hero-alert-left">
+            <div class="hero-badge-circle">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+            </div>
+            <div>
+              <div class="hero-heading">High-Severity Disruption: NanoCore Semiconductor Fab 2 Cleanroom Fire</div>
+              <div class="hero-subheading">
+                <span><strong>Origin:</strong> Hsinchu, Taiwan</span>
+                <span>•</span>
+                <span><strong>Part:</strong> MCU-X91 (32-bit Automotive MCU)</span>
+                <span>•</span>
+                <span style="color: #fb7185; font-weight: 700;">Buffer dry in 7.7 Days (Munich Gigafactory)</span>
+                <span>•</span>
+                <span style="color: #34d399;">Confidence: 94% (3 Sources Corroborated)</span>
+              </div>
+            </div>
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <button class="btn-outline" onclick="navigate('signals')">View Signal Feed</button>
+            <button class="btn-solid-primary" onclick="navigate('incident')">Investigate Now →</button>
+          </div>
+        </div>
+
+        <!-- Main 2-Column Grid -->
+        <div class="dashboard-grid-2">
+          
+          <!-- Left: Visual Runway Chart & Multi-Plant Breakdown -->
+          <div class="panel-card">
+            <div class="panel-header">
+              <div class="panel-title">
+                <svg width="18" height="18" fill="none" stroke="#38bdf8" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                Inventory Days of Cover vs Inbound Transit ETA
+              </div>
+              <span style="font-size: 11px; color: var(--emerald-400); font-weight: 700;">Deterministic Python Engine</span>
+            </div>
+
+            <!-- Visual Bar Comparison -->
+            <div class="runway-comparison-box">
+              <div class="runway-bar-container">
+                
+                <!-- Bar 1: Days of Cover -->
+                <div class="runway-track-row">
+                  <div class="runway-track-meta">
+                    <span style="color: #cbd5e1; font-weight: 600;">Usable On-Hand Inventory Runway (Days of Cover)</span>
+                    <strong style="color: #fbbf24;">7.7 Days (142,000 units)</strong>
+                  </div>
+                  <div class="progress-track">
+                    <div class="progress-fill" style="width: 65%; background: linear-gradient(90deg, #10b981 0%, #fbbf24 100%);"></div>
+                  </div>
+                </div>
+
+                <!-- Bar 2: Inbound Delivery -->
+                <div class="runway-track-row">
+                  <div class="runway-track-meta">
+                    <span style="color: #cbd5e1; font-weight: 600;">Inbound Maritime PO #88921 Delivery ETA</span>
+                    <strong style="color: #fb7185;">9.0 Days (80,000 units on vessel)</strong>
+                  </div>
+                  <div class="progress-track">
+                    <div class="progress-fill" style="width: 78%; background: #334155;"></div>
+                    <!-- Stockout Danger Gap -->
+                    <div class="gap-danger-zone" style="left: 65%; width: 13%;"></div>
+                  </div>
+                </div>
+
+              </div>
+
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--border-subtle); font-size: 12px;">
+                <span style="color: #f87171; font-weight: 700;">⚠️ 1.3-Day Unmitigated Stockout Window (24,050 units short)</span>
+                <span style="color: var(--text-muted);">Munich Halt Rate: <strong>€85,000 / hour</strong></span>
+              </div>
+            </div>
+
+            <!-- Multi-Plant Burn Rate Breakdown Table -->
+            <div style="font-size: 12px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px; text-transform: uppercase;">
+              Plant-Level Consumption Breakdown (FRD FR-ASS-001)
+            </div>
+            <table class="mini-table">
+              <thead>
+                <tr>
+                  <th>Assembly Plant</th>
+                  <th>Vehicle Program</th>
+                  <th>Daily Burn Rate</th>
+                  <th>Days of Cover</th>
+                  <th>Line Halt Rate</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Munich Gigafactory</strong> (Germany)</td>
+                  <td>Model-X Performance / Hyper-GT</td>
+                  <td>12,000 units/day</td>
+                  <td style="color: #fb7185; font-weight: 700;">7.7 Days</td>
+                  <td>€85,000 / hr</td>
+                </tr>
+                <tr>
+                  <td><strong>Bengaluru Plant</strong> (India)</td>
+                  <td>Urban-E Platform</td>
+                  <td>4,000 units/day</td>
+                  <td style="color: #fbbf24;">8.1 Days</td>
+                  <td>$28,000 / hr</td>
+                </tr>
+                <tr>
+                  <td><strong>Pune Plant</strong> (India)</td>
+                  <td>Commercial Delivery Chassis</td>
+                  <td>2,500 units/day</td>
+                  <td style="color: #fbbf24;">8.4 Days</td>
+                  <td>$24,000 / hr</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Right: Visual Blast Radius & Single Point of Failure -->
+          <div class="panel-card">
+            <div class="panel-header">
+              <div class="panel-title">
+                <svg width="18" height="18" fill="none" stroke="#fb7185" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="22" y1="12" x2="18" y2="12"></line><line x1="6" y1="12" x2="2" y2="12"></line><line x1="12" y1="6" x2="12" y2="2"></line><line x1="12" y1="22" x2="12" y2="18"></line></svg>
+                Graph Blast Radius (Amazon Neptune)
+              </div>
+            </div>
+
+            <div class="blast-chips-grid">
+              
+              <div class="blast-chip">
+                <div class="blast-chip-icon" style="background: rgba(244,63,94,0.15); color: #fb7185;">🔥</div>
+                <div class="blast-chip-content">
+                  <span class="blast-chip-label">Origin (Tier-2)</span>
+                  <span class="blast-chip-val">NanoCore Fab 2</span>
+                </div>
+              </div>
+
+              <div class="blast-chip">
+                <div class="blast-chip-icon" style="background: rgba(14,165,233,0.15); color: #38bdf8;">⚙️</div>
+                <div class="blast-chip-content">
+                  <span class="blast-chip-label">Disrupted Part</span>
+                  <span class="blast-chip-val">MCU-X91 Micro</span>
+                </div>
+              </div>
+
+              <div class="blast-chip">
+                <div class="blast-chip-icon" style="background: rgba(129,140,248,0.15); color: #a5b4fc;">🏭</div>
+                <div class="blast-chip-content">
+                  <span class="blast-chip-label">Tier-1 Supplier</span>
+                  <span class="blast-chip-val">BetaElectro GmbH</span>
+                </div>
+              </div>
+
+              <div class="blast-chip">
+                <div class="blast-chip-icon" style="background: rgba(251,191,36,0.15); color: #fde68a;">🚗</div>
+                <div class="blast-chip-content">
+                  <span class="blast-chip-label">Vehicle Programs</span>
+                  <span class="blast-chip-val">Hyper-GT / Urban-E</span>
+                </div>
+              </div>
+
+            </div>
+
+            <div style="margin-top: 14px; padding: 12px; background: var(--bg-surface-elevated); border-radius: 8px; border: 1px solid var(--border-subtle); font-size: 12px; line-height: 1.6; color: var(--text-secondary);">
+              <strong style="color: #fff;">Neptune Bottleneck Alert:</strong> Single-source sub-tier bottleneck. Cleanroom fire completely stops diffusion line for ≥ 21 days. No on-site wafer buffer at BetaElectro.
+            </div>
+
+            <div style="margin-top: 14px; display: flex; gap: 10px;">
+              <button class="btn-outline" style="flex: 1; justify-content: center;" onclick="navigate('graph')">View Graph →</button>
+              <button class="btn-solid-primary" style="flex: 1; justify-content: center;" onclick="navigate('mitigation')">Fix Shortage →</button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Flow Navigation Footer -->
+        <div class="flow-nav-footer">
+          <div class="flow-nav-left">
+            <span>Client Walkthrough:</span>
+            <strong style="color: #fff;">Step 1 of 6: Global Overview</strong>
+          </div>
+          <button class="btn-solid-primary" onclick="navigate('signals')">
+            Next: Review Disruption Signals (Epic 1) →
+          </button>
+        </div>
+
+      </section>
+
+      <!-- ============================================ -->
+      <!-- VIEW 2: SIGNALS & ALERTS FEED (Epic 1)      -->
+      <!-- ============================================ -->
+      <section id="view-signals" class="view-panel">
+        <div class="panel-card">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">
+                <svg width="18" height="18" fill="none" stroke="#38bdf8" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path></svg>
+                Signal Hub &amp; Quarantined Ingestion (Epic 1 &amp; FRD FR-SEN)
+              </div>
+              <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">
+                Formula: Confidence $C = \sum w_i \cdot S_i$ (Govt Bulletin 0.40 + AIS Satellite 0.30 + Verified News 0.20 + Social 0.10). Threshold $C \ge 0.75$ triggers verified incident.
+              </div>
+            </div>
+            <span style="font-size: 11px; color: var(--emerald-400); font-weight: 700;">Quarantined Reader: ACTIVE</span>
+          </div>
+
+          <!-- Signal 1: NanoCore Cleanroom Fire (Critical) -->
+          <div class="signal-card-box selected">
+            <div class="signal-header-row">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span class="signal-status-pill crit">CRITICAL · 94% CONFIDENCE · VERIFIED</span>
+                <span style="font-size: 11px; background: rgba(16,185,129,0.15); color: #34d399; padding: 2px 6px; border-radius: 4px; font-weight: 700;">
+                  SANITIZED ✓ Injection Risk: 0.02 (&lt; 0.85 threshold)
+                </span>
+              </div>
+              <span class="font-mono" style="font-size: 11px; color: var(--text-muted);">INCIDENT #SR-2026-091 · 08:14 UTC</span>
+            </div>
+            <div style="font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 4px;">
+              NanoCore Semiconductor Fab 2 Cleanroom Electrical Fire (Hsinchu, Taiwan)
+            </div>
+            <div style="font-size: 12px; color: var(--text-secondary); line-height: 1.5;">
+              Confirmed cleanroom fire halted Fab 2 diffusion line. Production freeze estimated at ≥ 21 days. Produces proprietary 32-bit automotive MCU-X91 microcontrollers utilized by Tier-1 BetaElectro GmbH for Munich EV battery control units.
+            </div>
+            <div class="signal-meta-row">
+              <span><strong>Corroborating Feeds (3 independent):</strong> Taiwan National Fire Agency + NOAA Satellite Thermal + Carrier AIS Telemetry</span>
+              <div style="display: flex; gap: 8px;">
+                <button class="btn-outline" style="padding: 4px 10px; font-size: 11px;" onclick="alert('Signal quarantined and logged in staging buffer.')">Dismiss</button>
+                <button class="btn-solid-primary" style="padding: 4px 12px; font-size: 11px;" onclick="navigate('incident')">Trigger Investigation (Sub-90s) →</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Signal 2: Port of Hamburg Strike -->
+          <div class="signal-card-box">
+            <div class="signal-header-row">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span class="signal-status-pill warn">MODERATE · 81% CONFIDENCE · MONITORING</span>
+                <span style="font-size: 11px; background: rgba(16,185,129,0.15); color: #34d399; padding: 2px 6px; border-radius: 4px; font-weight: 700;">
+                  SANITIZED ✓ Injection Risk: 0.00
+                </span>
+              </div>
+              <span class="font-mono" style="font-size: 11px; color: var(--text-muted);">ALERT #SIG-2026-104 · 06:40 UTC</span>
+            </div>
+            <div style="font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 4px;">
+              Port of Hamburg Dockworkers Warning Strike Announced
+            </div>
+            <div style="font-size: 12px; color: var(--text-secondary); line-height: 1.5;">
+              Ver.di trade union scheduled 48-hour container terminal work stoppage. Container dwell time increase projected at +4.2 days. 14-day plant safety inventory absorbs delay without line stoppage.
+            </div>
+            <div class="signal-meta-row">
+              <span><strong>Corroborating Feeds (2):</strong> Ver.di Official Bulletin + Port Authority Dwell Telemetry</span>
+              <span style="color: var(--emerald-400); font-weight: 600;">Buffer Safety Stock OK (14.2d)</span>
+            </div>
+          </div>
+
+          <!-- Signal 3: Red Sea Maritime Rerouting -->
+          <div class="signal-card-box">
+            <div class="signal-header-row">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span class="signal-status-pill warn">ELEVATED · 89% CONFIDENCE · VERIFIED</span>
+                <span style="font-size: 11px; background: rgba(16,185,129,0.15); color: #34d399; padding: 2px 6px; border-radius: 4px; font-weight: 700;">
+                  SANITIZED ✓ Injection Risk: 0.01
+                </span>
+              </div>
+              <span class="font-mono" style="font-size: 11px; color: var(--text-muted);">ALERT #SIG-2026-088 · Yesterday</span>
+            </div>
+            <div style="font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 4px;">
+              Bab-el-Mandeb Strait Maritime Security Advisory &amp; Rerouting
+            </div>
+            <div style="font-size: 12px; color: var(--text-secondary); line-height: 1.5;">
+              Carriers diverting around Cape of Good Hope, extending Far East to Rotterdam transit times by 10–14 days. Bunker surcharge +$850/TEU. Safety stock buffers in SAP ERP auto-adjusted.
+            </div>
+            <div class="signal-meta-row">
+              <span><strong>Corroborating Feeds (3):</strong> IMO Security Advisory + Maersk AIS Feed + Lloyd's List</span>
+              <span style="color: var(--text-muted);">ERP Lead Times Auto-Recalculated</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Flow Navigation Footer -->
+        <div class="flow-nav-footer">
+          <div class="flow-nav-left">
+            <span>Client Walkthrough:</span>
+            <strong style="color: #fff;">Step 2 of 6: Signal Ingestion &amp; Triage</strong>
+          </div>
+          <button class="btn-solid-primary" onclick="navigate('incident')">
+            Next: Open Incident Dossier &amp; Math Proof (Epic 4 &amp; 3) →
+          </button>
+        </div>
+      </section>
+
+      <!-- ============================================ -->
+      <!-- VIEW 3: INCIDENT INVESTIGATION (Epic 4 & 3) -->
+      <!-- ============================================ -->
+      <section id="view-incident" class="view-panel">
+        
+        <!-- Graceful Degradation Toggle & Controls Bar -->
+        <div style="display: flex; align-items: center; justify-content: space-between; background: var(--bg-surface-elevated); padding: 12px 18px; border-radius: 9px; border: 1px solid var(--border-subtle); margin-bottom: 16px;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <span style="font-size: 12px; font-weight: 700; color: #fff;">Operational Mode:</span>
+            <label style="display: flex; align-items: center; gap: 6px; font-size: 12px; cursor: pointer; color: var(--cyan-400);">
+              <input type="checkbox" id="degradeToggle" onchange="toggleGracefulDegradation(this.checked)">
+              <span>Simulate LLM Timeout (Test Graceful Degradation)</span>
+            </label>
+          </div>
+          <button class="btn-outline" onclick="runInvestigationPipeline()">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+            Re-run 6-Stage Investigation Pipeline
+          </button>
+        </div>
+
+        <!-- Degradation Fallback Banner (Hidden by default) -->
+        <div id="degradeBanner" style="display: none; background: rgba(245, 158, 11, 0.15); border: 1px solid var(--amber-400); color: #fef08a; padding: 10px 16px; border-radius: 8px; font-size: 12px; margin-bottom: 16px;">
+          ⚠️ <strong>CIRCUIT BREAKER ACTIVATED:</strong> LLM Narrative Synthesis timed out (&gt; 20s). System automatically fell back to <strong>Deterministic Fallback Mode (FRD FR-DEC-001 Alt Flow)</strong>. Zero arithmetic compromised.
+        </div>
+
+        <!-- 6-Step Investigation Pipeline Stepper (FRD FR-DEC-001) -->
+        <div class="stepper-container">
+          <div class="stepper-step completed" id="step1">
+            <div class="step-num">Stage 1 · 0–5s</div>
+            <div class="step-name">1. Signal Ingest</div>
+            <div class="step-latency">0.4s · Sanitized ✓</div>
+          </div>
+          <div class="stepper-step completed" id="step2">
+            <div class="step-num">Stage 2 · 5–35s</div>
+            <div class="step-name">2. Neptune Graph</div>
+            <div class="step-latency">12.2s · Tier-2 Path</div>
+          </div>
+          <div class="stepper-step completed" id="step3">
+            <div class="step-num">Stage 3 · 35–50s</div>
+            <div class="step-name">3. SAP ERP Sync</div>
+            <div class="step-latency">1.8s · Stock=142k</div>
+          </div>
+          <div class="stepper-step completed" id="step4">
+            <div class="step-num">Stage 4 · 50–60s</div>
+            <div class="step-name">4. Deterministic Math</div>
+            <div class="step-latency">0.05s · Cover=7.7d</div>
+          </div>
+          <div class="stepper-step completed" id="step5">
+            <div class="step-num">Stage 5 · 60–75s</div>
+            <div class="step-name">5. Contract Intel</div>
+            <div class="step-latency">14.5s · §14.2 Clauses</div>
+          </div>
+          <div class="stepper-step completed" id="step6">
+            <div class="step-num">Stage 6 · 75–87s</div>
+            <div class="step-name">6. Mitigation Pkg</div>
+            <div class="step-latency">18.1s · 3 Scenarios</div>
+          </div>
+        </div>
+
+        <!-- 2-Column Dossier Grid -->
+        <div class="dashboard-grid-2">
+          
+          <!-- Left: Grounded Synthesis & Interactive Citations -->
+          <div class="panel-card">
+            <div class="panel-header">
+              <div class="panel-title">
+                <svg width="18" height="18" fill="none" stroke="#38bdf8" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                Incident Dossier #SR-2026-091 Narrative
+              </div>
+              <span style="font-size: 11px; background: rgba(56, 189, 248, 0.15); color: #38bdf8; padding: 2px 8px; border-radius: 4px; font-weight: 700;">
+                LangGraph Detective Agent · 100% Grounded
+              </span>
+            </div>
+
+            <div id="narrativeContent" style="display: flex; flex-direction: column; gap: 12px; font-size: 13px; color: #cbd5e1; line-height: 1.6;">
+              <p>
+                <strong>1. Verified Disruption Event:</strong> At 08:14 UTC, a verified electrical cleanroom fire halted Fab 2 operations at 
+                <strong>NanoCore Semiconductor</strong> in Hsinchu, Taiwan <span class="citation-tag" onclick="showCitationModal('REUTERS-TW-9921')">[REUTERS-TW-9921]</span>. 
+                Satellite thermal imagery confirms production freeze for at least 21 calendar days.
+              </p>
+
+              <p>
+                <strong>2. Sub-Tier Dependency Mapping:</strong> Traversal of the Amazon Neptune Knowledge Graph confirms NanoCore is the single-source maker of the 
+                <strong>MCU-X91 32-bit Microcontroller</strong>, supplied directly to Tier-1 electronics partner 
+                <strong>BetaElectro GmbH</strong> <span class="citation-tag" onclick="showCitationModal('NEPTUNE-GRAPH')">[NEPTUNE-GRAPH]</span>. 
+                BetaElectro integrates MCU-X91 into the <strong>BMS-E4 Battery Control Unit</strong> assembled at Munich, Bengaluru, and Pune plants for the 
+                <strong>Model-X Performance and Hyper-GT</strong> vehicle programs.
+              </p>
+
+              <p>
+                <strong>3. Inventory Runway &amp; Shortage Calculation:</strong> Live SAP S/4HANA stock at Munich is <strong>142,000 units</strong> against an aggregate burn rate of 
+                <strong>18,500 units/day</strong> across 3 plants <span class="citation-tag" onclick="showCitationModal('SAP-INV-001')">[SAP-INV-001]</span>. 
+                The Deterministic Engine computes an exact <strong>Days of Cover of 7.7 Days</strong>. Inbound maritime transit PO #88921 is delayed to <strong>9.0 days</strong>, producing an unmitigated 
+                <strong style="color: #fb7185;">1.3-day stockout gap (24,050 units)</strong> starting on Day 8.
+              </p>
+
+              <p>
+                <strong>4. Commercial &amp; Contractual Recourse:</strong> Under Master Service Agreement <strong>#MSA-2024-BE §14.2</strong>, cleanroom fire does NOT permit unilateral Force Majeure waiver while pre-qualified AML alternate suppliers exist <span class="citation-tag" onclick="showCitationModal('MSA-2024-BE')">[MSA-2024-BE §14.2]</span>. 
+                Furthermore, §14.2(c) obligates BetaElectro to absorb <strong>50% of expedited air freight surcharges</strong> up to $100,000.
+              </p>
+            </div>
+
+            <!-- Contract Clauses Widget (FRD FR-UND-003) -->
+            <div style="margin-top: 14px; padding: 12px; background: var(--bg-surface-elevated); border-radius: 8px; border-left: 3px solid var(--cyan-400); font-size: 12px;">
+              <div style="font-weight: 700; color: #fff; margin-bottom: 4px;">Extracted Contract Intelligence (§14.2 Summary):</div>
+              <div style="color: var(--text-secondary); line-height: 1.5;">
+                • Force Majeure Relief: <strong>DENIED</strong> (Section 14.2.1 — AML alternative MicroChip Global exists)<br>
+                • Expedited Air Freight Liability: <strong>50/50 Cost-Sharing</strong> (Section 14.2.3 — up to $100k cap)<br>
+                • Delivery Delay SLA Penalty: <strong>+3.0% per calendar day</strong> beyond agreed dock receipt date
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Deterministic Math Proof Panel (BR-RULE-001) -->
+          <div class="panel-card">
+            <div class="panel-header">
+              <div class="panel-title">
+                <svg width="18" height="18" fill="none" stroke="#10b981" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                Deterministic Math Engine (Zero Hallucination)
+              </div>
+              <span style="color: var(--emerald-400); font-size: 11px; font-weight: 700;">100% REPRODUCIBLE</span>
+            </div>
+
+            <div style="background: #080c16; border-radius: 9px; padding: 14px; font-family: monospace; font-size: 12px; line-height: 1.8; color: var(--text-secondary);">
+              <div style="color: #94a3b8; font-weight: 700; margin-bottom: 4px;">// SAP S/4HANA Certified Inventory Balances:</div>
+              <div>Usable Physical Stock (S)   = <span style="color: #38bdf8; font-weight: 700;">142,000 units</span></div>
+              <div>MES Rolling 30-Day Burn (B) = <span style="color: #38bdf8; font-weight: 700;">18,500 units/day</span></div>
+              <div>Inbound Maritime PO ETA (T) = <span style="color: #fb7185; font-weight: 700;">9.0 days</span></div>
+              <br>
+              <div style="color: #94a3b8; font-weight: 700; margin-bottom: 4px;">// Executed strictly in src/services/risk/engine.py:</div>
+              <div>Days_of_Cover = S / B = 142,000 / 18,500 = <span style="color: #fbbf24; font-weight: 700;">7.68 Days (≈ 7.7d)</span></div>
+              <div>Stockout_Gap   = T - Cover = 9.0 - 7.68 = <span style="color: #f43f5e; font-weight: 700;">-1.32 Days Gap</span></div>
+              <div>Net_Shortage   = Gap * B = 1.32 * 18,500 = <span style="color: #f43f5e; font-weight: 700;">24,050 units</span></div>
+              <br>
+              <div style="color: #94a3b8; font-weight: 700; margin-bottom: 4px;">// Financial Loss Exposure Formula (FRD FR-ASS-003):</div>
+              <div>Operating Exposure Hours = 1.32d * 21.5 hrs = <span style="color: #fb7185;">28.3 hours</span></div>
+              <div>Munich Assembly Halt Cost = 28.3h * €85,000 = <span style="color: #f43f5e; font-weight: 700;">$2,405,000</span></div>
+              <div style="border-top: 1px solid rgba(255,255,255,0.08); margin-top: 6px; padding-top: 6px; color: var(--cyan-400);">
+                Deterministic Hash: SHA-256: a7f9c28e9184...88e1 ✓
+              </div>
+            </div>
+
+            <div style="margin-top: 12px; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 7px; padding: 10px; font-size: 11px; color: #a7f3d0;">
+              <strong>FDE Architectural Rule BR-RULE-001:</strong> All arithmetic is executed in compiled Python microservices. Generative models are strictly prohibited from calculating or modifying numerical values.
+            </div>
+
+            <button class="btn-solid-primary" style="width: 100%; margin-top: 14px; justify-content: center;" onclick="navigate('mitigation')">
+              Proceed to Mitigation Packages &amp; HITL Approval →
+            </button>
+          </div>
+
+        </div>
+
+        <!-- Flow Navigation Footer -->
+        <div class="flow-nav-footer">
+          <div class="flow-nav-left">
+            <span>Client Walkthrough:</span>
+            <strong style="color: #fff;">Step 3 of 6: Sub-90s Incident Investigation &amp; Proof</strong>
+          </div>
+          <button class="btn-solid-primary" onclick="navigate('graph')">
+            Next: Inspect Multi-Tier Knowledge Graph (Epic 2) →
+          </button>
+        </div>
+      </section>
+
+      <!-- ============================================ -->
+      <!-- VIEW 4: KNOWLEDGE GRAPH CANVAS (Epic 2)      -->
+      <!-- ============================================ -->
+      <section id="view-graph" class="view-panel">
+        <div class="panel-card">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">
+                <svg width="18" height="18" fill="none" stroke="#38bdf8" stroke-width="2" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle></svg>
+                Amazon Neptune Visual Multi-Tier Dependency Graph (Epic 2)
+              </div>
+              <div style="font-size: 12px; color: var(--text-muted); margin-top: 3px;">
+                Interactive OpenCypher 3-hop traversal. Click any node to inspect BOM specifications, contracts, and blast radius.
+              </div>
+            </div>
+            <span style="font-size: 11px; color: var(--cyan-400); font-family: monospace;">400k Nodes · 3M Edges</span>
+          </div>
+
+          <div class="graph-canvas-box">
+            <svg width="100%" height="100%" viewBox="0 0 1020 440">
+              <defs>
+                <filter id="glow-rose">
+                  <feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="#f43f5e"/>
+                </filter>
+                <filter id="glow-emerald">
+                  <feDropShadow dx="0" dy="0" stdDeviation="5" flood-color="#10b981"/>
+                </filter>
+                <marker id="arrow" viewBox="0 0 10 10" refX="22" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M 0 0 L 10 5 L 0 10 z" fill="#64748b" />
+                </marker>
+                <marker id="arrow-red" viewBox="0 0 10 10" refX="22" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M 0 0 L 10 5 L 0 10 z" fill="#f43f5e" />
+                </marker>
+              </defs>
+
+              <!-- Connection Edges -->
+              <!-- Tier 3 -> Tier 2 -->
+              <line x1="100" y1="150" x2="240" y2="230" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+              
+              <!-- Disrupted Primary Path (Red Dashed) -->
+              <line x1="240" y1="230" x2="430" y2="180" stroke="#f43f5e" stroke-width="3" stroke-dasharray="6,4" marker-end="url(#arrow-red)"/>
+              <line x1="430" y1="180" x2="620" y2="180" stroke="#f43f5e" stroke-width="3" stroke-dasharray="6,4" marker-end="url(#arrow-red)"/>
+              <line x1="620" y1="180" x2="800" y2="230" stroke="#f43f5e" stroke-width="3" stroke-dasharray="6,4" marker-end="url(#arrow-red)"/>
+              <line x1="800" y1="230" x2="940" y2="230" stroke="#0ea5e9" stroke-width="2" marker-end="url(#arrow)"/>
+
+              <!-- Qualified AML Alternate Path (Green Dashed) -->
+              <line x1="240" y1="360" x2="430" y2="310" stroke="#10b981" stroke-width="2" stroke-dasharray="4,4" marker-end="url(#arrow)"/>
+              <line x1="430" y1="310" x2="620" y2="180" stroke="#10b981" stroke-width="2" stroke-dasharray="4,4" marker-end="url(#arrow)"/>
+
+              <!-- NODES -->
+              <!-- Tier 3: Formosa Silicon Wafers -->
+              <g onclick="inspectGraphNode('silicon')" style="cursor: pointer;">
+                <circle cx="100" cy="150" r="28" fill="#1e293b" stroke="#64748b" stroke-width="2"/>
+                <text x="100" y="146" font-size="9" text-anchor="middle" fill="#cbd5e1" font-weight="700">TIER-3</text>
+                <text x="100" y="159" font-size="9" text-anchor="middle" fill="#fff">Formosa</text>
+                <text x="100" y="194" font-size="10" text-anchor="middle" fill="#94a3b8">Silicon Wafers</text>
+              </g>
+
+              <!-- Tier 2 Disrupted: NanoCore Fab 2 -->
+              <g onclick="inspectGraphNode('nanocore')" style="cursor: pointer;">
+                <circle cx="240" cy="230" r="38" fill="#4c0519" stroke="#f43f5e" stroke-width="3" filter="url(#glow-rose)"/>
+                <text x="240" y="225" font-size="10" text-anchor="middle" fill="#fda4af" font-weight="800">TIER-2</text>
+                <text x="240" y="240" font-size="10" text-anchor="middle" fill="#fff" font-weight="700">NanoCore</text>
+                <text x="240" y="284" font-size="10" text-anchor="middle" fill="#fb7185" font-weight="700">🔥 Fab 2 Cleanroom Fire</text>
+              </g>
+
+              <!-- Tier 2 Secondary: MicroChip Global -->
+              <g onclick="inspectGraphNode('microchip')" style="cursor: pointer;">
+                <circle cx="240" cy="360" r="32" fill="#064e3b" stroke="#10b981" stroke-width="2" filter="url(#glow-emerald)"/>
+                <text x="240" y="356" font-size="9" text-anchor="middle" fill="#a7f3d0" font-weight="800">SECONDARY</text>
+                <text x="240" y="370" font-size="9" text-anchor="middle" fill="#fff" font-weight="700">MicroChip</text>
+                <text x="240" y="408" font-size="10" text-anchor="middle" fill="#34d399">✅ AML Qualified</text>
+              </g>
+
+              <!-- Component: MCU-X91 -->
+              <g onclick="inspectGraphNode('mcux91')" style="cursor: pointer;">
+                <rect x="380" y="155" width="100" height="48" rx="8" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>
+                <text x="430" y="176" font-size="10" text-anchor="middle" fill="#38bdf8" font-weight="800">PART</text>
+                <text x="430" y="192" font-size="11" text-anchor="middle" fill="#fff" font-family="monospace">MCU-X91</text>
+                <text x="430" y="220" font-size="10" text-anchor="middle" fill="#94a3b8">32-bit Auto MCU</text>
+              </g>
+
+              <!-- Tier 1: BetaElectro GmbH -->
+              <g onclick="inspectGraphNode('betaelectro')" style="cursor: pointer;">
+                <circle cx="620" cy="180" r="36" fill="#0c4a6e" stroke="#0ea5e9" stroke-width="2"/>
+                <text x="620" y="176" font-size="10" text-anchor="middle" fill="#bae6fd" font-weight="800">TIER-1</text>
+                <text x="620" y="192" font-size="10" text-anchor="middle" fill="#fff" font-weight="700">BetaElectro</text>
+                <text x="620" y="232" font-size="10" text-anchor="middle" fill="#38bdf8">Nuremberg, DE</text>
+              </g>
+
+              <!-- Sub-assembly: BMS-E4 -->
+              <g onclick="inspectGraphNode('bmse4')" style="cursor: pointer;">
+                <rect x="750" y="205" width="100" height="48" rx="8" fill="#1e293b" stroke="#818cf8" stroke-width="2"/>
+                <text x="800" y="226" font-size="10" text-anchor="middle" fill="#a5b4fc" font-weight="800">ASSEMBLY</text>
+                <text x="800" y="242" font-size="11" text-anchor="middle" fill="#fff" font-family="monospace">BMS-E4 Unit</text>
+                <text x="800" y="270" font-size="10" text-anchor="middle" fill="#94a3b8">Battery ECU</text>
+              </g>
+
+              <!-- Plant: Munich Gigafactory -->
+              <g onclick="inspectGraphNode('munich')" style="cursor: pointer;">
+                <circle cx="940" cy="230" r="40" fill="#1e1b4b" stroke="#818cf8" stroke-width="3"/>
+                <text x="940" y="225" font-size="10" text-anchor="middle" fill="#c7d2fe" font-weight="800">PLANT</text>
+                <text x="940" y="241" font-size="10" text-anchor="middle" fill="#fff" font-weight="700">Munich</text>
+                <text x="940" y="284" font-size="10" text-anchor="middle" fill="#fb7185">€85k/hr Halt Risk</text>
+              </g>
+            </svg>
+          </div>
+
+          <!-- Node Detail Panel -->
+          <div id="graphNodeDetail" style="margin-top: 14px; padding: 14px; background: var(--bg-surface-elevated); border-radius: 9px; border: 1px solid var(--border-subtle); font-size: 13px;">
+            <div style="font-weight: 700; color: #38bdf8; margin-bottom: 4px;" id="nodeTitle">Selected Node: NanoCore Semiconductor Fab 2 (Tier-2 Supplier)</div>
+            <div style="color: var(--text-secondary); line-height: 1.5;" id="nodeBody">
+              Entity ID: <code>SUP-NC-882</code> · Single-source cleanroom facility for 32-bit MCU wafers in Hsinchu Science Park. Sole supplier for BetaElectro BMS-E4 assemblies. Exposure blast radius connects to Munich Line 2, Bengaluru, and Pune EV assembly.
+            </div>
+          </div>
+        </div>
+
+        <!-- Flow Navigation Footer -->
+        <div class="flow-nav-footer">
+          <div class="flow-nav-left">
+            <span>Client Walkthrough:</span>
+            <strong style="color: #fff;">Step 4 of 6: Multi-Tier Knowledge Graph &amp; Blast Radius</strong>
+          </div>
+          <button class="btn-solid-primary" onclick="navigate('simulator')">
+            Next: Test Real-Time Math Simulator (Epic 3) →
+          </button>
+        </div>
+      </section>
+
+      <!-- ============================================ -->
+      <!-- VIEW 5: IMPACT SIMULATOR (Epic 3 Interactive)-->
+      <!-- ============================================ -->
+      <section id="view-simulator" class="view-panel">
+        <div class="dashboard-grid-2">
+          
+          <div class="panel-card">
+            <div class="panel-header">
+              <div class="panel-title">
+                <svg width="18" height="18" fill="none" stroke="#38bdf8" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                Deterministic Simulation Sliders (SAP S/4HANA Feeds)
+              </div>
+              <button class="btn-outline" style="padding: 4px 10px; font-size: 11px;" onclick="resetSimDefaults()">Reset Defaults</button>
+            </div>
+
+            <!-- Slider 1 -->
+            <div style="margin-bottom: 16px;">
+              <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 5px;">
+                <span>Current Usable On-Hand Stock (Units)</span>
+                <strong id="slStockVal" style="color: #38bdf8;">142,000 units</strong>
+              </div>
+              <input type="range" min="80000" max="250000" step="5000" value="142000" style="width: 100%; accent-color: var(--cyan-500);" id="slStock" oninput="simRecalc()">
+            </div>
+
+            <!-- Slider 2 -->
+            <div style="margin-bottom: 16px;">
+              <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 5px;">
+                <span>Aggregate Daily Assembly Consumption (Units/Day)</span>
+                <strong id="slBurnVal" style="color: #38bdf8;">18,500 units/day</strong>
+              </div>
+              <input type="range" min="10000" max="30000" step="500" value="18500" style="width: 100%; accent-color: var(--cyan-500);" id="slBurn" oninput="simRecalc()">
+            </div>
+
+            <!-- Slider 3 -->
+            <div style="margin-bottom: 16px;">
+              <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 5px;">
+                <span>Inbound PO #88921 Maritime Transit Arrival (Days)</span>
+                <strong id="slTransitVal" style="color: #fb7185;">9.0 Days</strong>
+              </div>
+              <input type="range" min="4" max="18" step="0.5" value="9.0" style="width: 100%; accent-color: var(--rose-500);" id="slTransit" oninput="simRecalc()">
+            </div>
+
+            <!-- Slider 4 -->
+            <div style="margin-bottom: 10px;">
+              <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 5px;">
+                <span>Munich Gigafactory Hourly Line Downtime Loss Rate</span>
+                <strong id="slRateVal" style="color: #fb7185;">€85,000 / hr</strong>
+              </div>
+              <input type="range" min="40000" max="150000" step="5000" value="85000" style="width: 100%; accent-color: var(--rose-500);" id="slRate" oninput="simRecalc()">
+            </div>
+          </div>
+
+          <div class="panel-card">
+            <div class="panel-header">
+              <div class="panel-title">
+                <svg width="18" height="18" fill="none" stroke="#10b981" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                Calculated Deterministic Impact
+              </div>
+              <span style="color: var(--emerald-400); font-size: 11px; font-weight: 700;">Live Recalculation</span>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 10px; font-size: 13px;">
+              <div style="display: flex; justify-content: space-between; padding: 10px 12px; background: var(--bg-surface-elevated); border-radius: 8px;">
+                <span>Calculated Days of Cover:</span>
+                <strong id="calcDoc" style="color: #fbbf24;">7.68 Days</strong>
+              </div>
+              <div style="display: flex; justify-content: space-between; padding: 10px 12px; background: var(--bg-surface-elevated); border-radius: 8px;">
+                <span>Stockout Gap Window:</span>
+                <strong id="calcGap" style="color: #fb7185;">-1.32 Days</strong>
+              </div>
+              <div style="display: flex; justify-content: space-between; padding: 10px 12px; background: var(--bg-surface-elevated); border-radius: 8px;">
+                <span>Projected Net Shortage:</span>
+                <strong id="calcShortage" style="color: #fb7185;">24,050 Units</strong>
+              </div>
+              <div style="display: flex; justify-content: space-between; padding: 10px 12px; background: var(--bg-surface-elevated); border-radius: 8px;">
+                <span>Total Line Downtime Hours:</span>
+                <strong id="calcHours" style="color: #fb7185;">28.3 Hours</strong>
+              </div>
+              <div style="display: flex; justify-content: space-between; padding: 12px; background: rgba(244,63,94,0.15); border: 1px solid var(--rose-500); border-radius: 8px;">
+                <span style="font-weight: 700; color: #fff;">Total Financial Loss Exposure:</span>
+                <strong id="calcExpo" style="color: #fb7185; font-size: 18px;">$2,405,000</strong>
+              </div>
+            </div>
+
+            <button class="btn-solid-primary" style="width: 100%; margin-top: 14px; justify-content: center;" onclick="navigate('mitigation')">
+              Model Mitigation Packages (Epic 5) →
+            </button>
+          </div>
+
+        </div>
+
+        <!-- Flow Navigation Footer -->
+        <div class="flow-nav-footer">
+          <div class="flow-nav-left">
+            <span>Client Walkthrough:</span>
+            <strong style="color: #fff;">Step 5 of 6: Mathematical Impact Simulation</strong>
+          </div>
+          <button class="btn-solid-primary" onclick="navigate('mitigation')">
+            Next: Review Mitigation Packages &amp; Sign Token (Epic 5 &amp; 6) →
+          </button>
+        </div>
+      </section>
+
+      <!-- ============================================ -->
+      <!-- VIEW 6: MITIGATION & HITL TOKENS (Epic 5 & 6)-->
+      <!-- ============================================ -->
+      <section id="view-mitigation" class="view-panel">
+        <div class="panel-card">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">
+                <svg width="18" height="18" fill="none" stroke="#38bdf8" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                Ranked Mitigation Packages &amp; Cryptographic HITL Governance (Epic 5 &amp; 6)
+              </div>
+              <div style="font-size: 12px; color: var(--text-muted); margin-top: 3px;">
+                Human-in-the-Loop spend authorization gated by AWS KMS ECDSA P-256 tokens.
+              </div>
+            </div>
+          </div>
+
+          <!-- 3 Scenario Cards Side-by-Side -->
+          <div class="scenario-cards-row">
+            
+            <!-- Option 1: Air Charter (Recommended) -->
+            <div class="scenario-visual-card recommended">
+              <span class="rec-top-badge">RECOMMENDED (HIGHEST ROI)</span>
+              <div>
+                <div style="font-size: 11px; color: var(--cyan-400); font-weight: 800; text-transform: uppercase;">Option 1 · Air Charter</div>
+                <div style="font-size: 15px; font-weight: 800; color: #fff; margin-top: 3px;">Dedicated Boeing 777F Air Freight</div>
+                <div class="scenario-cost-large">$180,000 <span style="font-size: 11px; color: var(--text-muted); font-weight: 500;">(Lufthansa Cargo)</span></div>
+
+                <div class="metric-pill-row">
+                  <div class="metric-pill-item"><span>Delivery ETA:</span> <strong>3.5 Days (Day 4 Arrival)</strong></div>
+                  <div class="metric-pill-item"><span>Line Downtime:</span> <strong style="color: #34d399;">0.0 Hours Avoided</strong></div>
+                  <div class="metric-pill-item"><span>Net Benefit / ROI:</span> <strong style="color: #34d399;">+$2,225,000</strong></div>
+                  <div class="metric-pill-item"><span>Spend Governance:</span> <strong style="color: #fbbf24;">Dual VP Sign-off (&gt; $100k)</strong></div>
+                </div>
+              </div>
+
+              <button class="btn-solid-primary" style="width: 100%; justify-content: center;" onclick="triggerHITLModal(1, 180000)">
+                Authorize Option 1 ($180k) →
+              </button>
+            </div>
+
+            <!-- Option 2: MicroChip Global AML -->
+            <div class="scenario-visual-card">
+              <div>
+                <div style="font-size: 11px; color: var(--text-muted); font-weight: 800; text-transform: uppercase;">Option 2 · Dual Sourcing</div>
+                <div style="font-size: 15px; font-weight: 800; color: #fff; margin-top: 3px;">MicroChip Global Activation</div>
+                <div class="scenario-cost-large">$240,000 <span style="font-size: 11px; color: var(--text-muted); font-weight: 500;">(Spot Purchase)</span></div>
+
+                <div class="metric-pill-row">
+                  <div class="metric-pill-item"><span>Delivery ETA:</span> <strong>6.0 Days Lead Time</strong></div>
+                  <div class="metric-pill-item"><span>Buffer Safety Margin:</span> <strong style="color: #fbbf24;">1.7 Days Buffer</strong></div>
+                  <div class="metric-pill-item"><span>Net Benefit / ROI:</span> <strong style="color: #34d399;">+$2,165,000</strong></div>
+                  <div class="metric-pill-item"><span>AML Compliance:</span> <strong style="color: #34d399;">✅ Verified AML (Defect &lt; 1%)</strong></div>
+                </div>
+              </div>
+
+              <button class="btn-outline" style="width: 100%; justify-content: center;" onclick="triggerHITLModal(2, 240000)">
+                Authorize Option 2 ($240k) →
+              </button>
+            </div>
+
+            <!-- Option 3: Plant Line Rebalancing -->
+            <div class="scenario-visual-card">
+              <div>
+                <div style="font-size: 11px; color: var(--text-muted); font-weight: 800; text-transform: uppercase;">Option 3 · Operational</div>
+                <div style="font-size: 15px; font-weight: 800; color: #fff; margin-top: 3px;">Plant Line Rebalancing</div>
+                <div class="scenario-cost-large">$0 <span style="font-size: 11px; color: var(--text-muted); font-weight: 500;">(Direct Cash Spend)</span></div>
+
+                <div class="metric-pill-row">
+                  <div class="metric-pill-item"><span>Standard Line Throttle:</span> <strong>-30% Volume Cut</strong></div>
+                  <div class="metric-pill-item"><span>Sacrificed Gross Margin:</span> <strong style="color: #fb7185;">-$450,000</strong></div>
+                  <div class="metric-pill-item"><span>Net Benefit / ROI:</span> <strong style="color: #fbbf24;">+$1,955,000</strong></div>
+                  <div class="metric-pill-item"><span>Spend Governance:</span> <strong style="color: #a7f3d0;">Plant Director Approval</strong></div>
+                </div>
+              </div>
+
+              <button class="btn-outline" style="width: 100%; justify-content: center;" onclick="triggerHITLModal(3, 0)">
+                Authorize Option 3 (Rebalance) →
+              </button>
+            </div>
+
+          </div>
+
+          <!-- Comprehensive Trade-Off Comparison Matrix Table (FRD FR-DEC-003) -->
+          <div style="font-size: 12px; font-weight: 700; color: #fff; margin: 18px 0 8px;">
+            Side-by-Side Trade-off Comparison Matrix (FRD FR-DEC-003)
+          </div>
+          <table class="compare-table">
+            <thead>
+              <tr>
+                <th>Decision Attribute</th>
+                <th>Option 1: Air Expedite (B777F)</th>
+                <th>Option 2: MicroChip Global (AML)</th>
+                <th>Option 3: Plant Rebalancing</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Implementation Cost</strong></td>
+                <td style="color: #fb7185; font-weight: 700;">$180,000 (air freight surcharge)</td>
+                <td>$240,000 (spot market premium)</td>
+                <td style="color: #34d399; font-weight: 700;">$0 direct cash outlay</td>
+              </tr>
+              <tr>
+                <td><strong>Delivery / Resolution ETA</strong></td>
+                <td style="color: #34d399; font-weight: 700;">3.5 Days (Arrives Day 4)</td>
+                <td>6.0 Days (Arrives Day 6)</td>
+                <td>Immediate schedule adjustment</td>
+              </tr>
+              <tr>
+                <td><strong>Line Downtime Incurred</strong></td>
+                <td style="color: #34d399; font-weight: 700;">0.0 Hours (100% avoided)</td>
+                <td>0.0 Hours (1.7-day buffer margin)</td>
+                <td>0.0 Hours (ICE lines throttled)</td>
+              </tr>
+              <tr>
+                <td><strong>Production Volume Impact</strong></td>
+                <td style="color: #34d399; font-weight: 700;">0 units lost</td>
+                <td>0 units lost</td>
+                <td style="color: #fb7185;">-320 standard EV chassis</td>
+              </tr>
+              <tr>
+                <td><strong>AML Quality Certification</strong></td>
+                <td>N/A (Original BetaElectro component)</td>
+                <td style="color: #34d399;">✅ Pre-Qualified AML (Defect &lt; 0.4%)</td>
+                <td>N/A (Standard schedule shift)</td>
+              </tr>
+              <tr>
+                <td><strong>Governance Approval Tier</strong></td>
+                <td style="color: #fbbf24; font-weight: 700;">Tier 3: Dual VP Sign-off (&gt; $100k)</td>
+                <td style="color: #fbbf24; font-weight: 700;">Tier 3: Dual VP Sign-off (&gt; $100k)</td>
+                <td style="color: #a7f3d0;">Tier 1: Plant Director Approval</td>
+              </tr>
+              <tr>
+                <td><strong>Net Financial ROI</strong></td>
+                <td style="color: #34d399; font-weight: 800; font-size: 13px;">+$2,225,000 (HIGHEST)</td>
+                <td style="color: #34d399; font-weight: 700;">+$2,165,000</td>
+                <td style="color: #fbbf24; font-weight: 700;">+$1,955,000</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Flow Navigation Footer -->
+        <div class="flow-nav-footer">
+          <div class="flow-nav-left">
+            <span>Client Walkthrough:</span>
+            <strong style="color: #fff;">Step 6 of 6: Mitigation Packages &amp; HITL Approval</strong>
+          </div>
+          <button class="btn-solid-primary" onclick="navigate('audit')">
+            Final Step: Inspect WORM Audit Ledger &amp; Evals (Epic 7) →
+          </button>
+        </div>
+      </section>
+
+      <!-- ============================================ -->
+      <!-- VIEW 7: WORM AUDIT TRAIL & EVALS (Epic 7)   -->
+      <!-- ============================================ -->
+      <section id="view-audit" class="view-panel">
+        <div class="panel-card">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">
+                <svg width="18" height="18" fill="none" stroke="#38bdf8" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path></svg>
+                Tamper-Evident WORM Audit Ledger (Epic 7 &amp; ISO/TS Standards)
+              </div>
+              <div style="font-size: 12px; color: var(--text-muted); margin-top: 3px;">
+                Amazon S3 Object Lock (Compliance Mode) · 7-Year Mandatory Retention · SHA-256 Merkle Chaining.
+              </div>
+            </div>
+            <span style="font-size: 11px; color: var(--emerald-400); font-weight: 700;">&check; Zero Tamper Events</span>
+          </div>
+
+          <!-- Merkle Chained Audit Table -->
+          <div style="overflow-x: auto;">
+            <table class="mini-table">
+              <thead>
+                <tr>
+                  <th>Timestamp (UTC)</th>
+                  <th>Event Type</th>
+                  <th>Actor / Service</th>
+                  <th>Transaction Details</th>
+                  <th>Current SHA-256</th>
+                  <th>Previous Block Hash</th>
+                </tr>
+              </thead>
+              <tbody id="auditTableBody">
+                <tr>
+                  <td class="font-mono">08:14:12 UTC</td>
+                  <td><span class="signal-status-pill crit">SIGNAL_INGEST</span></td>
+                  <td>Signal Hub / Quarantined Reader</td>
+                  <td>Sanitized NanoCore cleanroom fire RSS; injection risk 0.02; C=0.94</td>
+                  <td class="font-mono" style="color: var(--cyan-400);">e3b0c442...</td>
+                  <td class="font-mono" style="color: var(--text-muted);">00000000... (GENESIS)</td>
+                </tr>
+                <tr>
+                  <td class="font-mono">08:14:28 UTC</td>
+                  <td><span class="signal-status-pill" style="background: rgba(14,165,233,0.15); color: #38bdf8;">GRAPH_TRAVERSAL</span></td>
+                  <td>Neptune Graph Svc</td>
+                  <td>Traversed 3-hop blast radius: NanoCore → MCU-X91 → BetaElectro → Munich</td>
+                  <td class="font-mono" style="color: var(--cyan-400);">8f434346...</td>
+                  <td class="font-mono" style="color: var(--text-muted);">e3b0c442...</td>
+                </tr>
+                <tr>
+                  <td class="font-mono">08:14:30 UTC</td>
+                  <td><span class="signal-status-pill warn">MATH_CERTIFIED</span></td>
+                  <td>Deterministic Engine</td>
+                  <td>Cover=7.7d, Gap=-1.3d, Shortage=24,050 units, Exposure=$2,405,000</td>
+                  <td class="font-mono" style="color: var(--cyan-400);">ca978112...</td>
+                  <td class="font-mono" style="color: var(--text-muted);">8f434346...</td>
+                </tr>
+                <tr>
+                  <td class="font-mono">08:15:22 UTC</td>
+                  <td><span class="signal-status-pill" style="background: rgba(192,132,252,0.15); color: #c084fc;">DOSSIER_READY</span></td>
+                  <td>LangGraph Detective Agent</td>
+                  <td>Rendered incident case dossier in 47.0s; 100% citations verified</td>
+                  <td class="font-mono" style="color: var(--cyan-400);">5e884898...</td>
+                  <td class="font-mono" style="color: var(--text-muted);">ca978112...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Continuous Evals Gate Panel (FRD FR-GOV-002) -->
+          <div style="margin-top: 18px; padding: 14px; background: var(--bg-surface-elevated); border-radius: 9px; border: 1px solid var(--border-subtle);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <span style="font-size: 13px; font-weight: 700; color: #fff;">CI/CD Automated Regression Evaluation Gate (FRD FR-GOV-002)</span>
+              <span style="background: rgba(16,185,129,0.15); color: #34d399; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700;">GATE: PASS ✅</span>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; font-size: 11px; margin-top: 8px;">
+              <div style="background: #080c16; padding: 8px 10px; border-radius: 6px;">
+                <span style="color: var(--text-muted);">Entity Extraction F1:</span>
+                <div style="font-size: 14px; font-weight: 800; color: #34d399; margin-top: 2px;">0.97 <span style="font-size: 10px; color: var(--text-muted);">(Target ≥ 0.95)</span></div>
+              </div>
+              <div style="background: #080c16; padding: 8px 10px; border-radius: 6px;">
+                <span style="color: var(--text-muted);">Graph Traversal Accuracy:</span>
+                <div style="font-size: 14px; font-weight: 800; color: #34d399; margin-top: 2px;">100% <span style="font-size: 10px; color: var(--text-muted);">(Target = 100%)</span></div>
+              </div>
+              <div style="background: #080c16; padding: 8px 10px; border-radius: 6px;">
+                <span style="color: var(--text-muted);">Math Consistency:</span>
+                <div style="font-size: 14px; font-weight: 800; color: #34d399; margin-top: 2px;">100% <span style="font-size: 10px; color: var(--text-muted);">(Zero Error)</span></div>
+              </div>
+              <div style="background: #080c16; padding: 8px 10px; border-radius: 6px;">
+                <span style="color: var(--text-muted);">Grounded Citation Score:</span>
+                <div style="font-size: 14px; font-weight: 800; color: #34d399; margin-top: 2px;">0.99 <span style="font-size: 10px; color: var(--text-muted);">(Target ≥ 0.98)</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 7 Core Business Rules Chips (FRD §3) -->
+          <div style="margin-top: 14px;">
+            <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase;">
+              Enforced Platform Business Rules (FRD §3)
+            </div>
+            <div style="display: flex; flex-wrap: wrap; gap: 6px; font-size: 10px;">
+              <span style="background: #141b2d; border: 1px solid var(--border-subtle); padding: 4px 8px; border-radius: 4px; color: #cbd5e1;">BR-001: Triad Separation (No Model Math)</span>
+              <span style="background: #141b2d; border: 1px solid var(--border-subtle); padding: 4px 8px; border-radius: 4px; color: #cbd5e1;">BR-002: Zero-Hallucination Citations</span>
+              <span style="background: #141b2d; border: 1px solid var(--border-subtle); padding: 4px 8px; border-radius: 4px; color: #cbd5e1;">BR-003: Mandatory HITL Spend Gating</span>
+              <span style="background: #141b2d; border: 1px solid var(--border-subtle); padding: 4px 8px; border-radius: 4px; color: #cbd5e1;">BR-004: Dual Signatures &gt; $100k</span>
+              <span style="background: #141b2d; border: 1px solid var(--border-subtle); padding: 4px 8px; border-radius: 4px; color: #cbd5e1;">BR-005: AML Qualified Secondary Sources Only</span>
+              <span style="background: #141b2d; border: 1px solid var(--border-subtle); padding: 4px 8px; border-radius: 4px; color: #cbd5e1;">BR-006: Quarantined Reader Passive Tags</span>
+              <span style="background: #141b2d; border: 1px solid var(--border-subtle); padding: 4px 8px; border-radius: 4px; color: #cbd5e1;">BR-007: WORM S3 Object Lock 7-Yr Retention</span>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL 1: HITL CRYPTOGRAPHIC APPROVAL           -->
+  <!-- ============================================== -->
+  <div class="modal-overlay" id="hitlModal">
+    <div class="modal-card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 10px;">
+        <div style="font-size: 15px; font-weight: 800; color: #fff;" id="hitlModalTitle">Cryptographic HITL Spend Authorization</div>
+        <button style="background: transparent; border: none; color: var(--text-muted); font-size: 18px; cursor: pointer;" onclick="closeHITLModal()">&times;</button>
+      </div>
+
+      <!-- Spend Tier Router Visual (FRD FR-ACT-001) -->
+      <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">
+        Spend Governance Threshold Router (FRD FR-ACT-001)
+      </div>
+      <div class="spend-router-track">
+        <div class="spend-router-node" id="routerTier1">
+          <div style="font-weight: 700; color: #cbd5e1;">Tier 1: ≤ $25,000</div>
+          <div style="color: var(--text-muted); font-size: 10px;">Category Manager Only</div>
+        </div>
+        <div class="spend-router-node" id="routerTier2">
+          <div style="font-weight: 700; color: #cbd5e1;">Tier 2: ≤ $100,000</div>
+          <div style="color: var(--text-muted); font-size: 10px;">Procurement Director</div>
+        </div>
+        <div class="spend-router-node active-tier" id="routerTier3">
+          <div style="font-weight: 800; color: var(--amber-400);">Tier 3: &gt; $100,000 ★</div>
+          <div style="color: #fde68a; font-size: 10px;">Dual VP Sign-off Required</div>
+        </div>
+      </div>
+
+      <div style="font-size: 12px; color: #cbd5e1; line-height: 1.5; margin-bottom: 14px;" id="hitlModalDesc">
+        You are authorizing Option 1 ($180,000 USD). This commitment exceeds the $100,000 threshold and requires <strong>Dual VP Cryptographic Signatures</strong>.
+      </div>
+
+      <!-- Signers Status Box -->
+      <div style="background: var(--bg-surface-elevated); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 12px; margin-bottom: 14px; font-size: 12px;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+          <span>Primary Signer: <strong>Priya Sharma (Category Mgr)</strong></span>
+          <span style="color: var(--emerald-400); font-weight: 700;">&check; Ready to Sign</span>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+          <span>Executive Co-Signer: <strong>Dr. Elena Rostova (VP Supply Chain)</strong></span>
+          <span style="color: var(--emerald-400); font-weight: 700;" id="vpSignStatus">&check; Biometric WebAuthn Authenticated</span>
+        </div>
+      </div>
+
+      <!-- Biometric Confirmation Checkbox -->
+      <div style="margin-bottom: 14px; display: flex; align-items: flex-start; gap: 8px; font-size: 12px; color: #cbd5e1;">
+        <input type="checkbox" id="bioCheck" style="margin-top: 3px; accent-color: var(--cyan-500);">
+        <label for="bioCheck">
+          I confirm that I have reviewed the deterministic calculation [Math Hash: <code style="color: var(--cyan-400);">a7f9c2...88e1</code>] and authorize the automated draft PO amendment to SAP S/4HANA.
+        </label>
+      </div>
+
+      <!-- Generated Token & SAP Confirmation Box -->
+      <div id="tokenPreview" style="display: none; background: #070a12; border: 1px solid var(--emerald-400); border-radius: 8px; padding: 12px; margin-bottom: 14px; font-family: monospace; font-size: 11px;">
+        <div style="color: var(--emerald-400); font-weight: 700; margin-bottom: 4px;">&check; AWS KMS ECDSA P-256 APPROVAL TOKEN ISSUED:</div>
+        <div style="color: #94a3b8; word-break: break-all;">
+          eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImFybjphd3M6a21zOmluY2lkZW50In0.eyJzdWIiOiJzaGFybWFAYXBleG1vdGlvbiIsImFjdGlvbiI6IlNBUF9QT19BTUVORCIsInNwZW5kX3VzZCI6MTgwMDAwLCJleHAiOjE3NzQ5MTk0MDB9.d4K9L7xQ8mN2vP...
+        </div>
+        <div style="color: var(--cyan-400); margin-top: 6px; font-weight: 700;">
+          ✓ SAP Document #PR-2026-009182 Created via OData API · Air Freight Condition Code 01 Dispatched
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 10px;">
+        <button class="btn-outline" onclick="closeHITLModal()">Cancel</button>
+        <button class="btn-solid-primary" id="btnSignSubmit" onclick="signAndDispatch()">
+          Digitally Sign &amp; Dispatch to SAP S/4HANA
+        </button>
+        <button class="btn-solid-primary" id="btnGoToAudit" style="display: none;" onclick="closeHITLModal(); navigate('audit');">
+          View in WORM Audit Ledger →
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL 2: BACKEND ROADMAP (Tasks Map)           -->
+  <!-- ============================================== -->
+  <div class="modal-overlay" id="roadmapModal">
+    <div class="modal-card" style="max-width: 740px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 10px;">
+        <div style="font-size: 15px; font-weight: 800; color: var(--cyan-400);">
+          Backend Tasks Mapping: How This UI Connects to Python Code
+        </div>
+        <button style="background: transparent; border: none; color: var(--text-muted); font-size: 18px; cursor: pointer;" onclick="closeRoadmapModal()">&times;</button>
+      </div>
+
+      <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 12px;">
+        Every screen you see maps directly to the 14 project phases and Python backend modules in <code>src/</code>:
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 8px; font-size: 11px;">
+        <div style="background: var(--bg-surface-elevated); padding: 10px 12px; border-radius: 7px;">
+          <strong style="color: var(--rose-400);">1. Signals &amp; Quarantined Reader:</strong> Phase 7 (Signal Ingestion) + Phase 2 (Redpanda Kafka topic <code>risk-alerts</code>). Python: <code>src/services/signals/sanitizer.py</code>.
+        </div>
+        <div style="background: var(--bg-surface-elevated); padding: 10px 12px; border-radius: 7px;">
+          <strong style="color: var(--cyan-400);">2. Multi-Tier Knowledge Graph:</strong> Phase 5 (Neptune Graph Client). Python: <code>src/graph/client.py</code> (OpenCypher 3-hop traversal).
+        </div>
+        <div style="background: var(--bg-surface-elevated); padding: 10px 12px; border-radius: 7px;">
+          <strong style="color: var(--emerald-400);">3. Deterministic Math Engine:</strong> Phase 6 (Days of Cover &amp; Shortage Gap). Python: <code>src/services/risk/engine.py</code> (Compiled Python C-extension).
+        </div>
+        <div style="background: var(--bg-surface-elevated); padding: 10px 12px; border-radius: 7px;">
+          <strong style="color: var(--purple-400);">4. Sub-90s Detective Agent:</strong> Phase 9 (LangGraph Multi-Agent Orchestration). Python: <code>src/agents/detective.py</code> + <code>src/agents/state.py</code>.
+        </div>
+        <div style="background: var(--bg-surface-elevated); padding: 10px 12px; border-radius: 7px;">
+          <strong style="color: var(--amber-400);">5. Cryptographic HITL Tokens:</strong> Phase 4 (AWS KMS ECDSA P-256 Token Authority). Python: <code>src/core/hitl_tokens.py</code>.
+        </div>
+        <div style="background: var(--bg-surface-elevated); padding: 10px 12px; border-radius: 7px;">
+          <strong style="color: #cbd5e1;">6. WORM Audit Ledger:</strong> Phase 3 &amp; 4 (Aurora PostgreSQL + S3 Object Lock). Python: <code>src/core/audit.py</code>.
+        </div>
+      </div>
+
+      <div style="margin-top: 16px; display: flex; justify-content: flex-end;">
+        <button class="btn-solid-primary" onclick="closeRoadmapModal()">Back to Dashboard</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL 3: CITATION PREVIEW MODAL                -->
+  <!-- ============================================== -->
+  <div class="modal-overlay" id="citationModal">
+    <div class="modal-card" style="max-width: 500px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 8px;">
+        <div style="font-size: 14px; font-weight: 800; color: var(--cyan-400);" id="citTitle">Citation Verification</div>
+        <button style="background: transparent; border: none; color: var(--text-muted); font-size: 18px; cursor: pointer;" onclick="closeCitationModal()">&times;</button>
+      </div>
+      <div style="font-size: 12px; color: #cbd5e1; line-height: 1.6;" id="citBody">
+        Verified against enterprise data sources.
+      </div>
+      <div style="margin-top: 14px; display: flex; justify-content: flex-end;">
+        <button class="btn-outline" onclick="closeCitationModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- FLOATING AI DETECTIVE COPILOT                  -->
+  <!-- ============================================== -->
+  <button class="floating-copilot-btn" onclick="toggleCopilot()">
+    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+    Ask Detective Co-Pilot
+  </button>
+
+  <div class="copilot-window" id="copilotWin">
+    <div style="padding: 12px 14px; background: var(--bg-surface-elevated); border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center;">
+      <div style="display: flex; align-items: center; gap: 7px;">
+        <div style="width: 7px; height: 7px; background: #34d399; border-radius: 50%;"></div>
+        <span style="font-size: 12px; font-weight: 700; color: #fff;">Detective AI Assistant</span>
+      </div>
+      <button style="background: transparent; border: none; color: var(--text-muted); font-size: 16px; cursor: pointer;" onclick="toggleCopilot()">&times;</button>
+    </div>
+
+    <!-- Quick Prompt Chips -->
+    <div style="padding: 8px 10px; background: #080c16; border-bottom: 1px solid var(--border-subtle); display: flex; gap: 5px; overflow-x: auto;">
+      <button class="btn-outline" style="font-size: 10px; white-space: nowrap; padding: 3px 7px;" onclick="sendQuickCopilot('What is our exact Days of Cover for MCU-X91?')">Days of Cover?</button>
+      <button class="btn-outline" style="font-size: 10px; white-space: nowrap; padding: 3px 7px;" onclick="sendQuickCopilot('Can BetaElectro claim Force Majeure under §14.2?')">Force Majeure?</button>
+      <button class="btn-outline" style="font-size: 10px; white-space: nowrap; padding: 3px 7px;" onclick="sendQuickCopilot('Compare Option 1 Air Charter vs Option 2 MicroChip')">Compare Mitigations</button>
+    </div>
+    
+    <div style="flex: 1; padding: 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 9px; font-size: 12px;" id="copilotChat">
+      <div style="background: var(--bg-surface-elevated); padding: 9px 11px; border-radius: 8px; color: #cbd5e1; line-height: 1.5;">
+        Hello. I am the <strong>ApexMotion Detective Co-Pilot</strong>. I have indexed Incident #SR-2026-091. Ask me about BOM dependencies, inventory runway, contract terms, or mitigation options.
+      </div>
+    </div>
+
+    <div style="padding: 9px; background: var(--bg-surface); border-top: 1px solid var(--border-subtle); display: flex; gap: 6px;">
+      <input type="text" id="copilotInput" placeholder="Ask about suppliers, burn rates, contracts..." style="flex:1; background: #080c16; border: 1px solid var(--border-subtle); border-radius: 6px; padding: 7px 10px; color: #fff; font-size: 12px; outline: none;" onkeypress="if(event.key==='Enter') sendCopilotMsg()">
+      <button class="btn-solid-primary" style="padding: 6px 11px; font-size: 11px;" onclick="sendCopilotMsg()">Send</button>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- JAVASCRIPT LOGIC                               -->
+  <!-- ============================================== -->
+  <script>
+    // Tab Navigation
+    function navigate(viewName, btnEl) {
+      document.querySelectorAll('.view-panel').forEach(v => v.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+
+      const target = document.getElementById('view-' + viewName);
+      if (target) target.classList.add('active');
+
+      if (btnEl) {
+        btnEl.classList.add('active');
+      } else {
+        document.querySelectorAll('.nav-item').forEach(b => {
+          if (b.getAttribute('onclick') && b.getAttribute('onclick').includes(viewName)) {
+            b.classList.add('active');
+          }
+        });
+      }
+
+      const titles = {
+        overview: 'Command Dashboard',
+        signals: 'Signals & Disruption Feed (Epic 1)',
+        incident: 'Incident Workbench & Math Proof (Epic 4 & 3)',
+        graph: 'Knowledge Graph Explorer (Epic 2)',
+        simulator: 'Deterministic Impact Simulator (Epic 3)',
+        mitigation: 'Mitigation Packages & HITL Governance (Epic 5 & 6)',
+        audit: 'WORM Audit Ledger & CI Evals (Epic 7)'
+      };
+      document.getElementById('breadcrumbCurrent').textContent = titles[viewName] || 'Command Dashboard';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Persona Switcher
+    function switchPersona(val) {
+      const avatar = document.getElementById('avatarIcon');
+      const name = document.getElementById('userNameLabel');
+      if (val === 'analyst') {
+        avatar.textContent = 'AC';
+        avatar.style.background = 'linear-gradient(135deg, #0284c7, #2563eb)';
+        name.textContent = 'Alex Chen';
+      } else if (val === 'sourcing') {
+        avatar.textContent = 'PS';
+        avatar.style.background = 'linear-gradient(135deg, #0ea5e9, #0d9488)';
+        name.textContent = 'Priya Sharma';
+      } else if (val === 'plant') {
+        avatar.textContent = 'KW';
+        avatar.style.background = 'linear-gradient(135deg, #d97706, #b45309)';
+        name.textContent = 'Klaus Weber';
+      } else if (val === 'vp') {
+        avatar.textContent = 'ER';
+        avatar.style.background = 'linear-gradient(135deg, #7c3aed, #4f46e5)';
+        name.textContent = 'Dr. Elena Rostova';
+      }
+    }
+
+    // Interactive Math Simulator
+    function simRecalc() {
+      const stock = parseFloat(document.getElementById('slStock').value);
+      const burn = parseFloat(document.getElementById('slBurn').value);
+      const transit = parseFloat(document.getElementById('slTransit').value);
+      const rate = parseFloat(document.getElementById('slRate').value);
+
+      document.getElementById('slStockVal').textContent = stock.toLocaleString() + ' units';
+      document.getElementById('slBurnVal').textContent = burn.toLocaleString() + ' units/day';
+      document.getElementById('slTransitVal').textContent = transit.toFixed(1) + ' Days';
+      document.getElementById('slRateVal').textContent = '€' + rate.toLocaleString() + ' / hr';
+
+      const doc = stock / burn;
+      const gap = transit - doc;
+      const shortage = gap > 0 ? Math.round(gap * burn) : 0;
+      const hours = gap > 0 ? (gap * 21.5).toFixed(1) : 0;
+      const exposure = gap > 0 ? Math.round(hours * rate) : 0;
+
+      document.getElementById('calcDoc').textContent = doc.toFixed(2) + ' Days';
+      document.getElementById('calcGap').textContent = gap > 0 ? `-${gap.toFixed(2)} Days` : '+ Buffer OK';
+      document.getElementById('calcGap').style.color = gap > 0 ? '#fb7185' : '#34d399';
+      document.getElementById('calcShortage').textContent = shortage.toLocaleString() + ' Units';
+      document.getElementById('calcHours').textContent = hours + ' Hours';
+      document.getElementById('calcExpo').textContent = '$' + exposure.toLocaleString();
+      document.getElementById('kpiDocVal').textContent = doc.toFixed(1) + ' Days';
+    }
+
+    function resetSimDefaults() {
+      document.getElementById('slStock').value = 142000;
+      document.getElementById('slBurn').value = 18500;
+      document.getElementById('slTransit').value = 9.0;
+      document.getElementById('slRate').value = 85000;
+      simRecalc();
+    }
+
+    // 6-Stage Investigation Pipeline Stepper Animation
+    function runInvestigationPipeline() {
+      const steps = ['step1', 'step2', 'step3', 'step4', 'step5', 'step6'];
+      steps.forEach(s => {
+        const el = document.getElementById(s);
+        el.classList.remove('completed');
+        el.classList.remove('active');
+      });
+
+      let current = 0;
+      const interval = setInterval(() => {
+        if (current > 0) {
+          document.getElementById(steps[current - 1]).classList.remove('active');
+          document.getElementById(steps[current - 1]).classList.add('completed');
+        }
+        if (current < steps.length) {
+          document.getElementById(steps[current]).classList.add('active');
+          current++;
+        } else {
+          clearInterval(interval);
+        }
+      }, 400);
+    }
+
+    // Graceful Degradation Toggle
+    function toggleGracefulDegradation(enabled) {
+      const banner = document.getElementById('degradeBanner');
+      const narrative = document.getElementById('narrativeContent');
+      if (enabled) {
+        banner.style.display = 'block';
+        narrative.style.opacity = '0.6';
+      } else {
+        banner.style.display = 'none';
+        narrative.style.opacity = '1.0';
+      }
+    }
+
+    // Interactive Graph Node Inspector
+    function inspectGraphNode(key) {
+      const title = document.getElementById('nodeTitle');
+      const body = document.getElementById('nodeBody');
+      if (key === 'nanocore') {
+        title.textContent = 'Selected: NanoCore Semiconductor Fab 2 (Tier-2 Disrupted)';
+        title.style.color = '#f43f5e';
+        body.innerHTML = 'Entity ID: <code>SUP-NC-882</code> · Cleanroom electrical fire in Hsinchu Fab 2. Produces 32-bit MCU-X91 wafers. 21-day production freeze. Single-point-of-failure for BetaElectro ECU assembly.';
+      } else if (key === 'microchip') {
+        title.textContent = 'Selected: MicroChip Global (Tier-2 Secondary AML Supplier)';
+        title.style.color = '#10b981';
+        body.innerHTML = 'Entity ID: <code>SUP-MC-104</code> · Pre-qualified on ApexMotion Approved Manufacturer List (AML). Pin-compatible MCU variant. Active quality defect rate &lt; 0.4%. Delivery lead time: 6.0 days.';
+      } else if (key === 'betaelectro') {
+        title.textContent = 'Selected: BetaElectro GmbH (Tier-1 Primary Partner)';
+        title.style.color = '#0ea5e9';
+        body.innerHTML = 'Master Agreement #MSA-2024-BE §14.2 obligates 50% cost-sharing for expedited air charter up to $100k. Dependent on NanoCore MCU wafers.';
+      } else if (key === 'mcux91') {
+        title.textContent = 'Selected: Part #MCU-X91 (32-bit Automotive Microcontroller)';
+        title.style.color = '#38bdf8';
+        body.innerHTML = 'Usable on-hand inventory across plants: 142,000 units. Daily consumption: 18,500 units/day. Inbound maritime transit delayed to 9.0 days, creating 24,050 units net deficit.';
+      } else if (key === 'munich') {
+        title.textContent = 'Selected: Munich EV Gigafactory (ApexMotion Plant)';
+        title.style.color = '#818cf8';
+        body.innerHTML = 'Assembles Model-X Performance and Hyper-GT battery packs. Operating line halt loss: €85,000 / hour. Stockout projected on Day 7.7 without expedite.';
+      } else if (key === 'silicon') {
+        title.textContent = 'Selected: Formosa Silicon (Tier-3 Raw Material Refiner)';
+        title.style.color = '#94a3b8';
+        body.innerHTML = 'Supplies electronic-grade polysilicon wafers to NanoCore. Operational status: Normal.';
+      } else if (key === 'bmse4') {
+        title.textContent = 'Selected: BMS-E4 Battery Control Unit (Sub-Assembly)';
+        title.style.color = '#a5b4fc';
+        body.innerHTML = 'Primary power distribution and cell management computer for ApexMotion EV battery packs.';
+      }
+    }
+
+    // HITL Modal Logic
+    let currentOpt = 1;
+    let currentSpend = 180000;
+
+    function triggerHITLModal(opt, spend) {
+      currentOpt = opt;
+      currentSpend = spend;
+      document.getElementById('tokenPreview').style.display = 'none';
+      document.getElementById('btnSignSubmit').style.display = 'inline-flex';
+      document.getElementById('btnGoToAudit').style.display = 'none';
+      document.getElementById('bioCheck').checked = false;
+
+      // Update router highlights
+      const r1 = document.getElementById('routerTier1');
+      const r2 = document.getElementById('routerTier2');
+      const r3 = document.getElementById('routerTier3');
+      r1.className = 'spend-router-node';
+      r2.className = 'spend-router-node';
+      r3.className = 'spend-router-node';
+
+      if (spend > 100000) {
+        r3.className = 'spend-router-node active-tier';
+        document.getElementById('hitlModalDesc').innerHTML = `You are authorizing Option ${opt} (<strong>$${spend.toLocaleString()} USD</strong>). This exceeds the $100,000 threshold, routing to <strong>Dual Executive VP Authorization</strong> under Rule BR-RULE-004.`;
+        document.getElementById('vpSignStatus').textContent = '✓ Biometric WebAuthn Authenticated';
+        document.getElementById('vpSignStatus').style.color = '#34d399';
+      } else if (spend > 25000) {
+        r2.className = 'spend-router-node active-tier';
+        document.getElementById('hitlModalDesc').innerHTML = `You are authorizing Option ${opt} (<strong>$${spend.toLocaleString()} USD</strong>). Requires Procurement Director authorization.`;
+        document.getElementById('vpSignStatus').textContent = 'Not Required (Under $100k)';
+        document.getElementById('vpSignStatus').style.color = '#94a3b8';
+      } else {
+        r1.className = 'spend-router-node active-tier';
+        document.getElementById('hitlModalDesc').innerHTML = `You are authorizing Option 3 (Operational Rebalance - $0 cash). Requires Plant Director sign-off.`;
+        document.getElementById('vpSignStatus').textContent = 'Not Required (Internal Rebalance)';
+        document.getElementById('vpSignStatus').style.color = '#94a3b8';
+      }
+
+      document.getElementById('hitlModal').classList.add('active');
+    }
+
+    function closeHITLModal() {
+      document.getElementById('hitlModal').classList.remove('active');
+    }
+
+    function signAndDispatch() {
+      const bioCheck = document.getElementById('bioCheck');
+      if (!bioCheck.checked) {
+        alert('Please check the confirmation box to verify you have reviewed the deterministic calculation.');
+        return;
+      }
+
+      document.getElementById('btnSignSubmit').style.display = 'none';
+      document.getElementById('tokenPreview').style.display = 'block';
+      document.getElementById('btnGoToAudit').style.display = 'inline-flex';
+
+      // Auto-append entry to WORM Audit Ledger
+      const tbody = document.getElementById('auditTableBody');
+      const tr = document.createElement('tr');
+      const now = new Date().toISOString().replace('T', ' ').substring(11, 19) + ' UTC';
+      tr.innerHTML = `
+        <td class="font-mono">${now}</td>
+        <td><span class="signal-status-pill" style="background: rgba(16,185,129,0.2); color:#6ee7b7;">HITL_TOKEN_SIGNED</span></td>
+        <td>Priya S. + Elena R.</td>
+        <td>Authorized Option ${currentOpt} ($${currentSpend.toLocaleString()} spend · Air Charter B777F dispatch)</td>
+        <td class="font-mono" style="color: var(--emerald-400);">9a22f831... (ECDSA P-256)</td>
+        <td class="font-mono" style="color: var(--cyan-400);">5e884898...</td>
+      `;
+      tbody.prepend(tr);
+    }
+
+    // Citation Detail Popups
+    function showCitationModal(key) {
+      const title = document.getElementById('citTitle');
+      const body = document.getElementById('citBody');
+      if (key === 'SAP-INV-001') {
+        title.textContent = 'Verified ERP Document: [SAP-INV-001]';
+        body.innerHTML = '<strong>SAP S/4HANA OData Endpoint:</strong> <code>GET /A2X/sap/opu/odata4/sap/api_purchaseorder_2/</code><br>• Usable Inventory on Hand: 142,000 units<br>• Verified dock delivery timestamp: 2026-11-19 07:30 UTC<br>• S3 WORM Hash: <code>a7f9c28e9184...</code>';
+      } else if (key === 'MSA-2024-BE') {
+        title.textContent = 'Verified Contract Document: [MSA-2024-BE §14.2]';
+        body.innerHTML = '<strong>Master Service Agreement BetaElectro GmbH (Doc #MSA-2024-BE):</strong><br>• Section 14.2.1: Cleanroom fire excluded from Force Majeure when secondary AML alternates exist.<br>• Section 14.2.3: Supplier obligates 50% expedited air freight cost-share up to $100k.<br>• Verified in Amazon OpenSearch Vector Index.';
+      } else if (key === 'NEPTUNE-GRAPH') {
+        title.textContent = 'Verified Neptune Traversal: [NEPTUNE-GRAPH]';
+        body.innerHTML = '<strong>Amazon Neptune OpenCypher Query Result:</strong><br>• Traversal Path: NanoCore (Tier-2) → MCU-X91 → BetaElectro (Tier-1) → BMS-E4 → Munich Plant Line 2.<br>• Single point of failure verified. Depth: 3 hops.';
+      } else if (key === 'REUTERS-TW-9921') {
+        title.textContent = 'Verified External Telemetry: [REUTERS-TW-9921]';
+        body.innerHTML = '<strong>Sanitized Telemetry Payload:</strong><br>• Source: Taiwan National Fire Agency dispatch + Satellite thermal anomaly sensor.<br>• Quarantined Reader verification: Zero prompt injection (Risk Score: 0.02). Confidence: 94%.';
+      }
+      document.getElementById('citationModal').classList.add('active');
+    }
+
+    function closeCitationModal() {
+      document.getElementById('citationModal').classList.remove('active');
+    }
+
+    // Backend Blueprint Modal
+    function openRoadmapModal() {
+      document.getElementById('roadmapModal').classList.add('active');
+    }
+    function closeRoadmapModal() {
+      document.getElementById('roadmapModal').classList.remove('active');
+    }
+
+    // Floating Copilot Chat Drawer
+    function toggleCopilot() {
+      document.getElementById('copilotWin').classList.toggle('open');
+    }
+
+    function sendQuickCopilot(text) {
+      document.getElementById('copilotInput').value = text;
+      sendCopilotMsg();
+    }
+
+    function sendCopilotMsg() {
+      const inp = document.getElementById('copilotInput');
+      const txt = inp.value.trim();
+      if (!txt) return;
+
+      const chat = document.getElementById('copilotChat');
+      const uMsg = document.createElement('div');
+      uMsg.style.cssText = 'background: #0284c7; color: white; padding: 8px 12px; border-radius: 8px; align-self: flex-end; max-width: 82%;';
+      uMsg.textContent = txt;
+      chat.appendChild(uMsg);
+      inp.value = '';
+
+      setTimeout(() => {
+        const bMsg = document.createElement('div');
+        bMsg.style.cssText = 'background: var(--bg-surface-elevated); padding: 9px 11px; border-radius: 8px; color: #cbd5e1; line-height: 1.5;';
+        const lower = txt.toLowerCase();
+        if (lower.includes('cover') || lower.includes('stock')) {
+          bMsg.innerHTML = '<strong>Deterministic Runway Analysis:</strong><br>Usable stock at Munich is <strong>142,000 units</strong>. With aggregate 3-plant burn at <strong>18,500 units/day</strong>, exact Days of Cover is <strong>7.68 Days</strong>.<br>Inbound maritime PO #88921 is delayed to Day 9.0, creating an unmitigated <strong>1.32-day stockout gap</strong> starting on Day 8.';
+        } else if (lower.includes('force majeure') || lower.includes('contract') || lower.includes('betaelectro')) {
+          bMsg.innerHTML = '<strong>Contract Intelligence Extract [MSA-2024-BE §14.2]:</strong><br>Cleanroom fires do NOT trigger unilateral Force Majeure relief when secondary AML alternatives (MicroChip Global) exist.<br>Clause §14.2(c) requires BetaElectro to split expedited air charter costs <strong>50/50 up to $100,000</strong>.';
+        } else if (lower.includes('compare') || lower.includes('air') || lower.includes('microchip') || lower.includes('mitigation')) {
+          bMsg.innerHTML = '<strong>Mitigation Trade-Off Matrix:</strong><br>• <strong>Option 1 (Air Charter):</strong> $180,000 cost · 3.5d ETA · 0 downtime · <strong>Net ROI: +$2,225,000</strong>.<br>• <strong>Option 2 (MicroChip Global):</strong> $240,000 cost · 6.0d lead time · 1.7d buffer safety margin.<br>Option 1 is recommended as it completely eliminates the €85k/hr Munich line halt risk.';
+        } else {
+          bMsg.innerHTML = `Query corroborated against Incident #SR-2026-091 in Amazon Neptune &amp; SAP ERP: Verified. Recommended path is <strong>Option 1 (Air Charter Expedite)</strong> requiring Dual VP Sign-off.`;
+        }
+        chat.appendChild(bMsg);
+        chat.scrollTop = chat.scrollHeight;
+      }, 400);
+
+      chat.scrollTop = chat.scrollHeight;
+    }
+  </script>
+</body>
+</html>

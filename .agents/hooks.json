@@ -1,0 +1,17 @@
+{
+  "pre-commit-quality-gate": {
+    "enabled": true,
+    "PreToolUse": [
+      {
+        "matcher": "run_command",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "./scripts/pre_commit_gate.sh",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}

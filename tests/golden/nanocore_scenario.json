@@ -1,0 +1,24 @@
+{
+  "scenario_id": "SCENARIO-NANOCORE-001",
+  "name": "NanoCore Semiconductor 9-Day Disruption Golden Test",
+  "description": "Canonical reference scenario for ApexMotion Supplier Risk Intelligence Platform. Semiconductor delivery disruption with 9.0 day ETA vs 7.68 days of cover.",
+  "inputs": {
+    "supplier_id": "SUP-NC-001",
+    "supplier_name": "NanoCore Microelectronics Ltd",
+    "component_sku": "SKU-MCU-4402",
+    "current_stock": 142000,
+    "daily_consumption_rate": 18500,
+    "eta_days": 9.0,
+    "unit_cost_usd": 100.25,
+    "factory_halt_cost_per_hour_eur": 85000.00
+  },
+  "expected": {
+    "days_of_cover": 7.68,
+    "gap_days": 1.32,
+    "shortage_volume": 24420,
+    "financial_exposure_usd": 2448105.00,
+    "risk_level": "CRITICAL",
+    "hitl_tier": "PROC_DIRECTOR",
+    "hitl_required": true
+  }
+}

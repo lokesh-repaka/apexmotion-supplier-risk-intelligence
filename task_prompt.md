@@ -1,6 +1,6 @@
 You have access to the project's authoritative documentation: `TASKS.md`, `CLAUDE.md`, `GEMINI.md`, `.agents/rules/`, and architecture specifications in `docs/` (`HLD_*.md`, `LLD_*.md`, `PRD_*.md`, `BRD_*.md`, `FRD_*.md`).
 
-Go ahead and complete **P3-2 · Database schema DDL (`schema.sql`) and Alembic migration baseline**, as defined in `TASKS.md`.
+Go ahead and complete **P3-3 · Repository layer — async CRUD for all five tables (`src/database/repositories/`)**, as defined in `TASKS.md`.
 
 ---
 

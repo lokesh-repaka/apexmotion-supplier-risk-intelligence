@@ -22,7 +22,7 @@ Sub-tasks in the same phase that do not share files can be open at the same time
 | P1-3 · Structured JSON logging (`src/core/logging.py`) — `trace_id` on every log line, no PII in raw form | `feature/core-structured-logging` | Completed ✅ |
 | P1-4 · FastAPI app skeleton — `src/api/main.py`, lifespan, `request_id` middleware, CORS, global exception handler | `feature/api-app-skeleton` | Completed ✅ |
 | P1-5 · Health routes — `GET /health` (no I/O) and `GET /health/ready` (deep: DB, Neptune, Kafka, Redis) | `feature/api-health-routes` | Completed ✅ |
-| P1-6 · GitHub Actions CI pipeline — lint (`ruff`) → type-check (`mypy`) → unit tests → Docker build | `feature/ci-github-actions` | Pending ❌ |
+| P1-6 · GitHub Actions CI pipeline — lint (`ruff`) → type-check (`mypy`) → unit tests → Docker build | `feature/ci-github-actions` | Completed ✅ |
 
 ---
 

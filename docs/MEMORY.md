@@ -17,11 +17,11 @@
 | Metric | Current Count | Status |
 |---|---|---|
 | **Phase 1 Progress** | 6 / 6 Tasks Completed | Completed ✅ |
-| **Phase 2 Progress** | 1 / 5 Tasks Completed | In Progress 🔄 |
-| **Total Test Suites** | 7 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`) | PASSED ✅ |
-| **Total Test Cases** | 43 unit/golden tests | 100% Passing (0 failures) |
+| **Phase 2 Progress** | 2 / 5 Tasks Completed | In Progress 🔄 |
+| **Total Test Suites** | 8 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`, `test_localstack_bootstrap.py`) | PASSED ✅ |
+| **Total Test Cases** | 49 unit/golden tests | 100% Passing (0 failures) |
 | **Code Coverage (`src/`)** | **94%** statement coverage | Exceeds 80% DoD gate |
-| **Active Branch** | `feature/docker-compose-local` $\to$ `development` | Clean |
+| **Active Branch** | `feature/localstack-bootstrap` $\to$ `development` | Clean |
 
 ---
 
@@ -74,6 +74,15 @@
     - Langfuse v2 (`3000:3000`) with PostgreSQL dependency health gating.
   - Isolated bridge network `apexmotion-network` and 4 named persistent volumes.
   - 5 new unit tests (43 total).
+  - PR #6 merged into `development`.
+- **P2-2 · LocalStack Bootstrap Script (`feature/localstack-bootstrap`)**: Completed ✅
+  - `scripts/localstack_bootstrap.sh`: Bash script automating local cloud emulation setup:
+    - S3 WORM audit bucket (`apexmotion-audit-worm`) with Object Lock in `COMPLIANCE` mode and 7-year retention policy (BR-RULE-007, FR-GOV-001).
+    - S3 raw documents bucket (`apexmotion-raw-contracts`).
+    - AWS KMS ECDSA P-256 signing key (`ECC_NIST_P256`, `SIGN_VERIFY`) with alias `alias/apexmotion-hitl-signer` for cryptographic HITL tokens (BR-RULE-001).
+    - IAM role stubs (`apexmotion-api-role`, `apexmotion-worker-role`) with execution trust policies.
+  - Idempotent execution and automatic mounting in `docker-compose.yml` (`/etc/localstack/init/ready.d/01-bootstrap.sh`).
+  - 6 new unit tests (49 total).
 
 ---
 
@@ -94,11 +103,12 @@
    - Production Docker images strictly prohibit root execution, enforcing unprivileged `appuser` (UID 10001) runtime.
 8. **Local Dev Store Isolation**:
    - Local backing stores operate on an isolated bridge network with memory bounding to guarantee reproducible local development without external cloud leakage.
+9. **WORM Immutability (BR-RULE-007)**:
+   - Audit trail archived into S3 Object Lock in COMPLIANCE mode with 7-year retention.
 
 ---
 
 ## 5. Next Planned Tasks
-- **P2-2**: LocalStack bootstrap script (`scripts/localstack_bootstrap.sh`).
 - **P2-3**: Redpanda topic creation script (`scripts/redpanda_topics.sh`).
-- **P2-4**: Neptune local emulation.
+- **P2-4**: Neptune local emulation (`docker-compose.yml` Gremlin Server integration).
 - **P2-5**: Makefile.

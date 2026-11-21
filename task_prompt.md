@@ -1,6 +1,6 @@
 You have access to the project's authoritative documentation: `TASKS.md`, `CLAUDE.md`, `GEMINI.md`, `.agents/rules/`, and architecture specifications in `docs/` (`HLD_*.md`, `LLD_*.md`, `PRD_*.md`, `BRD_*.md`, `FRD_*.md`).
 
-Go ahead and complete **P1-5 · Health routes (`src/api/routes/health.py`)**, as defined in `TASKS.md`.
+Go ahead and complete **P1-6 · GitHub Actions CI pipeline (`.github/workflows/ci.yml`)**, as defined in `TASKS.md`.
 
 ---
 

@@ -16,11 +16,11 @@
 
 | Metric | Current Count | Status |
 |---|---|---|
-| **Phase 1 Progress** | 4 / 6 Tasks Completed | In Progress 🔄 |
-| **Total Test Suites** | 4 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`) | PASSED ✅ |
-| **Total Test Cases** | 25 unit/golden tests | 100% Passing (0 failures) |
-| **Code Coverage (`src/`)** | **95%** statement coverage | Exceeds 80% DoD gate |
-| **Active Branch** | `feature/api-app-skeleton` $\to$ `development` | Clean |
+| **Phase 1 Progress** | 5 / 6 Tasks Completed | In Progress 🔄 |
+| **Total Test Suites** | 5 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`) | PASSED ✅ |
+| **Total Test Cases** | 32 unit/golden tests | 100% Passing (0 failures) |
+| **Code Coverage (`src/`)** | **94%** statement coverage | Exceeds 80% DoD gate |
+| **Active Branch** | `feature/api-health-routes` $\to$ `development` | Clean |
 
 ---
 
@@ -48,6 +48,12 @@
   - Standardized error envelopes conforming to CLAUDE.md Section 10 (`AppException`, `RequestValidationError`, `StarletteHTTPException`, `Exception`).
   - Traceback masking on unhandled 500 exceptions to prevent internal credential disclosure.
   - 92% coverage on `src/api/main.py`, 8 new unit tests (25 total).
+  - PR #3 merged into `development`.
+- **P1-5 · Health Routes (`feature/api-health-routes`)**: Completed ✅
+  - `src/api/routes/health.py`: Lightweight liveness probe (`GET /health`) with zero I/O and deep readiness probe (`GET /health/ready`) checking Aurora PostgreSQL, Amazon Neptune, Apache Kafka, and Redis.
+  - Concurrency via `asyncio.gather()` and strict 2.0s probe timeout with latency tracking.
+  - HTTP 503 status code returned when any downstream dependency is unhealthy.
+  - 91% statement coverage on `src/api/routes/health.py`, 7 new unit tests (32 total).
 
 ---
 
@@ -62,9 +68,10 @@
    - 100% of unit tests execute offline using local mock flags (`USE_LOCALSTACK=true`, `USE_MOCK_LLM=true`, `USE_LOCAL_KAFKA=true`).
 5. **Secure Error Envelopes**:
    - Error responses adhere to `{"error": {"code": ..., "message": ..., "trace_id": ...}}` with zero internal stack traces leaking to clients.
+6. **Liveness / Readiness Decoupling**:
+   - Liveness probes (`/health`) never perform network or database I/O, preventing cascading pod crashloops.
 
 ---
 
 ## 5. Next Planned Tasks
-- **P1-5**: Health routes (`GET /health`, `GET /health/ready`).
-- **P1-6**: GitHub Actions CI pipeline.
+- **P1-6**: GitHub Actions CI pipeline (`.github/workflows/ci.yml`).

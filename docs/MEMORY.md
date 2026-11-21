@@ -17,11 +17,11 @@
 | Metric | Current Count | Status |
 |---|---|---|
 | **Phase 1 Progress** | 6 / 6 Tasks Completed | Completed ✅ |
-| **Phase 2 Progress** | 4 / 5 Tasks Completed | In Progress 🔄 |
-| **Total Test Suites** | 10 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`, `test_localstack_bootstrap.py`, `test_redpanda_topics.py`, `test_neptune_emulation.py`) | PASSED ✅ |
-| **Total Test Cases** | 63 unit/golden tests | 100% Passing (0 failures) |
+| **Phase 2 Progress** | 5 / 5 Tasks Completed | Completed ✅ |
+| **Total Test Suites** | 11 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`, `test_localstack_bootstrap.py`, `test_redpanda_topics.py`, `test_neptune_emulation.py`, `test_makefile.py`) | PASSED ✅ |
+| **Total Test Cases** | 69 unit/golden tests | 100% Passing (0 failures) |
 | **Code Coverage (`src/`)** | **94%** statement coverage | Exceeds 80% DoD gate |
-| **Active Branch** | `feature/neptune-local-emulation` $\to$ `development` | Clean |
+| **Active Branch** | `feature/makefile-dev-commands` $\to$ `development` | Clean |
 
 ---
 
@@ -99,6 +99,11 @@
   - `scripts/neptune_seed.cypher`: Authored OpenCypher seed schema defining core nodes (`Supplier`, `Component`, `Assembly`, `Plant`, `Program`, `Contract`, `NewsEvent`, `GeopoliticalRisk`) and supply chain edges (`SUPPLIES`, `PART_OF_BOM`, `ASSEMBLED_AT`, `ALLOCATED_TO`, `TIER_1_OF`, `BOUND_BY`, `AFFECTS`, `THREATENS`), including NanoCore golden reference entities (`SUP-NC-882`, `MCU-X91`, `PLT-MUC-01`).
   - `scripts/neptune_smoke_test.sh`: Created executable bash script with strict error handling (`set -euo pipefail`), supporting `--dry-run` offline verification and live HTTP `/openCypher` / Gremlin query execution against port 8182.
   - 8 new unit tests in `tests/unit/test_neptune_emulation.py` (63 total passing tests across suite, 94% coverage).
+  - PR #9 merged into `development`.
+- **P2-5 · Developer Makefile (`feature/makefile-dev-commands`)**: Completed ✅
+  - `Makefile`: Centralized developer automation defining `run-api`, `run-worker`, `run-frontend`, `test`, `test-unit`, `test-golden`, `test-coverage`, `lint`, `format`, `type-check`, `seed`, `up`, `down`, and `clean`.
+  - Enforced strict offline isolation flags (`USE_LOCALSTACK=true USE_MOCK_LLM=true USE_LOCAL_KAFKA=true`) within `test` and `test-coverage` targets.
+  - 6 new unit tests in `tests/unit/test_makefile.py` (69 total passing tests across suite, 94% coverage).
 
 ---
 
@@ -125,9 +130,12 @@
     - Real-time streams are pre-partitioned (3 partitions) to support high throughput (1.11M events/day) without consumer starvation.
 11. **Knowledge Graph Topology Isolation**:
     - Graph database emulation operates on standard port 8182 within `apexmotion-network`, seed Cypher adheres strictly to golden multi-tier supply chain topology.
+12. **Standardized Command Automation**:
+    - Developer operations governed through a canonical Makefile, eliminating configuration drift and enforcing offline test flags.
 
 ---
 
 ## 5. Next Planned Tasks
-- **P2-5**: Makefile (`make run-api`, `make run-worker`, `make run-frontend`, `make test`, `make lint`, `make seed`).
-- **P3-1**: SQLAlchemy 2 async models (`src/database/models.py`).
+- **Phase 3 — Persistence Layer (Aurora PostgreSQL)**:
+  - **P3-1**: SQLAlchemy 2 async models — `suppliers`, `risk_alerts`, `hitl_approvals`, `audit_logs`, `agent_runs` (`src/database/models.py`).
+  - **P3-2**: Database schema DDL (`schema.sql`) and Alembic migration baseline.

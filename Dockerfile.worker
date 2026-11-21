@@ -1,0 +1,55 @@
+# ==============================================================================
+# ApexMotion Supplier Risk Intelligence Platform - Worker Containerfile
+# Background worker for Kafka signal consumption and LangGraph orchestration
+# ==============================================================================
+
+FROM python:3.12-slim AS builder
+
+WORKDIR /app
+
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
+
+# Install build dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install python dependencies
+COPY pyproject.toml .
+RUN pip install --upgrade pip setuptools wheel && \
+    pip install .
+
+# ==============================================================================
+# Final Runtime Stage
+# ==============================================================================
+FROM python:3.12-slim AS runner
+
+WORKDIR /app
+
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONPATH="/app"
+
+# Security: Create non-root system group and user
+RUN groupadd -g 10001 appgroup && \
+    useradd -u 10001 -g appgroup -s /sbin/nologin -M appuser
+
+# Copy installed dependencies from builder
+COPY --from=builder /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
+COPY --from=builder /usr/local/bin /usr/local/bin
+
+# Copy source code
+COPY src/ /app/src/
+
+# Set ownership to unprivileged user
+RUN chown -R appuser:appgroup /app
+
+# Switch to non-root user
+USER appuser
+
+# Launch worker loop
+CMD ["python3", "-m", "src.kafka.consumer"]

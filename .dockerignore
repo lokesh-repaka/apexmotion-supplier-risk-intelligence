@@ -1,0 +1,38 @@
+# Git and GitHub
+.git
+.gitignore
+.github
+
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Virtual Environments
+.venv/
+venv/
+env/
+
+# Environment files and credentials (CWE-312 Secret Exfiltration Defense)
+.env
+.env.*
+*.pem
+*.key
+*credentials*.json
+secrets/
+
+# Frontend assets and node dependencies
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# Documentation and temporary files
+docs/
+*.log
+.DS_Store

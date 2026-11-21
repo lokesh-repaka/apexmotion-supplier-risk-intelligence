@@ -18,11 +18,11 @@
 |---|---|---|
 | **Phase 1 Progress** | 6 / 6 Tasks Completed | Completed ✅ |
 | **Phase 2 Progress** | 5 / 5 Tasks Completed | Completed ✅ |
-| **Phase 3 Progress** | 1 / 5 Tasks Completed | In Progress 🔄 |
-| **Total Test Suites** | 12 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`, `test_localstack_bootstrap.py`, `test_redpanda_topics.py`, `test_neptune_emulation.py`, `test_makefile.py`, `test_database_models.py`) | PASSED ✅ |
-| **Total Test Cases** | 77 unit/golden tests | 100% Passing (0 failures) |
-| **Code Coverage (`src/`)** | **95%** statement coverage | Exceeds 80% DoD gate |
-| **Active Branch** | `feature/database-sqlalchemy-models` $\to$ `development` | Clean |
+| **Phase 3 Progress** | 2 / 5 Tasks Completed | In Progress 🔄 |
+| **Total Test Suites** | 13 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`, `test_localstack_bootstrap.py`, `test_redpanda_topics.py`, `test_neptune_emulation.py`, `test_makefile.py`, `test_database_models.py`, `test_database_migrations.py`) | PASSED ✅ |
+| **Total Test Cases** | 83 unit/golden tests | 100% Passing (0 failures) |
+| **Code Coverage (`src/`)** | **85%** statement coverage | Exceeds 80% DoD gate |
+| **Active Branch** | `feature/database-schema-migrations` $\to$ `development` | Clean |
 
 ---
 
@@ -117,6 +117,14 @@
     - `AgentRun` (`agent_runs`): Multi-agent execution telemetry, token usage, duration, and Langfuse trace link.
   - Cross-dialect portability: Native PostgreSQL types (`JSONB`, `ARRAY`) with fallback SQLite variants for offline unit testing.
   - 8 new unit tests in `tests/unit/test_database_models.py` including async in-memory SQLite schema validation (77 total passing tests across suite, 95% statement coverage).
+  - PR #11 merged into `development`.
+- **P3-2 · Database Schema DDL & Alembic Migration Baseline (`feature/database-schema-migrations`)**: Completed ✅
+  - `schema.sql` and `src/database/schema.sql`: Full PostgreSQL DDL script creating all 5 operational tables (`suppliers`, `risk_alerts`, `hitl_approvals`, `audit_logs`, `agent_runs`) with UUID extensions (`uuid-ossp`, `pgcrypto`), performance indexes, check constraints (`tier`, `risk_score`, `risk_level`, `spend_tier`, `status`), foreign keys, monetary precision (`NUMERIC(14,2)`), unique anti-replay constraint on `hitl_approvals.token_hash`, and an append-only trigger on `audit_logs` preventing `UPDATE` and `DELETE` (BR-RULE-007).
+  - `alembic.ini`: Repo root configuration mapping `script_location = src/database/migrations` and dynamic URL resolution.
+  - `src/database/migrations/env.py`: Async/sync migration runner dynamically resolving `DATABASE_URL` from `src.core.config.get_settings()`, binding `target_metadata = Base.metadata`, with offline dialect normalization.
+  - `src/database/migrations/script.py.mako`: Revision template.
+  - `src/database/migrations/versions/0001_initial_schema.py`: Baseline initial migration declaring all 5 tables, indexes, constraints, foreign keys, and complete `upgrade()` and `downgrade()`.
+  - 6 new unit tests in `tests/unit/test_database_migrations.py` validating DDL, alembic configuration, baseline revision, and offline SQL generation (`alembic upgrade head --sql`) (83 total passing tests across suite, 85% statement coverage).
 
 ---
 
@@ -147,10 +155,13 @@
     - Developer operations governed through a canonical Makefile, eliminating configuration drift and enforcing offline test flags.
 13. **Relational Model Purity & Anti-Replay Security**:
     - Aurora PostgreSQL models strictly enforce `NUMERIC(14,2)` for financial calculations, unique constraints on cryptographic `token_hash`, and programmatic append-only enforcement on audit logs.
+14. **Versioned Schema Baseline & Offline Migration Safety**:
+    - Database schema versions tracked via Alembic baseline with offline SQL compilation support (`alembic upgrade head --sql`), dual upgrade/downgrade logic, and database-level trigger immutability.
 
 ---
 
 ## 5. Next Planned Tasks
 - **Phase 3 — Persistence Layer (Aurora PostgreSQL)**:
-  - **P3-2**: Database schema DDL (`schema.sql`) and Alembic migration baseline.
   - **P3-3**: Repository layer — async CRUD for all five tables (`src/database/repositories/`).
+  - **P3-4**: Redis caching layer (`src/database/cache.py`).
+  - **P3-5**: Database seed script (`scripts/seed_db.py`).

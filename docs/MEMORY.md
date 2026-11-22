@@ -243,6 +243,20 @@
     - Domain exception hierarchy: maps `NeptuneTimeoutError` to `TraversalError(status_code=504)` and connection/circuit-breaker failures to status 503.
     - Exported domain models and service in `src/graph/__init__.py`.
   - 15 comprehensive unit tests in `tests/unit/test_supplier_traversal.py` achieving **100% statement coverage** on `src/graph/traversal.py` (217 total passing tests across suite, 95% total coverage).
+- **P5-5 · Graph Traversal Unit Tests (`feature/graph-traversal-tests`)**: Completed ✅
+  - `src/graph/queries/library.py`: Added canonical `QUERY_FIVE_HOP_DISRUPTION_PATH` and registered `five_hop_disruption_path` query template in `CYPHER_QUERIES`.
+  - `src/graph/traversal.py`: Implemented `DisruptionPath` dataclass, `get_five_hop_disruption_paths`, `is_single_source`, and `get_component_source_redundancy` on `SupplierTraversalService`.
+  - `tests/unit/test_graph_traversal_paths.py`: Added 12 comprehensive unit tests asserting:
+    - 5-hop path from NewsEvent (`EVT-NEWS-2026-081` -> `SUP-NC-882` -> `CMP-MCU-X91` -> `ASM-BECU-04` -> `PLT-MUC-01` -> `PRG-HGT-2026`).
+    - 5-hop path from GeopoliticalRisk (`RISK-GEO-TW-01` -> `SUP-NC-882` -> `CMP-MCU-X91` -> `ASM-BECU-04` -> `PLT-MUC-01` -> `PRG-HGT-2026`).
+    - 5-hop multi-tier supply chain path (`SUP-RAW-901` -> `SUP-NC-882` -> `CMP-MCU-X91` -> `ASM-BECU-04` -> `PLT-MUC-01` -> `PRG-HGT-2026`).
+    - Exact 5-hop assertions: length=5, 6 distinct node entities, continuous causal lineage.
+    - Single-source dependency detection: sole-supplier part identification, contractual flag validation, and multi-source redundancy exclusion (`CMP-PMIC-440` verified not flagged).
+    - Query latency SLO compliance (<=2.0s per CLAUDE.md Sec 7) and timeout/circuit-breaker exception mapping (504, 503, 400).
+    - Offline isolation: zero network or AWS calls using mock NeptuneClient.
+  - Achieved **100% statement and branch coverage** on `src/graph/traversal.py` (259 statements) and `src/graph/queries/library.py` (47 statements).
+  - Total passing unit tests: **229 passed** (95% project-wide test coverage).
+  - **Phase 5 (Knowledge Graph — Amazon Neptune) is now 100% complete (5/5 tasks).**
 
 ---
 
@@ -307,12 +321,14 @@
 26. **Bounded Multi-Tier Supply Chain Traversal & Blast Radius Isolation (SEC-027)**:
     - Multi-tier supply chain traversals in `SupplierTraversalService` (`src/graph/traversal.py`) are strictly bounded to prevent graph recursion denial-of-service and cycle-induced memory exhaustion. Tier chains (`TIER_1_OF`) are capped at 1..4 hops, subgraphs are restricted to 2-hop ego boundaries with node and edge deduplication in memory, and query execution is governed by a 5.0-second deadline. Downstream disruption blast radius maps shortest-path impacts across components, consuming assembly plants, and vehicle programs without executing probabilistic LLM operations or arithmetic calculations in the graph tier (BR-RULE-001).
 
+27. **Deterministic 5-Hop Disruption Path & Single-Source Boundary Isolation (SEC-028)**:
+    - Multi-hop supply chain disruption investigations validate exact 5-hop path trajectories (`Origin Signal -> Supplier -> Component -> Assembly -> Plant -> Program`), establishing causal lineage from external incidents to end-product vehicle programs. Single-source dependency detection strictly isolates sole-source bottleneck components (`supplier_count == 1` or `is_single_source == true`) from multi-sourced redundant components, preventing false-positive escalation of emergency spot-buy workflows. All graph queries strictly honor the 2.0-second p95 latency SLO and 5.0-second hard deadline with circuit breaker protection.
+
 ---
 
 ## 5. Next Planned Tasks
-- **Phase 5 — Knowledge Graph (Amazon Neptune)**:
-  - **P5-1**: Neptune OpenCypher client (`src/graph/neptune_client.py`) — connection pool, query executor, retry logic (`feature/graph-neptune-client`) [Completed ✅].
-  - **P5-2**: Graph schema seed — `Supplier`, `Component`, `Plant`, `Contract`, `NewsEvent`, `GeopoliticalRisk` nodes + all relationships (`feature/graph-schema-seed`) [Completed ✅].
-  - **P5-3**: Named Cypher query library (`src/graph/queries/`) — supplier-to-component, component-to-plant, tier-chain traversal (`feature/graph-cypher-queries`) [Completed ✅].
-  - **P5-4**: Supplier traversal service (`src/graph/traversal.py`) — shortest-path disruption -> affected SKUs -> affected plants (`feature/graph-traversal-service`) [Completed ✅].
-  - **P5-5**: Graph traversal unit tests — mock Neptune responses, assert 5-hop path and single-source dependency detection (`feature/graph-traversal-tests`).
+- **Phase 6 — Kafka Event Ingestion**:
+  - **P6-1**: Kafka consumer (`src/kafka/consumer.py`) — MSK consumer group, at-least-once delivery, dead-letter queue on 3 failures (`feature/kafka-event-consumer`).
+  - **P6-2**: Kafka producer (`src/kafka/producer.py`) — internal event publishing for `risk-alerts`, `hitl-required`, `audit-events` (`feature/kafka-event-producer`).
+  - **P6-3**: Event schemas (`src/kafka/schemas/`) — `SupplierEvent`, `RiskAlert`, `HITLRequest`, `AuditEvent` JSON schemas with Pydantic validation (`feature/kafka-event-schemas`).
+  - **P6-4**: Consumer integration test — Testcontainers Kafka, publish 3 events, assert all 3 persisted in `risk_alerts` table (`feature/kafka-consumer-integration-test`).

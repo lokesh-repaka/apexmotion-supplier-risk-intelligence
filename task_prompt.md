@@ -1,6 +1,6 @@
 You have access to the project's authoritative documentation: `TASKS.md`, `CLAUDE.md`, `GEMINI.md`, `.agents/rules/`, and architecture specifications in `docs/` (`HLD_*.md`, `LLD_*.md`, `PRD_*.md`, `BRD_*.md`, `FRD_*.md`).
 
-Go ahead and complete **P5-5 · Graph traversal unit tests — mock Neptune responses, assert 5-hop path and single-source dependency detection**, as defined in `TASKS.md`.
+Go ahead and complete **P6-1 · Kafka consumer (`src/kafka/consumer.py`) — MSK consumer group, at-least-once delivery, dead-letter queue on 3 failures**, as defined in `TASKS.md`.
 
 ---
 

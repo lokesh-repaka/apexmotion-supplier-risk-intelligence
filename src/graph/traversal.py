@@ -159,6 +159,26 @@ class SupplierSubgraph:
     edges: list[dict[str, Any]] = field(default_factory=list)
 
 
+@dataclass
+class DisruptionPath:
+    """Full multi-hop disruption path from signal or sub-tier through to plant/program."""
+
+    origin_id: str
+    origin_type: str
+    supplier_id: str
+    supplier_name: str
+    component_id: str
+    mpn: str
+    assembly_id: str | None = None
+    assembly_name: str | None = None
+    plant_id: str | None = None
+    plant_name: str | None = None
+    program_id: str | None = None
+    program_model: str | None = None
+    hop_count: int = 5
+    path_nodes: list[str] = field(default_factory=list)
+
+
 class SupplierTraversalService:
     """Graph traversal service for supplier impact analysis and risk blast radius."""
 
@@ -626,3 +646,94 @@ class SupplierTraversalService:
             nodes=list(node_map.values()),
             edges=edges,
         )
+
+    async def get_five_hop_disruption_paths(self, supplier_id: str) -> list[DisruptionPath]:
+        """Retrieve 5-hop disruption paths originating from incidents or sub-tier suppliers.
+
+        Path: Incident/GeopoliticalThreat -> Supplier -> Component -> Assembly -> Plant -> Program.
+
+        Args:
+            supplier_id: Disrupted supplier identifier.
+
+        Returns:
+            List of DisruptionPath objects with hop_count=5.
+
+        Raises:
+            TraversalError: If graph query fails.
+        """
+        try:
+            records = await self._library.execute(
+                self._client,
+                "five_hop_disruption_path",
+                {"supplier_id": supplier_id},
+            )
+        except Exception as exc:
+            raise self._map_exception(
+                f"retrieve 5-hop disruption paths for supplier {supplier_id}",
+                exc,
+            ) from exc
+
+        paths: list[DisruptionPath] = []
+        for rec in records:
+            paths.append(
+                DisruptionPath(
+                    origin_id=rec.get("origin_id", ""),
+                    origin_type=rec.get("origin_type", ""),
+                    supplier_id=rec.get("supplier_id", ""),
+                    supplier_name=rec.get("supplier_name", ""),
+                    component_id=rec.get("component_id", ""),
+                    mpn=rec.get("mpn", ""),
+                    assembly_id=rec.get("assembly_id"),
+                    assembly_name=rec.get("assembly_name"),
+                    plant_id=rec.get("plant_id"),
+                    plant_name=rec.get("plant_name"),
+                    program_id=rec.get("program_id"),
+                    program_model=rec.get("program_model"),
+                    hop_count=int(rec.get("hop_count", 5)),
+                    path_nodes=list(rec.get("path_nodes", [])),
+                )
+            )
+        return paths
+
+    async def is_single_source(self, component_id: str) -> bool:
+        """Check if a specific component has a single-source dependency.
+
+        Args:
+            component_id: Component ID (e.g. 'CMP-MCU-X91') or MPN.
+
+        Returns:
+            True if single-sourced, False if multi-sourced or redundant.
+        """
+        risks = await self.find_single_source_risks()
+        return any(r.component_id == component_id or r.mpn == component_id for r in risks)
+
+    async def get_component_source_redundancy(self, component_id: str) -> dict[str, Any]:
+        """Evaluate supplier source redundancy for a component.
+
+        Args:
+            component_id: Component ID or MPN.
+
+        Returns:
+            Dictionary with component_id, is_single_source, supplier_count, supplier_ids, risk_tier.
+        """
+        risks = await self.find_single_source_risks()
+        for r in risks:
+            if r.component_id == component_id or r.mpn == component_id:
+                return {
+                    "component_id": r.component_id,
+                    "mpn": r.mpn,
+                    "is_single_source": True,
+                    "supplier_count": r.supplier_count,
+                    "supplier_ids": r.supplier_ids,
+                    "supplier_names": r.supplier_names,
+                    "risk_tier": "CRITICAL" if r.criticality == "CRITICAL" else "HIGH",
+                }
+        return {
+            "component_id": component_id,
+            "mpn": component_id,
+            "is_single_source": False,
+            "supplier_count": 2,
+            "supplier_ids": [],
+            "supplier_names": [],
+            "risk_tier": "LOW",
+        }

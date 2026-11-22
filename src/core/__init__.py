@@ -1,5 +1,16 @@
 """Core utilities, configuration, logging, and security for ApexMotion platform."""
 
+from src.core.audit import (
+    AuditError,
+    AuditWriteError,
+    AuditWriter,
+    coerce_uuid,
+    get_actor_audit_trail,
+    get_entity_audit_trail,
+    get_trace_audit_trail,
+    sanitize_audit_payload,
+    write_audit_log,
+)
 from src.core.config import Settings, get_settings
 from src.core.demo_auth import (
     DEMO_PERSONAS,
@@ -86,4 +97,13 @@ __all__ = [
     "is_eligible_signer",
     "validate_approval_signers",
     "evaluate_spend_authorization",
+    "AuditError",
+    "AuditWriteError",
+    "AuditWriter",
+    "write_audit_log",
+    "get_entity_audit_trail",
+    "get_trace_audit_trail",
+    "get_actor_audit_trail",
+    "coerce_uuid",
+    "sanitize_audit_payload",
 ]

@@ -1,6 +1,6 @@
 You have access to the project's authoritative documentation: `TASKS.md`, `CLAUDE.md`, `GEMINI.md`, `.agents/rules/`, and architecture specifications in `docs/` (`HLD_*.md`, `LLD_*.md`, `PRD_*.md`, `BRD_*.md`, `FRD_*.md`).
 
-Go ahead and complete **P4-5 · Append-only audit writer (`src/core/audit.py`) — immutable `audit_logs` rows, never called inside a rollback-able transaction**, as defined in `TASKS.md`.
+Go ahead and complete **P5-1 · Neptune OpenCypher client (`src/graph/neptune_client.py`) — connection pool, query executor, retry logic**, as defined in `TASKS.md`.
 
 ---
 

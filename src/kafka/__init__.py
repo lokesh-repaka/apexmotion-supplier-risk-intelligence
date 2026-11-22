@@ -26,6 +26,10 @@ from src.kafka.consumer import (
     KafkaDLQError,
     KafkaMessageProcessingError,
 )
+from src.kafka.handlers import (
+    create_risk_alert_consumer_handler,
+    persist_risk_alert,
+)
 from src.kafka.producer import (
     EventJSONEncoder,
     EventProducer,
@@ -84,6 +88,8 @@ __all__ = [
     "SeverityLevel",
     "SpendTier",
     "SupplierEvent",
+    "create_risk_alert_consumer_handler",
     "get_event_producer",
+    "persist_risk_alert",
     "serialize_payload",
 ]

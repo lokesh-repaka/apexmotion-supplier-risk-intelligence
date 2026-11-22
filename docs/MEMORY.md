@@ -21,11 +21,11 @@
 | **Phase 3 Progress** | 5 / 5 Tasks Completed | Completed ✅ |
 | **Phase 4 Progress** | 5 / 5 Tasks Completed | Completed ✅ |
 | **Phase 5 Progress** | 5 / 5 Tasks Completed | Completed ✅ |
-| **Phase 6 Progress** | 3 / 4 Tasks Completed | In Progress 🔄 |
-| **Total Test Suites** | 29 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`, `test_localstack_bootstrap.py`, `test_redpanda_topics.py`, `test_neptune_emulation.py`, `test_makefile.py`, `test_database_models.py`, `test_database_migrations.py`, `test_database_repositories.py`, `test_token_hash_index.py`, `test_opensearch_client.py`, `test_security_rbac.py`, `test_hitl_tokens.py`, `test_demo_tokens.py`, `test_spend_tier_router.py`, `test_audit_writer.py`, `test_neptune_client.py`, `test_graph_seed.py`, `test_cypher_queries.py`, `test_supplier_traversal.py`, `test_graph_traversal_paths.py`, `test_kafka_consumer.py`, `test_kafka_producer.py`, `test_kafka_schemas.py`) | PASSED ✅ |
-| **Total Test Cases** | 307 unit tests | 100% Passing (0 failures) |
-| **Code Coverage (`src/`)** | **95.95%** statement coverage (`src/kafka/schemas/` at 100%) | Exceeds 80% DoD gate |
-| **Active Branch** | `feature/kafka-event-schemas` $\to$ `development` | Clean |
+| **Phase 6 Progress** | 4 / 4 Tasks Completed | Completed ✅ |
+| **Total Test Suites** | 30 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`, `test_localstack_bootstrap.py`, `test_redpanda_topics.py`, `test_neptune_emulation.py`, `test_makefile.py`, `test_database_models.py`, `test_database_migrations.py`, `test_database_repositories.py`, `test_token_hash_index.py`, `test_opensearch_client.py`, `test_security_rbac.py`, `test_hitl_tokens.py`, `test_demo_tokens.py`, `test_spend_tier_router.py`, `test_audit_writer.py`, `test_neptune_client.py`, `test_graph_seed.py`, `test_cypher_queries.py`, `test_supplier_traversal.py`, `test_graph_traversal_paths.py`, `test_kafka_consumer.py`, `test_kafka_producer.py`, `test_kafka_schemas.py`, `test_kafka_consumer_integration.py`) | PASSED ✅ |
+| **Total Test Cases** | 318 tests (307 unit + 11 integration) | 100% Passing (0 failures) |
+| **Code Coverage (`src/`)** | **96.08%** statement coverage (`src/kafka/handlers.py` and `src/kafka/schemas/` at 100%) | Exceeds 80% DoD gate |
+| **Active Branch** | `feature/kafka-consumer-integration-test` $\to$ `development` | Clean |
 
 ---
 
@@ -295,6 +295,24 @@
     * `AuditEvent` / `AuditEventSchema` (`audit-events`): Immutable forensic audit entries streaming to S3 WORM archive with automated recursive sanitization of credential keys (`token`, `password`, `kms_key`, `secret`).
   - Base architecture: `BaseEvent` enforces `extra="forbid"`, automatic whitespace stripping, UTC timestamp enforcement, distributed trace propagation, exact Decimal string serialization, and JSON schema registry export (`model_json_schema()`).
   - 29 comprehensive unit tests in `tests/unit/test_kafka_schemas.py` achieving **100% statement and branch coverage** on all schema modules (307 total passing tests across suite, 95.95% total coverage).
+- **P6-4 · Consumer Integration Test (`feature/kafka-consumer-integration-test`)**: Completed ✅
+  - `src/kafka/handlers.py`: Implemented robust Kafka topic consumer handler and persistence pipeline:
+    * `persist_risk_alert`: Parses, validates, and persists `RiskAlert` event payloads to Aurora PostgreSQL `risk_alerts` table using `RiskAlertRepository`.
+    * Idempotent redelivery guard: detects existing alerts by ID, performing atomic in-place updates rather than failing with primary key collision crashes (SEC-032).
+    * Entity ID coercion: normalizes alert IDs to UUID (supporting standard UUID and deterministic UUIDv5 strings), and resolves business supplier identifiers (e.g. `SUP-NC-882`) to database `suppliers.id` foreign keys.
+    * The Triad of Responsibility (BR-RULE-001): guarantees exact `Decimal` precision preservation for `days_of_cover`, `gap_days`, and `financial_exposure` with zero float truncation.
+    * `create_risk_alert_consumer_handler`: Closure factory binding async session factories to `EventConsumer.register_handler()`.
+  - Exported handler functions in `src/kafka/__init__.py`.
+  - `tests/integration/test_kafka_consumer_integration.py`: Added 11 comprehensive integration tests asserting:
+    * Publishing 3 canonical `RiskAlert` events via `EventProducer`, consuming via `EventConsumer`, and verifying all 3 persisted in `risk_alerts` table with exact Decimal numbers, status, and supplier foreign keys.
+    * Strict manual offset commits executed only after successful database transaction commit.
+    * Idempotent redelivery handling duplicate events without database violation.
+    * Trace ID context propagation from Kafka message headers (`X-Trace-ID`) to logs and database records.
+    * Corrupt / poisonous event routing to Dead-Letter Queue (`risk-alerts.dlq`) without database commit.
+    * Batch publishing and sequential consumption.
+    * Testcontainers environment detection preserving offline test isolation.
+  - Achieved **100% statement and branch coverage** on `src/kafka/handlers.py` (80 statements) and **96.08%** project-wide test coverage across 318 passing tests.
+  - **Phase 6 (Kafka Event Ingestion) is now 100% complete (4/4 tasks).**
 
 ---
 
@@ -367,12 +385,15 @@
     - Streaming event publishing (`src/kafka/producer.py`) strictly enforces `acks="all"`, synchronous broker confirmation (`future.get(timeout)`), and automated JSON serialization preserving `Decimal` monetary precision (BR-RULE-001) as strings without IEEE 754 float distortion. Domain partition keys (`supplier_id`, `action_id`, `entity_id`) guarantee total event ordering across broker partitions, while distributed trace identifiers (`X-Trace-ID`, `X-Client-ID`, `X-Timestamp`) ensure end-to-end observability across the Kafka event bus.
 30. **Strict Schema Boundaries, Monetary Precision & PII Sanitization (SEC-031)**:
     - All streaming events across Apache Kafka MSK topics strictly adhere to Pydantic v2 event contracts (`src/kafka/schemas/`) with `extra="forbid"`, preventing untrusted field injection. Financial commitments and inventory metrics strictly enforce `Decimal` precision, serializing to exact strings in JSON payloads to prevent floating-point distortion. Forensic audit events automatically redact credentials (`password`, `token`, `secret`, `kms_key`), and HITL authorization requests deterministically enforce spend-tier thresholds and required dual executive sign-offs prior to message publishing.
+31. **Idempotent Streaming Ingestion & Database Transaction Integrity (SEC-032)**:
+    - Kafka event consumers persisting data to Aurora PostgreSQL (`src/kafka/handlers.py`) guarantee strict idempotency by inspecting existing records prior to insertion and performing atomic in-place updates. Transaction boundaries strictly commit before Kafka manual offset commits, and transaction rollbacks trigger exception bubbling to consumer retries. Poisonous or corrupt messages fail gracefully into dead-letter queues (`<topic>.dlq`) without committing unhandled offsets, guaranteeing at-least-once delivery with zero duplicate database corruption.
 
 ---
 
 ## 5. Next Planned Tasks
-- **Phase 6 — Kafka Event Ingestion**:
-  - **P6-1**: Kafka consumer (`src/kafka/consumer.py`) — Completed ✅ (`feature/kafka-event-consumer`).
-  - **P6-2**: Kafka producer (`src/kafka/producer.py`) — Completed ✅ (`feature/kafka-event-producer`).
-  - **P6-3**: Event schemas (`src/kafka/schemas/`) — Completed ✅ (`feature/kafka-event-schemas`).
-  - **P6-4**: Consumer integration test — Testcontainers Kafka, publish 3 events, assert all 3 persisted in `risk_alerts` table (`feature/kafka-consumer-integration-test`).
+- **Phase 7 — Deterministic Risk Engine**:
+  - **P7-1**: Risk calculator (`src/services/risk/calculator.py`) — Days of Cover, gap days, shortage volume, financial exposure — all `Decimal`, zero float (`feature/risk-calculator-core`).
+  - **P7-2**: Risk scorer (`src/services/risk/scorer.py`) — `CRITICAL` / `HIGH` / `MEDIUM` / `LOW` assignment from gap + exposure thresholds (`feature/risk-scorer`).
+  - **P7-3**: Inventory aggregation service (`src/services/risk/inventory_service.py`) — real-time stock pull from Aurora + Redis cache (`feature/risk-inventory-service`).
+  - **P7-4**: Alert deduplication (`src/services/alert_service.py`) — same supplier + component within 1-hour window collapses to one alert (`feature/risk-alert-deduplication`).
+  - **P7-5**: NanoCore golden tests — `tests/golden/nanocore_scenario.json` asserts `days_of_cover=7.68`, `shortage_volume=24420`, `financial_exposure=2448105.00` exactly (`feature/risk-nanocore-golden-tests`).

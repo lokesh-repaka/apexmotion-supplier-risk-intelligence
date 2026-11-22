@@ -231,6 +231,18 @@
     - Standardized execution facade (`CypherQueryLibrary.execute`) passing parameters safely to `NeptuneClient`.
     - Exported named query templates, helper functions, and dictionary registry in `src/graph/queries/__init__.py` and `src/graph/__init__.py`.
   - 13 comprehensive unit tests in `tests/unit/test_cypher_queries.py` achieving **100% statement coverage** on `src/graph/queries/` (202 total passing tests across suite, 93.98% total coverage).
+- **P5-4 · Supplier Traversal Service (`feature/graph-traversal-service`)**: Completed ✅
+  - `src/graph/traversal.py`: Implemented `SupplierTraversalService` utilizing `NeptuneClient` and `CypherQueryLibrary`:
+    - Disruption blast radius calculation (`get_disruption_blast_radius`): traverses supplier -> affected SKUs -> consuming assembly plants -> vehicle programs, resolving canonical NanoCore golden scenario (`SUP-NC-882` -> `CMP-MCU-X91` -> `PLT-MUC-01` -> `PRG-HGT-2026`).
+    - Affected components resolution (`get_affected_components`): maps criticality, days of cover, daily consumption rate, and single-source flags.
+    - Affected plants resolution (`get_affected_plants`): supports direct and BOM-based assembly plant traversal with financial downtime rates.
+    - Multi-tier chain traversal (`get_tier_chain`): resolves paths from sub-tier suppliers (Tier-2/3) to Tier-1 direct OEM suppliers.
+    - Single-source dependency detection (`find_single_source_risks`): identifies sole-supplier vulnerability components and single-source flags.
+    - Geopolitical exposure resolution (`get_geopolitical_exposure`): correlates regional and geopolitical threats to supplier operations.
+    - Ego-subgraph extraction (`get_supplier_subgraph`): compiles 2-hop deduplicated nodes and edges for frontend visualization (`GET /api/v1/suppliers/{id}/graph`).
+    - Domain exception hierarchy: maps `NeptuneTimeoutError` to `TraversalError(status_code=504)` and connection/circuit-breaker failures to status 503.
+    - Exported domain models and service in `src/graph/__init__.py`.
+  - 15 comprehensive unit tests in `tests/unit/test_supplier_traversal.py` achieving **100% statement coverage** on `src/graph/traversal.py` (217 total passing tests across suite, 95% total coverage).
 
 ---
 
@@ -292,6 +304,9 @@
 25. **Immutable Parameterized Cypher Query Catalog (SEC-026)**:
     - All OpenCypher queries executed against Amazon Neptune must be constructed through `CypherQuery` and `CypherQueryLibrary` (`src/graph/queries/`). Queries use strict parameter binding (`$supplier_id`, `$component_id`, etc.) with programmatic validation enforcing that required parameters are supplied and non-null before query execution. Dynamic string interpolation and concatenation of user or agent input into Cypher syntax is strictly prohibited, eliminating Cypher injection vulnerabilities across all graph traversal workflows.
 
+26. **Bounded Multi-Tier Supply Chain Traversal & Blast Radius Isolation (SEC-027)**:
+    - Multi-tier supply chain traversals in `SupplierTraversalService` (`src/graph/traversal.py`) are strictly bounded to prevent graph recursion denial-of-service and cycle-induced memory exhaustion. Tier chains (`TIER_1_OF`) are capped at 1..4 hops, subgraphs are restricted to 2-hop ego boundaries with node and edge deduplication in memory, and query execution is governed by a 5.0-second deadline. Downstream disruption blast radius maps shortest-path impacts across components, consuming assembly plants, and vehicle programs without executing probabilistic LLM operations or arithmetic calculations in the graph tier (BR-RULE-001).
+
 ---
 
 ## 5. Next Planned Tasks
@@ -299,5 +314,5 @@
   - **P5-1**: Neptune OpenCypher client (`src/graph/neptune_client.py`) — connection pool, query executor, retry logic (`feature/graph-neptune-client`) [Completed ✅].
   - **P5-2**: Graph schema seed — `Supplier`, `Component`, `Plant`, `Contract`, `NewsEvent`, `GeopoliticalRisk` nodes + all relationships (`feature/graph-schema-seed`) [Completed ✅].
   - **P5-3**: Named Cypher query library (`src/graph/queries/`) — supplier-to-component, component-to-plant, tier-chain traversal (`feature/graph-cypher-queries`) [Completed ✅].
-  - **P5-4**: Supplier traversal service (`src/graph/traversal.py`) — shortest-path disruption -> affected SKUs -> affected plants (`feature/graph-traversal-service`).
+  - **P5-4**: Supplier traversal service (`src/graph/traversal.py`) — shortest-path disruption -> affected SKUs -> affected plants (`feature/graph-traversal-service`) [Completed ✅].
   - **P5-5**: Graph traversal unit tests — mock Neptune responses, assert 5-hop path and single-source dependency detection (`feature/graph-traversal-tests`).

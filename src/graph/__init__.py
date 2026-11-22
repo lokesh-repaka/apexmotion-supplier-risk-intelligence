@@ -16,6 +16,16 @@ Exports:
 - CypherQueryLibrary: Query catalog and executor.
 - CYPHER_QUERIES: Named query dictionary.
 - get_query: Helper to get query by name.
+- SupplierTraversalService: Multi-tier graph traversal service.
+- TraversalError: Graph traversal domain exception.
+- DisruptionBlastRadius: Blast radius summary container.
+- AffectedComponent: Downstream impacted component model.
+- AffectedPlant: Consuming assembly plant model.
+- AffectedProgram: Vehicle production program model.
+- TierChain: Multi-tier supply chain relationship.
+- SingleSourceRisk: Single-supplier vulnerability model.
+- GeopoliticalRiskExposure: Regional threat exposure model.
+- SupplierSubgraph: Ego-subgraph nodes and edges container.
 """
 
 from src.graph.neptune_client import (
@@ -45,6 +55,18 @@ from src.graph.seed import (
     seed_graph,
     verify_seed_integrity,
 )
+from src.graph.traversal import (
+    AffectedComponent,
+    AffectedPlant,
+    AffectedProgram,
+    DisruptionBlastRadius,
+    GeopoliticalRiskExposure,
+    SingleSourceRisk,
+    SupplierSubgraph,
+    SupplierTraversalService,
+    TierChain,
+    TraversalError,
+)
 
 __all__ = [
     "CYPHER_QUERIES",
@@ -54,8 +76,13 @@ __all__ = [
     "GOLDEN_PLANTS",
     "GOLDEN_RELATIONSHIPS",
     "GOLDEN_SUPPLIERS",
+    "AffectedComponent",
+    "AffectedPlant",
+    "AffectedProgram",
     "CypherQuery",
     "CypherQueryLibrary",
+    "DisruptionBlastRadius",
+    "GeopoliticalRiskExposure",
     "GraphSeedError",
     "NeptuneCircuitBreakerOpenError",
     "NeptuneClient",
@@ -64,6 +91,11 @@ __all__ = [
     "NeptuneQueryError",
     "NeptuneTimeoutError",
     "SeedResult",
+    "SingleSourceRisk",
+    "SupplierSubgraph",
+    "SupplierTraversalService",
+    "TierChain",
+    "TraversalError",
     "get_query",
     "get_seed_cypher_statements",
     "seed_graph",

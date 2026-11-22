@@ -80,7 +80,7 @@ Sub-tasks in the same phase that do not share files can be open at the same time
 |------|--------|--------|
 | P5-1 · Neptune OpenCypher client (`src/graph/neptune_client.py`) — connection pool, query executor, retry logic | `feature/graph-neptune-client` | Completed ✅ |
 | P5-2 · Graph schema seed — `Supplier`, `Component`, `Plant`, `Contract`, `NewsEvent`, `GeopoliticalRisk` nodes + all relationships | `feature/graph-schema-seed` | Completed ✅ |
-| P5-3 · Named Cypher query library (`src/graph/queries/`) — supplier-to-component, component-to-plant, tier-chain traversal | `feature/graph-cypher-queries` | Pending ❌ |
+| P5-3 · Named Cypher query library (`src/graph/queries/`) — supplier-to-component, component-to-plant, tier-chain traversal | `feature/graph-cypher-queries` | Completed ✅ |
 | P5-4 · Supplier traversal service (`src/graph/traversal.py`) — shortest-path disruption → affected SKUs → affected plants | `feature/graph-traversal-service` | Pending ❌ |
 | P5-5 · Graph traversal unit tests — mock Neptune responses, assert 5-hop path and single-source dependency detection | `feature/graph-traversal-tests` | Pending ❌ |
 
@@ -300,20 +300,20 @@ Phases 4, 5, 6, 7, and 8 all depend on Phase 3 and can be developed in parallel.
 
 | Phase | Name | Tasks | Completed |
 |-------|------|-------|-----------|
-| 1 | Runtime Skeleton | 6 | 0 ❌ |
-| 2 | Local Dev Environment | 5 | 0 ❌ |
-| 3 | Persistence Layer | 5 | 0 ❌ |
-| 4 | Identity, Security & HITL Tokens | 5 | 0 ❌ |
-| 5 | Knowledge Graph (Neptune) | 5 | 0 ❌ |
-| 6 | Kafka Event Ingestion | 4 | 0 ❌ |
-| 7 | Deterministic Risk Engine | 5 | 0 ❌ |
-| 8 | LLM Foundation | 5 | 0 ❌ |
-| 9 | LangGraph Agent Workflow | 6 | 0 ❌ |
-| 10 | HITL Approval System | 4 | 0 ❌ |
-| 11 | FastAPI API Routes | 6 | 0 ❌ |
-| 12 | React Frontend | 6 | 0 ❌ |
-| 13 | Supplier Seed Data & Golden Datasets | 4 | 0 ❌ |
-| 14 | Unit & Integration Tests | 6 | 0 ❌ |
-| 15 | Observability | 5 | 0 ❌ |
-| 16 | Infrastructure & Delivery | 6 | 0 ❌ |
-| **Total** | | **83** | **0 (0%)** |
+| 1 | Runtime Skeleton | 6 | 6 (100%) ✅ |
+| 2 | Local Dev Environment | 5 | 5 (100%) ✅ |
+| 3 | Persistence Layer | 5 | 5 (100%) ✅ |
+| 4 | Identity, Security & HITL Tokens | 5 | 5 (100%) ✅ |
+| 5 | Knowledge Graph (Neptune) | 5 | 3 (60%) 🔄 |
+| 6 | Kafka Event Ingestion | 4 | 0 (0%) ❌ |
+| 7 | Deterministic Risk Engine | 5 | 0 (0%) ❌ |
+| 8 | LLM Foundation | 5 | 0 (0%) ❌ |
+| 9 | LangGraph Agent Workflow | 6 | 0 (0%) ❌ |
+| 10 | HITL Approval System | 4 | 0 (0%) ❌ |
+| 11 | FastAPI API Routes | 6 | 0 (0%) ❌ |
+| 12 | React Frontend | 6 | 0 (0%) ❌ |
+| 13 | Supplier Seed Data & Golden Datasets | 4 | 0 (0%) ❌ |
+| 14 | Unit & Integration Tests | 6 | 0 (0%) ❌ |
+| 15 | Observability | 5 | 0 (0%) ❌ |
+| 16 | Infrastructure & Delivery | 6 | 0 (0%) ❌ |
+| **Total** | | **83** | **24 (28.9%)** |

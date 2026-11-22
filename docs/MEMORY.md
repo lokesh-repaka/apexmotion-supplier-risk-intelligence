@@ -20,11 +20,12 @@
 | **Phase 2 Progress** | 5 / 5 Tasks Completed | Completed ✅ |
 | **Phase 3 Progress** | 5 / 5 Tasks Completed | Completed ✅ |
 | **Phase 4 Progress** | 5 / 5 Tasks Completed | Completed ✅ |
-| **Phase 5 Progress** | 3 / 5 Tasks Completed | In Progress 🔄 |
-| **Total Test Suites** | 21 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`, `test_localstack_bootstrap.py`, `test_redpanda_topics.py`, `test_neptune_emulation.py`, `test_makefile.py`, `test_database_models.py`, `test_database_migrations.py`, `test_database_repositories.py`, `test_token_hash_index.py`, `test_opensearch_client.py`, `test_security_rbac.py`, `test_hitl_tokens.py`, `test_neptune_client.py`, `test_graph_seed.py`, `test_cypher_queries.py`) | PASSED ✅ |
-| **Total Test Cases** | 202 unit tests | 100% Passing (0 failures) |
-| **Code Coverage (`src/`)** | **93.98%** statement coverage (`src/graph/queries/` at 100%) | Exceeds 80% DoD gate |
-| **Active Branch** | `feature/graph-cypher-queries` $\to$ `development` | Clean |
+| **Phase 5 Progress** | 5 / 5 Tasks Completed | Completed ✅ |
+| **Phase 6 Progress** | 1 / 4 Tasks Completed | In Progress 🔄 |
+| **Total Test Suites** | 27 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`, `test_localstack_bootstrap.py`, `test_redpanda_topics.py`, `test_neptune_emulation.py`, `test_makefile.py`, `test_database_models.py`, `test_database_migrations.py`, `test_database_repositories.py`, `test_token_hash_index.py`, `test_opensearch_client.py`, `test_security_rbac.py`, `test_hitl_tokens.py`, `test_demo_tokens.py`, `test_spend_tier_router.py`, `test_audit_writer.py`, `test_neptune_client.py`, `test_graph_seed.py`, `test_cypher_queries.py`, `test_supplier_traversal.py`, `test_graph_traversal_paths.py`, `test_kafka_consumer.py`) | PASSED ✅ |
+| **Total Test Cases** | 248 unit tests | 100% Passing (0 failures) |
+| **Code Coverage (`src/`)** | **94.8%** statement coverage (`src/kafka/consumer.py` at 99%) | Exceeds 80% DoD gate |
+| **Active Branch** | `feature/kafka-event-consumer` $\to$ `development` | Clean |
 
 ---
 
@@ -258,6 +259,20 @@
   - Total passing unit tests: **229 passed** (95% project-wide test coverage).
   - **Phase 5 (Knowledge Graph — Amazon Neptune) is now 100% complete (5/5 tasks).**
 
+### Phase 6: Kafka Event Ingestion
+- **P6-1 · Kafka Consumer (`feature/kafka-event-consumer`)**: Completed ✅
+  - `src/kafka/consumer.py`: Implemented robust MSK consumer group event ingestion service (`EventConsumer`):
+    - At-least-once delivery semantics: disabled auto-commits (`enable_auto_commit=False`), enforcing explicit manual offset commits strictly after successful message handler completion or successful dead-letter queue persistence.
+    - Transient fault recovery: automatic retry mechanism attempting up to 3 executions with exponential backoff on transient processing errors.
+    - Forensic Dead-Letter Queue (DLQ): on 3 consecutive failures, publishes comprehensive forensic metadata payload (`original_topic`, `original_partition`, `original_offset`, `original_key`, `original_payload`, `error_message`, `failure_count`, `failed_at`, `trace_id`) to `<topic>.dlq` (`settings.KAFKA_TOPIC_SUPPLIER_EVENTS + ".dlq"`).
+    - DLQ fault tolerance: offset is strictly NOT committed if DLQ publish fails, preventing data loss and preserving at-least-once delivery guarantees.
+    - Resilient deserialization: parses valid JSON, gracefully retains string or raw binary payloads, and logs payload diagnostics.
+    - Distributed trace context propagation: extracts `X-Trace-ID` / `trace_id` from message headers, binds trace context, and falls back to deterministic UUID generation.
+    - Lifecycle management: provides non-blocking batch polling (`poll`), single-cycle batch runner (`run_once`), continuous loop with exception handling, and clean resource teardown (`close`).
+    - Domain exception hierarchy: `KafkaConsumerError`, `KafkaDLQError`, and `KafkaMessageProcessingError` subclassing `AppException`.
+    - Exported models and consumer in `src/kafka/__init__.py`.
+  - 19 comprehensive unit tests in `tests/unit/test_kafka_consumer.py` achieving **99% statement coverage** on `src/kafka/consumer.py` (248 total passing tests across suite, 94.8% total coverage).
+
 ---
 
 ## 4. Architectural Invariants Enforced
@@ -323,12 +338,14 @@
 
 27. **Deterministic 5-Hop Disruption Path & Single-Source Boundary Isolation (SEC-028)**:
     - Multi-hop supply chain disruption investigations validate exact 5-hop path trajectories (`Origin Signal -> Supplier -> Component -> Assembly -> Plant -> Program`), establishing causal lineage from external incidents to end-product vehicle programs. Single-source dependency detection strictly isolates sole-source bottleneck components (`supplier_count == 1` or `is_single_source == true`) from multi-sourced redundant components, preventing false-positive escalation of emergency spot-buy workflows. All graph queries strictly honor the 2.0-second p95 latency SLO and 5.0-second hard deadline with circuit breaker protection.
+28. **At-Least-Once Delivery Semantics & Dead-Letter Forensic Guarantees (SEC-029)**:
+    - Streaming event consumers (`src/kafka/consumer.py`) strictly commit partition offsets manually and only after successful business handler completion or successful persistence to `<topic>.dlq`. Transient processing exceptions trigger up to 3 retried attempts before routing to the dead-letter queue. If DLQ publication fails, partition offsets are never committed, guaranteeing zero message loss and complete at-least-once delivery semantics across distributed broker partitions.
 
 ---
 
 ## 5. Next Planned Tasks
 - **Phase 6 — Kafka Event Ingestion**:
-  - **P6-1**: Kafka consumer (`src/kafka/consumer.py`) — MSK consumer group, at-least-once delivery, dead-letter queue on 3 failures (`feature/kafka-event-consumer`).
+  - **P6-1**: Kafka consumer (`src/kafka/consumer.py`) — Completed ✅ (`feature/kafka-event-consumer`).
   - **P6-2**: Kafka producer (`src/kafka/producer.py`) — internal event publishing for `risk-alerts`, `hitl-required`, `audit-events` (`feature/kafka-event-producer`).
   - **P6-3**: Event schemas (`src/kafka/schemas/`) — `SupplierEvent`, `RiskAlert`, `HITLRequest`, `AuditEvent` JSON schemas with Pydantic validation (`feature/kafka-event-schemas`).
   - **P6-4**: Consumer integration test — Testcontainers Kafka, publish 3 events, assert all 3 persisted in `risk_alerts` table (`feature/kafka-consumer-integration-test`).

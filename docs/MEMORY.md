@@ -22,10 +22,11 @@
 | **Phase 4 Progress** | 5 / 5 Tasks Completed | Completed ✅ |
 | **Phase 5 Progress** | 5 / 5 Tasks Completed | Completed ✅ |
 | **Phase 6 Progress** | 4 / 4 Tasks Completed | Completed ✅ |
-| **Total Test Suites** | 30 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`, `test_localstack_bootstrap.py`, `test_redpanda_topics.py`, `test_neptune_emulation.py`, `test_makefile.py`, `test_database_models.py`, `test_database_migrations.py`, `test_database_repositories.py`, `test_token_hash_index.py`, `test_opensearch_client.py`, `test_security_rbac.py`, `test_hitl_tokens.py`, `test_demo_tokens.py`, `test_spend_tier_router.py`, `test_audit_writer.py`, `test_neptune_client.py`, `test_graph_seed.py`, `test_cypher_queries.py`, `test_supplier_traversal.py`, `test_graph_traversal_paths.py`, `test_kafka_consumer.py`, `test_kafka_producer.py`, `test_kafka_schemas.py`, `test_kafka_consumer_integration.py`) | PASSED ✅ |
-| **Total Test Cases** | 318 tests (307 unit + 11 integration) | 100% Passing (0 failures) |
-| **Code Coverage (`src/`)** | **96.08%** statement coverage (`src/kafka/handlers.py` and `src/kafka/schemas/` at 100%) | Exceeds 80% DoD gate |
-| **Active Branch** | `feature/kafka-consumer-integration-test` $\to$ `development` | Clean |
+| **Phase 7 Progress** | 1 / 5 Tasks Completed | In Progress 🔄 |
+| **Total Test Suites** | 31 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`, `test_localstack_bootstrap.py`, `test_redpanda_topics.py`, `test_neptune_emulation.py`, `test_makefile.py`, `test_database_models.py`, `test_database_migrations.py`, `test_database_repositories.py`, `test_token_hash_index.py`, `test_opensearch_client.py`, `test_security_rbac.py`, `test_hitl_tokens.py`, `test_demo_tokens.py`, `test_spend_tier_router.py`, `test_audit_writer.py`, `test_neptune_client.py`, `test_graph_seed.py`, `test_cypher_queries.py`, `test_supplier_traversal.py`, `test_graph_traversal_paths.py`, `test_kafka_consumer.py`, `test_kafka_producer.py`, `test_kafka_schemas.py`, `test_kafka_consumer_integration.py`, `test_risk_calculator.py`) | PASSED ✅ |
+| **Total Test Cases** | 337 tests (326 unit + 11 integration) | 100% Passing (0 failures) |
+| **Code Coverage (`src/`)** | **96.28%** statement coverage (`src/services/risk/calculator.py`, `src/kafka/handlers.py`, and `src/kafka/schemas/` at 100%) | Exceeds 80% DoD gate |
+| **Active Branch** | `feature/risk-calculator-core` $\to$ `development` | Clean |
 
 ---
 
@@ -314,6 +315,28 @@
   - Achieved **100% statement and branch coverage** on `src/kafka/handlers.py` (80 statements) and **96.08%** project-wide test coverage across 318 passing tests.
   - **Phase 6 (Kafka Event Ingestion) is now 100% complete (4/4 tasks).**
 
+### Phase 7: Deterministic Risk Engine
+- **P7-1 · Risk Calculator (`feature/risk-calculator-core`)**: Completed ✅
+  - `src/services/risk/calculator.py`: Implemented 100% deterministic supply chain risk calculation engine adhering strictly to The Triad of Responsibility (BR-RULE-001):
+    * **Zero LLM Math**: Pure Python arithmetic with zero probabilistic inference or floating-point drift.
+    * **Strict Decimal Precision**: Enforced `Decimal` with `ROUND_HALF_UP` rounding across all calculations (`days_of_cover`, `gap_days`, `shortage_volume`, `financial_exposure`, `factory_halt_exposure`).
+    * **Canonical NanoCore Golden Scenario**: Reproduces exact reference values to the cent:
+      - Days of Cover: `142,000 / 18,500 = 7.68` days
+      - Shortage Gap: `9.00 - 7.68 = 1.32` days
+      - Shortage Volume: `1.32 * 18,500 = 24,420` units
+      - Financial Exposure: `24,420 * $100.25 = $2,448,105.00`
+    * **Factory Line Halt Exposure**: Calculated downtime hours (`gap_days * operating_hours_per_day`) multiplied by hourly factory halt rate (e.g. €85,000/hr -> €2,692,800.00).
+    * **Comprehensive Edge Case Guards**:
+      - Zero inventory stock (`current_stock = 0`) -> `days_of_cover = 0.00`, full ETA gap.
+      - Zero consumption rate (`daily_consumption_rate = 0`) -> capped at `999.00` days (`DAYS_OF_COVER_MAX_CAP`), `gap = 0.00`, `shortage = 0`.
+      - Negative gap (healthy inventory buffer where ETA < days of cover) -> strictly clamped to `0.00` gap, `0` shortage volume, `$0.00` exposure.
+      - Exact zero gap (just-in-time replenishment) -> `0.00` gap.
+      - Zero unit cost -> `$0.00` exposure.
+      - Negative inputs (stock < 0, rate < 0, ETA < 0, cost < 0) -> raises `InvalidInventoryInputError`.
+    * **Cryptographic Verification**: Computes deterministic SHA-256 verification hash across all input and output parameters.
+  - Exported classes and exceptions in `src/services/risk/__init__.py` and `src/services/__init__.py`.
+  - 19 comprehensive unit tests in `tests/unit/test_risk_calculator.py` achieving **100% statement and branch coverage** on `src/services/risk/calculator.py` (139 statements) and **96.28%** total project coverage across 337 passing tests.
+
 ---
 
 ## 4. Architectural Invariants Enforced
@@ -387,12 +410,14 @@
     - All streaming events across Apache Kafka MSK topics strictly adhere to Pydantic v2 event contracts (`src/kafka/schemas/`) with `extra="forbid"`, preventing untrusted field injection. Financial commitments and inventory metrics strictly enforce `Decimal` precision, serializing to exact strings in JSON payloads to prevent floating-point distortion. Forensic audit events automatically redact credentials (`password`, `token`, `secret`, `kms_key`), and HITL authorization requests deterministically enforce spend-tier thresholds and required dual executive sign-offs prior to message publishing.
 31. **Idempotent Streaming Ingestion & Database Transaction Integrity (SEC-032)**:
     - Kafka event consumers persisting data to Aurora PostgreSQL (`src/kafka/handlers.py`) guarantee strict idempotency by inspecting existing records prior to insertion and performing atomic in-place updates. Transaction boundaries strictly commit before Kafka manual offset commits, and transaction rollbacks trigger exception bubbling to consumer retries. Poisonous or corrupt messages fail gracefully into dead-letter queues (`<topic>.dlq`) without committing unhandled offsets, guaranteeing at-least-once delivery with zero duplicate database corruption.
+32. **The Triad of Responsibility & Strict Decimal Precision Invariant (SEC-033)**:
+    - 100% of supply chain risk calculations (`src/services/risk/calculator.py`) run in pure deterministic Python. AI agents and LLMs are strictly forbidden from performing inventory or financial arithmetic (BR-RULE-001). All fractional, currency, and inventory numbers are represented as `Decimal` with `ROUND_HALF_UP` rounding, eliminating floating-point drift and IEEE 754 precision loss. Physical inventory constraints strictly reject negative inputs (`stock < 0`, `rate < 0`, `ETA < 0`, `cost < 0`), zero consumption is capped at 999.00 days, and every calculation emits a reproducible SHA-256 verification token.
 
 ---
 
 ## 5. Next Planned Tasks
 - **Phase 7 — Deterministic Risk Engine**:
-  - **P7-1**: Risk calculator (`src/services/risk/calculator.py`) — Days of Cover, gap days, shortage volume, financial exposure — all `Decimal`, zero float (`feature/risk-calculator-core`).
+  - **P7-1**: Risk calculator (`src/services/risk/calculator.py`) — Completed ✅ (`feature/risk-calculator-core`).
   - **P7-2**: Risk scorer (`src/services/risk/scorer.py`) — `CRITICAL` / `HIGH` / `MEDIUM` / `LOW` assignment from gap + exposure thresholds (`feature/risk-scorer`).
   - **P7-3**: Inventory aggregation service (`src/services/risk/inventory_service.py`) — real-time stock pull from Aurora + Redis cache (`feature/risk-inventory-service`).
   - **P7-4**: Alert deduplication (`src/services/alert_service.py`) — same supplier + component within 1-hour window collapses to one alert (`feature/risk-alert-deduplication`).

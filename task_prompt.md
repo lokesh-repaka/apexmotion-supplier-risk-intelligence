@@ -1,6 +1,6 @@
 You have access to the project's authoritative documentation: `TASKS.md`, `CLAUDE.md`, `GEMINI.md`, `.agents/rules/`, and architecture specifications in `docs/` (`HLD_*.md`, `LLD_*.md`, `PRD_*.md`, `BRD_*.md`, `FRD_*.md`).
 
-Go ahead and complete **P7-1 · Risk calculator (`src/services/risk/calculator.py`) — Days of Cover, gap days, shortage volume, financial exposure — all `Decimal`, zero float**, as defined in `TASKS.md`.
+Go ahead and complete **P7-2 · Risk scorer (`src/services/risk/scorer.py`) — `CRITICAL` / `HIGH` / `MEDIUM` / `LOW` assignment from gap + exposure thresholds**, as defined in `TASKS.md`.
 
 ---
 

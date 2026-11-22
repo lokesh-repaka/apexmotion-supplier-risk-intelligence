@@ -179,6 +179,15 @@
   - Authored CLI utility `scripts/generate_demo_tokens.py` supporting `text` console dashboard, `json` machine-readable output, and `env` shell variable export.
   - Exported demo persona models and utilities in `src/core/__init__.py`.
   - Added 6 comprehensive unit and integration tests in `tests/unit/test_demo_tokens.py` with 100% statement coverage on `src/core/demo_auth.py` (143 total passing tests across suite, 91.74% total coverage).
+- **P4-4: Spend-tier router** (`feature/security-spend-tier-router`):
+  - Created domain model `SpendTierRoute` and routing engine (`src/core/spend_tier_router.py`) enforcing BR-RULE-001 Decimal precision and rejecting native IEEE 754 float types.
+  - Mapped action commitments deterministically to governance tiers:
+    - Tier 1 (`CATEGORY_MGR`): Spend <= $25,000.00 (1x token, 1-hr TTL).
+    - Tier 2 (`PROC_DIRECTOR`): Spend $25,000.01 - $100,000.00 (1x token, 1-hr TTL).
+    - Tier 3 (`DUAL_VP`): Spend > $100,000.00 (Dual sign-off, 2x tokens, 30-min TTL, requiring distinct Procurement Director and VP Supply Chain signatures).
+  - Implemented `can_user_approve_spend`, `is_eligible_signer`, `validate_approval_signers`, and `evaluate_spend_authorization` (raising 403 `AuthorizationException` on unauthorized attempts).
+  - Exported router models and functions in `src/core/__init__.py`.
+  - Added 13 unit tests in `tests/unit/test_spend_tier_router.py`, achieving **100% statement coverage** on `src/core/spend_tier_router.py` (156 total passing tests across suite, 92.54% total coverage).
 
 ---
 
@@ -225,9 +234,11 @@
 20. **Deterministic Persona Token Emulation & RBAC Tier Alignment**:
     - Pre-configured demo authentication tokens emulate production Okta OIDC JWTs, binding explicit user IDs, emails, roles, and groups to strict monetary spend limits (analyst $0, category manager $25k, procurement director $100k, VP supply chain dual-signoff, admin system-only). Lower-tier tokens are blocked from elevated operations by FastAPI RBAC guards, preventing test-environment privilege drift.
 
+21. **Deterministic Spend-Tier Routing & Dual Executive Sign-Off Enforcement**:
+    - Financial commitment actions are strictly routed to governance tiers based on deterministic `Decimal` amount evaluation. Amounts <= $25,000 require Category Manager approval (1-hr TTL); amounts between $25,001 and $100,000 require Procurement Director approval (1-hr TTL); amounts > $100,000 unconditionally require dual sign-off from two distinct executives (Procurement Director + VP Supply Chain, 30-min TTL), rejecting single-signer authorization with standard 403 `INSUFFICIENT_ROLE` error envelopes.
+
 ---
 
 ## 5. Next Planned Tasks
 - **Phase 4 — Identity, Security & HITL Token Service**:
-  - **P4-4**: Spend-tier router — maps action amount to HITL tier (`CATEGORY_MGR` <=$25k / `PROC_DIRECTOR` <=$100k / `DUAL_VP` >$100k) (`feature/security-spend-tier-router`).
   - **P4-5**: Append-only audit writer (`src/core/audit.py`) (`feature/security-audit-writer`).

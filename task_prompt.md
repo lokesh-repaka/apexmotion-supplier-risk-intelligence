@@ -1,6 +1,6 @@
 You have access to the project's authoritative documentation: `TASKS.md`, `CLAUDE.md`, `GEMINI.md`, `.agents/rules/`, and architecture specifications in `docs/` (`HLD_*.md`, `LLD_*.md`, `PRD_*.md`, `BRD_*.md`, `FRD_*.md`).
 
-Go ahead and complete **P4-4 · Spend-tier router — maps action amount to HITL tier (`CATEGORY_MGR` ≤$25k / `PROC_DIRECTOR` ≤$100k / `DUAL_VP` >$100k)**, as defined in `TASKS.md`.
+Go ahead and complete **P4-5 · Append-only audit writer (`src/core/audit.py`) — immutable `audit_logs` rows, never called inside a rollback-able transaction**, as defined in `TASKS.md`.
 
 ---
 

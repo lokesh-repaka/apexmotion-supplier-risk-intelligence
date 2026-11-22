@@ -1,6 +1,6 @@
 You have access to the project's authoritative documentation: `TASKS.md`, `CLAUDE.md`, `GEMINI.md`, `.agents/rules/`, and architecture specifications in `docs/` (`HLD_*.md`, `LLD_*.md`, `PRD_*.md`, `BRD_*.md`, `FRD_*.md`).
 
-Go ahead and complete **P3-5 · OpenSearch client (`src/database/opensearch_client.py`) — k-NN vector index setup, upsert, and nearest-neighbour search**, as defined in `TASKS.md`.
+Go ahead and complete **P4-1 · Okta JWT validation and require_role() guard (src/core/security.py) — SAML 2.0 / OIDC**, as defined in `TASKS.md`.
 
 ---
 

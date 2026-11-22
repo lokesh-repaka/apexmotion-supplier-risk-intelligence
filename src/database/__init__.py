@@ -11,6 +11,7 @@ from src.database.models import (
     RiskAlert,
     Supplier,
 )
+from src.database.opensearch_client import OpenSearchClient
 from src.database.repositories import (
     AgentRunRepository,
     AuditLogRepository,
@@ -37,6 +38,7 @@ __all__ = [
     "get_async_session_factory",
     "get_db_session",
     "BaseRepository",
+    "OpenSearchClient",
     "SupplierRepository",
     "RiskAlertRepository",
     "HITLApprovalRepository",

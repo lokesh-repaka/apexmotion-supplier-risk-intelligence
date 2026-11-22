@@ -1,6 +1,6 @@
 You have access to the project's authoritative documentation: `TASKS.md`, `CLAUDE.md`, `GEMINI.md`, `.agents/rules/`, and architecture specifications in `docs/` (`HLD_*.md`, `LLD_*.md`, `PRD_*.md`, `BRD_*.md`, `FRD_*.md`).
 
-Go ahead and complete **P4-1 · Okta JWT validation and require_role() guard (src/core/security.py) — SAML 2.0 / OIDC**, as defined in `TASKS.md`.
+Go ahead and complete **P4-2 · AWS KMS ECDSA P-256 HITL token service (src/core/hitl_tokens.py) — issue, sign, verify, replay detection**, as defined in `TASKS.md`.
 
 ---
 

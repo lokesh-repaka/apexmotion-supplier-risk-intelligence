@@ -46,6 +46,13 @@ def test_settings_import_and_defaults():
     assert settings.KEYCLOAK_REALM == "apexmotion"
     assert settings.KEYCLOAK_CLIENT_ID == "apexmotion-risk-api"
 
+    # Okta & JWT
+    assert settings.OKTA_DOMAIN == "dev-apexmotion.okta.com"
+    assert settings.OKTA_ISSUER == "https://dev-apexmotion.okta.com/oauth2/default"
+    assert settings.OKTA_AUDIENCE == "api://apexmotion-risk"
+    assert settings.JWT_ALGORITHM == "HS256"
+    assert settings.JWT_SECRET_KEY.get_secret_value() is not None
+
     # Offline dev flags
     assert settings.USE_LOCALSTACK is True
     assert settings.USE_MOCK_LLM is True

@@ -63,7 +63,7 @@ Sub-tasks in the same phase that do not share files can be open at the same time
 
 | Task | Branch | Status |
 |------|--------|--------|
-| P4-1 · Okta JWT validation and `require_role()` guard (`src/core/security.py`) — SAML 2.0 / OIDC | `feature/security-okta-jwt-rbac` | Pending ❌ |
+| P4-1 · Okta JWT validation and `require_role()` guard (`src/core/security.py`) — SAML 2.0 / OIDC | `feature/security-okta-jwt-rbac` | Completed ✅ |
 | P4-2 · AWS KMS ECDSA P-256 HITL token service (`src/core/hitl_tokens.py`) — issue, sign, verify, replay detection | `feature/security-hitl-token-service` | Pending ❌ |
 | P4-3 · Demo Okta tokens for `analyst`, `category_manager`, `procurement_director`, `vp_supply_chain`, `system_admin` personas | `feature/security-demo-auth-tokens` | Pending ❌ |
 | P4-4 · Spend-tier router — maps action amount to HITL tier (`CATEGORY_MGR` ≤$25k / `PROC_DIRECTOR` ≤$100k / `DUAL_VP` >$100k) | `feature/security-spend-tier-router` | Pending ❌ |

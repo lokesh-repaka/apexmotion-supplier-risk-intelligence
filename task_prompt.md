@@ -1,6 +1,6 @@
 You have access to the project's authoritative documentation: `TASKS.md`, `CLAUDE.md`, `GEMINI.md`, `.agents/rules/`, and architecture specifications in `docs/` (`HLD_*.md`, `LLD_*.md`, `PRD_*.md`, `BRD_*.md`, `FRD_*.md`).
 
-Go ahead and complete **P3-3 · Repository layer — async CRUD for all five tables (`src/database/repositories/`)**, as defined in `TASKS.md`.
+Go ahead and complete **P3-4 · `hitl_approvals.token_hash` unique index — prevents replay attacks at the database level**, as defined in `TASKS.md`.
 
 ---
 

@@ -171,6 +171,14 @@
     - Deterministic SHA-256 token hashing (`compute_token_hash`) for database-level anti-replay verification against `hitl_approvals.token_hash`.
     - Dual sign-off enforcement (`verify_dual_approval`) verifying two independently signed tokens with distinct signers bound to the same action ID.
   - 20 unit tests in `tests/unit/test_hitl_tokens.py` verifying all success and failure branches, achieving **100% statement and branch coverage** on `src/core/hitl_tokens.py` (137 total passing tests across suite, 91.37% statement coverage).
+- **P4-3: Demo Okta tokens for platform personas** (`feature/security-demo-auth-tokens`):
+  - Created domain model `DemoPersona` (`src/core/demo_auth.py`) with strict `Decimal` monetary spend limits adhering to BR-RULE-001 ($0 for analyst, $25,000 for category manager, $100,000 for procurement director, $2,500,000 dual-signoff for VP supply chain, system-only for admin).
+  - Implemented in-memory `DEMO_PERSONAS` registry aligned with `CLAUDE.md` Section 3 and frontend UI mockup personas (Alex Chen, Priya Sharma, Klaus Weber, Dr. Elena Rostova, Alex Mercer).
+  - Implemented `get_demo_persona` with role enum, string ID, and alias resolution (`supply_chain_analyst`, `cat_manager`, `director`, `vp`, `admin`).
+  - Implemented `generate_demo_token` and `generate_all_demo_tokens` signing OIDC/Okta compliant JWTs populated with subject, email, name, role claims, and groups.
+  - Authored CLI utility `scripts/generate_demo_tokens.py` supporting `text` console dashboard, `json` machine-readable output, and `env` shell variable export.
+  - Exported demo persona models and utilities in `src/core/__init__.py`.
+  - Added 6 comprehensive unit and integration tests in `tests/unit/test_demo_tokens.py` with 100% statement coverage on `src/core/demo_auth.py` (143 total passing tests across suite, 91.74% total coverage).
 
 ---
 
@@ -214,10 +222,12 @@
 19. **Cryptographic KMS ECDSA P-256 HITL Spend Governance & Dual Sign-Off**:
     - Consequential spend commitments and mitigation dispatches strictly require AWS KMS ECDSA P-256 cryptographic signatures, bound immutably to action ID, alert ID, and monetary amount. Spend <= $100k is granted a 1-hour TTL single token; spend > $100k strictly requires dual sign-off from two distinct executives with a 30-minute TTL, while SHA-256 token hashing guarantees zero replay attacks across database transactions.
 
+20. **Deterministic Persona Token Emulation & RBAC Tier Alignment**:
+    - Pre-configured demo authentication tokens emulate production Okta OIDC JWTs, binding explicit user IDs, emails, roles, and groups to strict monetary spend limits (analyst $0, category manager $25k, procurement director $100k, VP supply chain dual-signoff, admin system-only). Lower-tier tokens are blocked from elevated operations by FastAPI RBAC guards, preventing test-environment privilege drift.
+
 ---
 
 ## 5. Next Planned Tasks
 - **Phase 4 — Identity, Security & HITL Token Service**:
-  - **P4-3**: Demo Okta tokens for `analyst`, `category_manager`, `procurement_director`, `vp_supply_chain`, `system_admin` personas (`feature/security-demo-auth-tokens`).
   - **P4-4**: Spend-tier router — maps action amount to HITL tier (`CATEGORY_MGR` <=$25k / `PROC_DIRECTOR` <=$100k / `DUAL_VP` >$100k) (`feature/security-spend-tier-router`).
   - **P4-5**: Append-only audit writer (`src/core/audit.py`) (`feature/security-audit-writer`).

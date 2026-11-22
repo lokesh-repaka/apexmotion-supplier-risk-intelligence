@@ -21,11 +21,11 @@
 | **Phase 3 Progress** | 5 / 5 Tasks Completed | Completed ✅ |
 | **Phase 4 Progress** | 5 / 5 Tasks Completed | Completed ✅ |
 | **Phase 5 Progress** | 5 / 5 Tasks Completed | Completed ✅ |
-| **Phase 6 Progress** | 1 / 4 Tasks Completed | In Progress 🔄 |
-| **Total Test Suites** | 27 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`, `test_localstack_bootstrap.py`, `test_redpanda_topics.py`, `test_neptune_emulation.py`, `test_makefile.py`, `test_database_models.py`, `test_database_migrations.py`, `test_database_repositories.py`, `test_token_hash_index.py`, `test_opensearch_client.py`, `test_security_rbac.py`, `test_hitl_tokens.py`, `test_demo_tokens.py`, `test_spend_tier_router.py`, `test_audit_writer.py`, `test_neptune_client.py`, `test_graph_seed.py`, `test_cypher_queries.py`, `test_supplier_traversal.py`, `test_graph_traversal_paths.py`, `test_kafka_consumer.py`) | PASSED ✅ |
-| **Total Test Cases** | 248 unit tests | 100% Passing (0 failures) |
-| **Code Coverage (`src/`)** | **94.8%** statement coverage (`src/kafka/consumer.py` at 99%) | Exceeds 80% DoD gate |
-| **Active Branch** | `feature/kafka-event-consumer` $\to$ `development` | Clean |
+| **Phase 6 Progress** | 2 / 4 Tasks Completed | In Progress 🔄 |
+| **Total Test Suites** | 28 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`, `test_localstack_bootstrap.py`, `test_redpanda_topics.py`, `test_neptune_emulation.py`, `test_makefile.py`, `test_database_models.py`, `test_database_migrations.py`, `test_database_repositories.py`, `test_token_hash_index.py`, `test_opensearch_client.py`, `test_security_rbac.py`, `test_hitl_tokens.py`, `test_demo_tokens.py`, `test_spend_tier_router.py`, `test_audit_writer.py`, `test_neptune_client.py`, `test_graph_seed.py`, `test_cypher_queries.py`, `test_supplier_traversal.py`, `test_graph_traversal_paths.py`, `test_kafka_consumer.py`, `test_kafka_producer.py`) | PASSED ✅ |
+| **Total Test Cases** | 278 unit tests | 100% Passing (0 failures) |
+| **Code Coverage (`src/`)** | **95.56%** statement coverage (`src/kafka/producer.py` at 100%) | Exceeds 80% DoD gate |
+| **Active Branch** | `feature/kafka-event-producer` $\to$ `development` | Clean |
 
 ---
 
@@ -272,6 +272,21 @@
     - Domain exception hierarchy: `KafkaConsumerError`, `KafkaDLQError`, and `KafkaMessageProcessingError` subclassing `AppException`.
     - Exported models and consumer in `src/kafka/__init__.py`.
   - 19 comprehensive unit tests in `tests/unit/test_kafka_consumer.py` achieving **99% statement coverage** on `src/kafka/consumer.py` (248 total passing tests across suite, 94.8% total coverage).
+- **P6-2 · Kafka Producer (`feature/kafka-event-producer`)**: Completed ✅
+  - `src/kafka/producer.py`: Implemented enterprise Kafka event publishing service (`EventProducer`):
+    - At-least-once delivery guarantees: configured `acks="all"`, `retries=3`, `compression_type="gzip"`, and synchronous broker confirmation (`future.get(timeout)`).
+    - Dedicated domain event dispatch methods:
+      * `publish_risk_alert`: routes calculated risk alerts to `risk-alerts` topic, extracting partition keys from `supplier_id` / `alert_id` / `sku`.
+      * `publish_hitl_request`: routes approval requests to `hitl-required` topic, extracting partition keys from `action_id` / `alert_id`.
+      * `publish_audit_event`: routes forensic logs to `audit-events` topic, extracting partition keys from `entity_id` / `trace_id`.
+    - Generic and batch publishing APIs supporting both synchronous (`publish`, `publish_batch`) and non-blocking asynchronous (`publish_async`, `publish_batch_async`) execution.
+    - Precision-preserving serialization (`EventJSONEncoder`): serializes `Decimal` monetary values (BR-RULE-001) as high-precision strings, plus `datetime`, `date`, `UUID`, Pydantic models, and dataclasses without precision loss.
+    - Distributed tracing and metadata enrichment (`format_headers`): automatically attaches `X-Trace-ID`, `X-Client-ID`, and `X-Timestamp` to all message headers.
+    - Resilient error translation: maps Kafka timeout failures to `KafkaPublishTimeoutError` (504), broker disconnects to `KafkaBrokerUnavailableError` (503), and payload failures to `KafkaSerializationError` (400).
+    - Lifecycle and context managers (`flush`, `close`, `__enter__`, `__exit__`, `__aenter__`, `__aexit__`).
+    - Global thread-safe singleton accessor `get_event_producer()`.
+    - Exported models, exceptions, and producer in `src/kafka/__init__.py`.
+  - 30 comprehensive unit tests in `tests/unit/test_kafka_producer.py` achieving **100% statement and branch coverage** on `src/kafka/producer.py` (278 total passing tests across suite, 95.56% total coverage).
 
 ---
 
@@ -340,12 +355,14 @@
     - Multi-hop supply chain disruption investigations validate exact 5-hop path trajectories (`Origin Signal -> Supplier -> Component -> Assembly -> Plant -> Program`), establishing causal lineage from external incidents to end-product vehicle programs. Single-source dependency detection strictly isolates sole-source bottleneck components (`supplier_count == 1` or `is_single_source == true`) from multi-sourced redundant components, preventing false-positive escalation of emergency spot-buy workflows. All graph queries strictly honor the 2.0-second p95 latency SLO and 5.0-second hard deadline with circuit breaker protection.
 28. **At-Least-Once Delivery Semantics & Dead-Letter Forensic Guarantees (SEC-029)**:
     - Streaming event consumers (`src/kafka/consumer.py`) strictly commit partition offsets manually and only after successful business handler completion or successful persistence to `<topic>.dlq`. Transient processing exceptions trigger up to 3 retried attempts before routing to the dead-letter queue. If DLQ publication fails, partition offsets are never committed, guaranteeing zero message loss and complete at-least-once delivery semantics across distributed broker partitions.
+29. **Distributed Event Publication Reliability & Precision Preservation (SEC-030)**:
+    - Streaming event publishing (`src/kafka/producer.py`) strictly enforces `acks="all"`, synchronous broker confirmation (`future.get(timeout)`), and automated JSON serialization preserving `Decimal` monetary precision (BR-RULE-001) as strings without IEEE 754 float distortion. Domain partition keys (`supplier_id`, `action_id`, `entity_id`) guarantee total event ordering across broker partitions, while distributed trace identifiers (`X-Trace-ID`, `X-Client-ID`, `X-Timestamp`) ensure end-to-end observability across the Kafka event bus.
 
 ---
 
 ## 5. Next Planned Tasks
 - **Phase 6 — Kafka Event Ingestion**:
   - **P6-1**: Kafka consumer (`src/kafka/consumer.py`) — Completed ✅ (`feature/kafka-event-consumer`).
-  - **P6-2**: Kafka producer (`src/kafka/producer.py`) — internal event publishing for `risk-alerts`, `hitl-required`, `audit-events` (`feature/kafka-event-producer`).
+  - **P6-2**: Kafka producer (`src/kafka/producer.py`) — Completed ✅ (`feature/kafka-event-producer`).
   - **P6-3**: Event schemas (`src/kafka/schemas/`) — `SupplierEvent`, `RiskAlert`, `HITLRequest`, `AuditEvent` JSON schemas with Pydantic validation (`feature/kafka-event-schemas`).
   - **P6-4**: Consumer integration test — Testcontainers Kafka, publish 3 events, assert all 3 persisted in `risk_alerts` table (`feature/kafka-consumer-integration-test`).

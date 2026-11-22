@@ -287,8 +287,8 @@ Phases 4, 5, 6, 7, and 8 all depend on Phase 3 and can be developed in parallel.
 
 | Task Phases | Delivery Milestone | Target Week | Status |
 |-------------|-------------------|-------------|--------|
-| P1 + P2 + P3 + P4 (partial) | **POC Foundation** — skeleton, local stack, DB, auth wired | Week 3 | Pending ❌ |
-| P4 + P5 + P6 + P7 + P8 | **Risk Engine Ready** — Neptune, Kafka, deterministic calc, LLM gateway | Week 6 | Pending ❌ |
+| P1 + P2 + P3 + P4 (partial) | **POC Foundation** — skeleton, local stack, DB, auth wired | Week 3 | Completed ✅ |
+| P4 + P5 + P6 + P7 + P8 | **Risk Engine Ready** — Neptune, Kafka, deterministic calc, LLM gateway | Week 6 | In Progress 🔄 |
 | P9 + P10 + P11 + P13 | **Phase 1 POC** — NanoCore simulation live, HITL demo, all API routes | Week 10 | Pending ❌ |
 | P12 + P14 + P15 | **MVP Frontend & Test Coverage** — React UI, golden tests green, observability on | Week 16 | Pending ❌ |
 | P11 (live Tier-1 connectors) + Production data | **Phase 2 MVP** — Bengaluru, Pune, Munich suppliers live | Week 22 | Pending ❌ |
@@ -304,7 +304,7 @@ Phases 4, 5, 6, 7, and 8 all depend on Phase 3 and can be developed in parallel.
 | 2 | Local Dev Environment | 5 | 5 (100%) ✅ |
 | 3 | Persistence Layer | 5 | 5 (100%) ✅ |
 | 4 | Identity, Security & HITL Tokens | 5 | 5 (100%) ✅ |
-| 5 | Knowledge Graph (Neptune) | 5 | 3 (60%) 🔄 |
+| 5 | Knowledge Graph (Neptune) | 5 | 5 (100%) ✅ |
 | 6 | Kafka Event Ingestion | 4 | 0 (0%) ❌ |
 | 7 | Deterministic Risk Engine | 5 | 0 (0%) ❌ |
 | 8 | LLM Foundation | 5 | 0 (0%) ❌ |
@@ -316,4 +316,4 @@ Phases 4, 5, 6, 7, and 8 all depend on Phase 3 and can be developed in parallel.
 | 14 | Unit & Integration Tests | 6 | 0 (0%) ❌ |
 | 15 | Observability | 5 | 0 (0%) ❌ |
 | 16 | Infrastructure & Delivery | 6 | 0 (0%) ❌ |
-| **Total** | | **83** | **24 (28.9%)** |
+| **Total** | | **83** | **26 (31.3%)** |

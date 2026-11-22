@@ -188,6 +188,15 @@
   - Implemented `can_user_approve_spend`, `is_eligible_signer`, `validate_approval_signers`, and `evaluate_spend_authorization` (raising 403 `AuthorizationException` on unauthorized attempts).
   - Exported router models and functions in `src/core/__init__.py`.
   - Added 13 unit tests in `tests/unit/test_spend_tier_router.py`, achieving **100% statement coverage** on `src/core/spend_tier_router.py` (156 total passing tests across suite, 92.54% total coverage).
+- **P4-5: Append-only audit writer** (`feature/security-audit-writer`):
+  - Implemented `src/core/audit.py` with `write_audit_log` and `AuditWriter` service class enforcing BR-RULE-007.
+  - Enforced autonomous transaction execution: audit entries execute inside an independent, dedicated `AsyncSession`, guaranteeing persistence even when outer caller business transactions fail or are explicitly rolled back.
+  - Implemented automatic distributed trace context propagation via `src.core.logging.get_trace_id()`.
+  - Implemented deterministic UUID coercion (`coerce_uuid`) supporting string UUIDs and human-readable identifiers (`usr-alex-chen`, `sys-engine`).
+  - Implemented recursive state payload sanitization (`sanitize_audit_payload`) automatically masking tokens, secrets, passwords, and private keys.
+  - Provided forensic trail query helpers: `get_entity_audit_trail`, `get_trace_audit_trail`, and `get_actor_audit_trail`.
+  - Added 7 unit tests in `tests/unit/test_audit_writer.py`, achieving **100% statement coverage** on `src/core/audit.py` (163 total passing tests across suite, 93.00% total coverage).
+  - **Phase 4 (Identity, Security & HITL Token Service) is now 100% complete (5/5 tasks).**
 
 ---
 
@@ -237,8 +246,15 @@
 21. **Deterministic Spend-Tier Routing & Dual Executive Sign-Off Enforcement**:
     - Financial commitment actions are strictly routed to governance tiers based on deterministic `Decimal` amount evaluation. Amounts <= $25,000 require Category Manager approval (1-hr TTL); amounts between $25,001 and $100,000 require Procurement Director approval (1-hr TTL); amounts > $100,000 unconditionally require dual sign-off from two distinct executives (Procurement Director + VP Supply Chain, 30-min TTL), rejecting single-signer authorization with standard 403 `INSUFFICIENT_ROLE` error envelopes.
 
+22. **Autonomous Transaction Decoupling for Append-Only Audit Trails (BR-RULE-007)**:
+    - Forensic audit records in `audit_logs` are executed strictly within dedicated, independent `AsyncSession` instances, decoupling them from caller transactions. If a business workflow fails, rejects authorization, or triggers a database rollback, the audit log of the attempt remains permanently committed. Credential fields (`token`, `secret`, `password`, `key`) are automatically redacted prior to persistence.
+
 ---
 
 ## 5. Next Planned Tasks
-- **Phase 4 — Identity, Security & HITL Token Service**:
-  - **P4-5**: Append-only audit writer (`src/core/audit.py`) (`feature/security-audit-writer`).
+- **Phase 5 — Knowledge Graph (Amazon Neptune)**:
+  - **P5-1**: Neptune OpenCypher client (`src/graph/neptune_client.py`) — connection pool, query executor, retry logic (`feature/graph-neptune-client`).
+  - **P5-2**: Graph schema seed — `Supplier`, `Component`, `Plant`, `Contract`, `NewsEvent`, `GeopoliticalRisk` nodes + all relationships (`feature/graph-schema-seed`).
+  - **P5-3**: Named Cypher query library (`src/graph/queries/`) — supplier-to-component, component-to-plant, tier-chain traversal (`feature/graph-cypher-queries`).
+  - **P5-4**: Supplier traversal service (`src/graph/traversal.py`) — shortest-path disruption -> affected SKUs -> affected plants (`feature/graph-traversal-service`).
+  - **P5-5**: Graph traversal unit tests — mock Neptune responses, assert 5-hop path and single-source dependency detection (`feature/graph-traversal-tests`).

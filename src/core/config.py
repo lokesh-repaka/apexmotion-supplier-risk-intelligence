@@ -146,6 +146,30 @@ class Settings(BaseSettings):
     )
 
     # --------------------------------------------------------------------------
+    # Okta Identity & RBAC (SAML 2.0 / OIDC)
+    # --------------------------------------------------------------------------
+    OKTA_DOMAIN: str = Field(
+        default="dev-apexmotion.okta.com",
+        description="Okta enterprise tenant domain",
+    )
+    OKTA_ISSUER: str = Field(
+        default="https://dev-apexmotion.okta.com/oauth2/default",
+        description="Okta OIDC issuer URL",
+    )
+    OKTA_AUDIENCE: str = Field(
+        default="api://apexmotion-risk",
+        description="Expected Okta audience claim (aud)",
+    )
+    JWT_ALGORITHM: str = Field(
+        default="HS256",
+        description="Default JWT signing algorithm for local dev/testing (RS256 in prod with Okta JWKS)",
+    )
+    JWT_SECRET_KEY: SecretStr = Field(
+        default=SecretStr("apexmotion_super_secure_jwt_dev_secret_key_min_32_chars"),
+        description="HMAC secret key for local development and test token signing",
+    )
+
+    # --------------------------------------------------------------------------
     # AWS KMS (HITL Cryptographic Signatures)
     # --------------------------------------------------------------------------
     KMS_KEY_ARN: str = Field(

@@ -19,10 +19,11 @@
 | **Phase 1 Progress** | 6 / 6 Tasks Completed | Completed ✅ |
 | **Phase 2 Progress** | 5 / 5 Tasks Completed | Completed ✅ |
 | **Phase 3 Progress** | 5 / 5 Tasks Completed | Completed ✅ |
-| **Total Test Suites** | 16 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`, `test_localstack_bootstrap.py`, `test_redpanda_topics.py`, `test_neptune_emulation.py`, `test_makefile.py`, `test_database_models.py`, `test_database_migrations.py`, `test_database_repositories.py`, `test_token_hash_index.py`, `test_opensearch_client.py`) | PASSED ✅ |
-| **Total Test Cases** | 105 unit/golden tests | 100% Passing (0 failures) |
-| **Code Coverage (`src/`)** | **88%** statement coverage | Exceeds 80% DoD gate |
-| **Active Branch** | `feature/database-opensearch-client` $\to$ `development` | Clean |
+| **Phase 4 Progress** | 1 / 5 Tasks Completed | In Progress 🔄 |
+| **Total Test Suites** | 17 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`, `test_localstack_bootstrap.py`, `test_redpanda_topics.py`, `test_neptune_emulation.py`, `test_makefile.py`, `test_database_models.py`, `test_database_migrations.py`, `test_database_repositories.py`, `test_token_hash_index.py`, `test_opensearch_client.py`, `test_security_rbac.py`) | PASSED ✅ |
+| **Total Test Cases** | 117 unit/golden tests | 100% Passing (0 failures) |
+| **Code Coverage (`src/`)** | **90%** statement coverage | Exceeds 80% DoD gate |
+| **Active Branch** | `feature/security-okta-jwt-rbac` $\to$ `development` | Clean |
 
 ---
 
@@ -148,6 +149,19 @@
     - Semantic k-nearest-neighbour vector search (`search_knn`) with optional boolean metadata filtering (`filter_criteria`) and minimum score thresholds.
     - Document retrieval and deletion (`get_document`, `delete_document`) with resilient 404 handling.
   - 9 new unit tests in `tests/unit/test_opensearch_client.py` covering index provisioning, upsert, bulk indexing, filtered k-NN vector queries, error resilience, and client connection cleanup (105 total passing tests across suite, 88.49% statement coverage).
+  - PR #15 merged into `development`.
+
+### Phase 4: Identity, Security & HITL Token Service
+- **P4-1 · Okta JWT Validation & require_role() RBAC (`feature/security-okta-jwt-rbac`)**: Completed ✅
+  - `src/core/security.py`: Implemented enterprise OIDC / Okta JWT validation and RBAC decorators:
+    - User roles: `analyst`, `supply_chain_analyst`, `category_manager`, `procurement_director`, `vp_supply_chain`, `system_admin`.
+    - Role hierarchy weights: `analyst` (10) < `category_manager` (20) < `procurement_director` (30) < `vp_supply_chain` (40) < `system_admin` (50).
+    - `AuthenticatedUser` model with `has_role`, `has_any_role`, and `is_at_least` supporting role aliases (`analyst` <-> `supply_chain_analyst`) and hierarchical permission escalation.
+    - Robust claim extraction across multiple standard OIDC/Okta/Keycloak claim structures (`roles`, `groups`, `realm_access.roles`, `scp`).
+    - Standardized cryptographic JWT decoding and expiration validation (`validate_jwt_token`) raising `AuthenticationException` (401) on missing/invalid/expired tokens.
+    - Reusable FastAPI dependencies: `get_current_user`, `require_role(required_role, allow_higher=True)`, and `require_any_role(*roles, allow_higher=True)` raising `AuthorizationException` (403) on under-privileged calls.
+    - Development and test token generator `create_access_token` supporting custom claims, roles, and expiration TTL.
+  - 12 new unit and integration tests in `tests/unit/test_security_rbac.py` verifying full token lifecycle, claims normalization, RBAC authorization, and FastAPI route responses (117 total passing tests across suite, 89.60% statement coverage).
 
 ---
 
@@ -186,10 +200,13 @@
     - Physical database unique index `idx_hitl_approvals_token_hash` guarantees that any re-submitted KMS ECDSA signature token is unconditionally rejected by Aurora PostgreSQL, preventing fraudulent mitigation execution.
 17. **Canonical k-NN Vector Indexing & Hybrid Query Isolation**:
     - OpenSearch document embeddings are strictly mapped to HNSW cosine similarity indices with 1536-dimensional dense vectors, combining vector distance search with boolean metadata filters without leaking raw un-sanitized supplier text.
+18. **Enterprise OIDC/Okta Identity & RBAC Hierarchy Enforcement**:
+    - All API routes and sensitive capabilities are gated behind cryptographic JWT verification and role hierarchy guards (`analyst` < `category_manager` < `procurement_director` < `vp_supply_chain` < `system_admin`), normalizing claim extractions across Okta (`groups`), Keycloak (`realm_access.roles`), and OAuth2 (`scp`), rejecting expired, unauthenticated, or under-privileged requests with standardized 401/403 error envelopes.
 
 ---
 
 ## 5. Next Planned Tasks
 - **Phase 4 — Identity, Security & HITL Token Service**:
-  - **P4-1**: Okta JWT validation and `require_role()` guard (`src/core/security.py`) — SAML 2.0 / OIDC (`feature/security-okta-jwt-rbac`).
+  - **P4-2**: AWS KMS ECDSA P-256 HITL token service (`src/core/hitl_tokens.py`) (`feature/security-hitl-token-service`).
+  - **P4-3**: Demo Okta tokens for `analyst`, `category_manager`, `procurement_director`, `vp_supply_chain`, `system_admin` personas (`feature/security-demo-auth-tokens`).
   - **P4-2**: AWS KMS ECDSA P-256 HITL token service (`src/core/hitl_tokens.py`).

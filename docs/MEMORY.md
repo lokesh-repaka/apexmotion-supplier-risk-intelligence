@@ -19,11 +19,11 @@
 | **Phase 1 Progress** | 6 / 6 Tasks Completed | Completed ✅ |
 | **Phase 2 Progress** | 5 / 5 Tasks Completed | Completed ✅ |
 | **Phase 3 Progress** | 5 / 5 Tasks Completed | Completed ✅ |
-| **Phase 4 Progress** | 1 / 5 Tasks Completed | In Progress 🔄 |
-| **Total Test Suites** | 17 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`, `test_localstack_bootstrap.py`, `test_redpanda_topics.py`, `test_neptune_emulation.py`, `test_makefile.py`, `test_database_models.py`, `test_database_migrations.py`, `test_database_repositories.py`, `test_token_hash_index.py`, `test_opensearch_client.py`, `test_security_rbac.py`) | PASSED ✅ |
-| **Total Test Cases** | 117 unit/golden tests | 100% Passing (0 failures) |
-| **Code Coverage (`src/`)** | **90%** statement coverage | Exceeds 80% DoD gate |
-| **Active Branch** | `feature/security-okta-jwt-rbac` $\to$ `development` | Clean |
+| **Phase 4 Progress** | 2 / 5 Tasks Completed | In Progress 🔄 |
+| **Total Test Suites** | 18 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`, `test_localstack_bootstrap.py`, `test_redpanda_topics.py`, `test_neptune_emulation.py`, `test_makefile.py`, `test_database_models.py`, `test_database_migrations.py`, `test_database_repositories.py`, `test_token_hash_index.py`, `test_opensearch_client.py`, `test_security_rbac.py`, `test_hitl_tokens.py`) | PASSED ✅ |
+| **Total Test Cases** | 137 unit/golden tests | 100% Passing (0 failures) |
+| **Code Coverage (`src/`)** | **91%** statement coverage (`src/core/hitl_tokens.py` at 100%) | Exceeds 80% DoD gate |
+| **Active Branch** | `feature/security-hitl-token-service` $\to$ `development` | Clean |
 
 ---
 
@@ -162,6 +162,15 @@
     - Reusable FastAPI dependencies: `get_current_user`, `require_role(required_role, allow_higher=True)`, and `require_any_role(*roles, allow_higher=True)` raising `AuthorizationException` (403) on under-privileged calls.
     - Development and test token generator `create_access_token` supporting custom claims, roles, and expiration TTL.
   - 12 new unit and integration tests in `tests/unit/test_security_rbac.py` verifying full token lifecycle, claims normalization, RBAC authorization, and FastAPI route responses (117 total passing tests across suite, 89.60% statement coverage).
+- **P4-2 · AWS KMS ECDSA P-256 HITL Token Service (`feature/security-hitl-token-service`)**: Completed ✅
+  - `src/core/hitl_tokens.py`: Implemented AWS KMS ECDSA P-256 token service with cryptographic signing and verification (ECC_NIST_P256, ECDSA_SHA_256):
+    - Spend authority tiers: `CATEGORY_MGR` (<= $25,000, 1-hr TTL), `PROC_DIRECTOR` ($25,001 - $100,000, 1-hr TTL), and `DUAL_VP` (> $100,000, 30-min TTL) strictly enforcing `Decimal` precision per BR-RULE-001.
+    - Deterministic canonical payload serialization (`action_id`, `alert_id`, `action_type`, `amount_usd`, `spend_tier`, `issued_at`, `expires_at`, `nonce`, `signer_id`, `signer_role`).
+    - Cryptographic signature issuance and verification via AWS KMS with graceful ClientError exception trapping.
+    - URL-safe Base64 serialization and deserialization with strict format validation.
+    - Deterministic SHA-256 token hashing (`compute_token_hash`) for database-level anti-replay verification against `hitl_approvals.token_hash`.
+    - Dual sign-off enforcement (`verify_dual_approval`) verifying two independently signed tokens with distinct signers bound to the same action ID.
+  - 20 unit tests in `tests/unit/test_hitl_tokens.py` verifying all success and failure branches, achieving **100% statement and branch coverage** on `src/core/hitl_tokens.py` (137 total passing tests across suite, 91.37% statement coverage).
 
 ---
 
@@ -202,11 +211,13 @@
     - OpenSearch document embeddings are strictly mapped to HNSW cosine similarity indices with 1536-dimensional dense vectors, combining vector distance search with boolean metadata filters without leaking raw un-sanitized supplier text.
 18. **Enterprise OIDC/Okta Identity & RBAC Hierarchy Enforcement**:
     - All API routes and sensitive capabilities are gated behind cryptographic JWT verification and role hierarchy guards (`analyst` < `category_manager` < `procurement_director` < `vp_supply_chain` < `system_admin`), normalizing claim extractions across Okta (`groups`), Keycloak (`realm_access.roles`), and OAuth2 (`scp`), rejecting expired, unauthenticated, or under-privileged requests with standardized 401/403 error envelopes.
+19. **Cryptographic KMS ECDSA P-256 HITL Spend Governance & Dual Sign-Off**:
+    - Consequential spend commitments and mitigation dispatches strictly require AWS KMS ECDSA P-256 cryptographic signatures, bound immutably to action ID, alert ID, and monetary amount. Spend <= $100k is granted a 1-hour TTL single token; spend > $100k strictly requires dual sign-off from two distinct executives with a 30-minute TTL, while SHA-256 token hashing guarantees zero replay attacks across database transactions.
 
 ---
 
 ## 5. Next Planned Tasks
 - **Phase 4 — Identity, Security & HITL Token Service**:
-  - **P4-2**: AWS KMS ECDSA P-256 HITL token service (`src/core/hitl_tokens.py`) (`feature/security-hitl-token-service`).
   - **P4-3**: Demo Okta tokens for `analyst`, `category_manager`, `procurement_director`, `vp_supply_chain`, `system_admin` personas (`feature/security-demo-auth-tokens`).
-  - **P4-2**: AWS KMS ECDSA P-256 HITL token service (`src/core/hitl_tokens.py`).
+  - **P4-4**: Spend-tier router — maps action amount to HITL tier (`CATEGORY_MGR` <=$25k / `PROC_DIRECTOR` <=$100k / `DUAL_VP` >$100k) (`feature/security-spend-tier-router`).
+  - **P4-5**: Append-only audit writer (`src/core/audit.py`) (`feature/security-audit-writer`).

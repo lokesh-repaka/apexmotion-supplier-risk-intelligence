@@ -78,7 +78,7 @@ Sub-tasks in the same phase that do not share files can be open at the same time
 
 | Task | Branch | Status |
 |------|--------|--------|
-| P5-1 · Neptune OpenCypher client (`src/graph/neptune_client.py`) — connection pool, query executor, retry logic | `feature/graph-neptune-client` | Pending ❌ |
+| P5-1 · Neptune OpenCypher client (`src/graph/neptune_client.py`) — connection pool, query executor, retry logic | `feature/graph-neptune-client` | Completed ✅ |
 | P5-2 · Graph schema seed — `Supplier`, `Component`, `Plant`, `Contract`, `NewsEvent`, `GeopoliticalRisk` nodes + all relationships | `feature/graph-schema-seed` | Pending ❌ |
 | P5-3 · Named Cypher query library (`src/graph/queries/`) — supplier-to-component, component-to-plant, tier-chain traversal | `feature/graph-cypher-queries` | Pending ❌ |
 | P5-4 · Supplier traversal service (`src/graph/traversal.py`) — shortest-path disruption → affected SKUs → affected plants | `feature/graph-traversal-service` | Pending ❌ |

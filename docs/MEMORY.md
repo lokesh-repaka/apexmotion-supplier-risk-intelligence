@@ -19,11 +19,12 @@
 | **Phase 1 Progress** | 6 / 6 Tasks Completed | Completed ✅ |
 | **Phase 2 Progress** | 5 / 5 Tasks Completed | Completed ✅ |
 | **Phase 3 Progress** | 5 / 5 Tasks Completed | Completed ✅ |
-| **Phase 4 Progress** | 2 / 5 Tasks Completed | In Progress 🔄 |
-| **Total Test Suites** | 18 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`, `test_localstack_bootstrap.py`, `test_redpanda_topics.py`, `test_neptune_emulation.py`, `test_makefile.py`, `test_database_models.py`, `test_database_migrations.py`, `test_database_repositories.py`, `test_token_hash_index.py`, `test_opensearch_client.py`, `test_security_rbac.py`, `test_hitl_tokens.py`) | PASSED ✅ |
-| **Total Test Cases** | 137 unit/golden tests | 100% Passing (0 failures) |
-| **Code Coverage (`src/`)** | **91%** statement coverage (`src/core/hitl_tokens.py` at 100%) | Exceeds 80% DoD gate |
-| **Active Branch** | `feature/security-hitl-token-service` $\to$ `development` | Clean |
+| **Phase 4 Progress** | 5 / 5 Tasks Completed | Completed ✅ |
+| **Phase 5 Progress** | 1 / 5 Tasks Completed | In Progress 🔄 |
+| **Total Test Suites** | 19 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`, `test_localstack_bootstrap.py`, `test_redpanda_topics.py`, `test_neptune_emulation.py`, `test_makefile.py`, `test_database_models.py`, `test_database_migrations.py`, `test_database_repositories.py`, `test_token_hash_index.py`, `test_opensearch_client.py`, `test_security_rbac.py`, `test_hitl_tokens.py`, `test_neptune_client.py`) | PASSED ✅ |
+| **Total Test Cases** | 177 unit tests | 100% Passing (0 failures) |
+| **Code Coverage (`src/`)** | **93.49%** statement coverage (`src/graph/neptune_client.py` at 99%) | Exceeds 80% DoD gate |
+| **Active Branch** | `feature/graph-neptune-client` $\to$ `development` | Clean |
 
 ---
 
@@ -198,6 +199,21 @@
   - Added 7 unit tests in `tests/unit/test_audit_writer.py`, achieving **100% statement coverage** on `src/core/audit.py` (163 total passing tests across suite, 93.00% total coverage).
   - **Phase 4 (Identity, Security & HITL Token Service) is now 100% complete (5/5 tasks).**
 
+### Phase 5: Knowledge Graph (Amazon Neptune)
+- **P5-1 · Neptune OpenCypher Client (`feature/graph-neptune-client`)**: Completed ✅
+  - `src/graph/neptune_client.py`: Implemented asynchronous Amazon Neptune OpenCypher client:
+    - Bounded connection pooling via `httpx.AsyncClient` (`max_connections=100`, `max_keepalive_connections=20`, `keepalive_expiry=30.0s`).
+    - Standardized OpenCypher execution via `POST /openCypher` with JSON parameter binding to prevent Cypher query injection (SEC-024).
+    - Exponential backoff retry logic (LLD Section 6.1: 3 retries, $0.5s, 1.0s, 2.0s$) on transient HTTP codes (429, 500, 502, 503, 504) and network dropouts.
+    - Immediate failure on client errors (400 Bad Request) without retry.
+    - Strict 5.0-second query deadline raising `NeptuneTimeoutError` (`GRAPH_504_TIMEOUT`).
+    - Circuit breaker pattern tracking consecutive failures/timeouts (threshold: 5) raising `NeptuneCircuitBreakerOpenError` (`GRAPH_CIRCUIT_BREAKER_OPEN`, 503) to prevent cascading resource starvation.
+    - Distributed `trace_id` propagation in request headers (`X-Trace-ID`, `X-Request-ID`).
+    - Cluster health check probe (`health_check`) executing `RETURN 1 AS ping`.
+    - Injectable HTTP transport for 100% offline unit testing with zero external network or AWS dependencies.
+  - Exported client and structured exception hierarchy in `src/graph/__init__.py`.
+  - 14 comprehensive unit tests in `tests/unit/test_neptune_client.py` achieving **99% statement coverage** on `src/graph/neptune_client.py` (177 total passing tests across suite, 93.49% total coverage).
+
 ---
 
 ## 4. Architectural Invariants Enforced
@@ -249,11 +265,14 @@
 22. **Autonomous Transaction Decoupling for Append-Only Audit Trails (BR-RULE-007)**:
     - Forensic audit records in `audit_logs` are executed strictly within dedicated, independent `AsyncSession` instances, decoupling them from caller transactions. If a business workflow fails, rejects authorization, or triggers a database rollback, the audit log of the attempt remains permanently committed. Credential fields (`token`, `secret`, `password`, `key`) are automatically redacted prior to persistence.
 
+23. **Neptune OpenCypher Resilience, Connection Pooling & Injection Defense (SEC-024)**:
+    - Amazon Neptune OpenCypher queries are executed asynchronously via `httpx.AsyncClient` with bounded connection pooling (max 100 connections, 20 keepalive). All parameters are bound natively in JSON request bodies to prevent Cypher query injection. Transient network and cluster failures (429, 500, 502, 503, 504) are subject to exponential backoff retries (3 retries: 0.5s, 1.0s, 2.0s) with strict 5.0s query timeout (`GRAPH_504_TIMEOUT`). Circuit breaker pattern trips after 5 consecutive failures, fail-fasting to cached graph topology and preventing cascading dependency collapse.
+
 ---
 
 ## 5. Next Planned Tasks
 - **Phase 5 — Knowledge Graph (Amazon Neptune)**:
-  - **P5-1**: Neptune OpenCypher client (`src/graph/neptune_client.py`) — connection pool, query executor, retry logic (`feature/graph-neptune-client`).
+  - **P5-1**: Neptune OpenCypher client (`src/graph/neptune_client.py`) — connection pool, query executor, retry logic (`feature/graph-neptune-client`) [Completed ✅].
   - **P5-2**: Graph schema seed — `Supplier`, `Component`, `Plant`, `Contract`, `NewsEvent`, `GeopoliticalRisk` nodes + all relationships (`feature/graph-schema-seed`).
   - **P5-3**: Named Cypher query library (`src/graph/queries/`) — supplier-to-component, component-to-plant, tier-chain traversal (`feature/graph-cypher-queries`).
   - **P5-4**: Supplier traversal service (`src/graph/traversal.py`) — shortest-path disruption -> affected SKUs -> affected plants (`feature/graph-traversal-service`).

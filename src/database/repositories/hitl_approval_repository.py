@@ -1,14 +1,19 @@
-"""Asynchronous repository for HITLApproval domain entities."""
+"""Asynchronous repository for HITLApproval domain entities and cryptographic anti-replay verification."""
 
 from collections.abc import Sequence
 from datetime import UTC, datetime
 from uuid import UUID
 
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database.models import HITLApproval
 from src.database.repositories.base import BaseRepository
+
+
+class TokenReplayError(Exception):
+    """Raised when an approval token hash has already been used (cryptographic replay attack)."""
 
 
 class HITLApprovalRepository(BaseRepository[HITLApproval]):
@@ -22,6 +27,28 @@ class HITLApprovalRepository(BaseRepository[HITLApproval]):
         stmt = select(HITLApproval).where(HITLApproval.token_hash == token_hash)
         result = await self.session.execute(stmt)
         return result.scalars().first()
+
+    async def is_token_used(self, token_hash: str) -> bool:
+        """Check if a token hash has already been registered in hitl_approvals."""
+        approval = await self.get_by_token_hash(token_hash)
+        return approval is not None
+
+    async def create_approval(self, approval: HITLApproval) -> HITLApproval:
+        """Create an approval while enforcing cryptographic anti-replay validation.
+
+        Raises:
+            TokenReplayError: If the token_hash was already used in a previous approval.
+        """
+        if await self.is_token_used(approval.token_hash):
+            raise TokenReplayError(f"Replay detected for token hash: {approval.token_hash}")
+
+        try:
+            return await self.create(approval)
+        except IntegrityError as exc:
+            await self.session.rollback()
+            raise TokenReplayError(
+                f"Replay detected for token hash: {approval.token_hash}"
+            ) from exc
 
     async def get_by_alert_id(self, alert_id: UUID) -> Sequence[HITLApproval]:
         """Fetch approvals triggered by an incident alert."""

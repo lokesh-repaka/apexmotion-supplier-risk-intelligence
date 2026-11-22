@@ -18,6 +18,7 @@ from src.database.repositories import (
     HITLApprovalRepository,
     RiskAlertRepository,
     SupplierRepository,
+    TokenReplayError,
 )
 from src.database.session import (
     get_async_engine,
@@ -39,6 +40,7 @@ __all__ = [
     "SupplierRepository",
     "RiskAlertRepository",
     "HITLApprovalRepository",
+    "TokenReplayError",
     "AuditLogRepository",
     "AgentRunRepository",
 ]

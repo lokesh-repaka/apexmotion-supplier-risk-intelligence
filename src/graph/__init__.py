@@ -12,6 +12,10 @@ Exports:
 - seed_graph: Seeding execution function.
 - verify_seed_integrity: Post-seeding validation report.
 - get_seed_cypher_statements: Statement generator.
+- CypherQuery: Parameterized Cypher query container.
+- CypherQueryLibrary: Query catalog and executor.
+- CYPHER_QUERIES: Named query dictionary.
+- get_query: Helper to get query by name.
 """
 
 from src.graph.neptune_client import (
@@ -21,6 +25,12 @@ from src.graph.neptune_client import (
     NeptuneConnectionError,
     NeptuneQueryError,
     NeptuneTimeoutError,
+)
+from src.graph.queries import (
+    CYPHER_QUERIES,
+    CypherQuery,
+    CypherQueryLibrary,
+    get_query,
 )
 from src.graph.seed import (
     GOLDEN_COMPONENTS,
@@ -37,12 +47,15 @@ from src.graph.seed import (
 )
 
 __all__ = [
+    "CYPHER_QUERIES",
     "GOLDEN_COMPONENTS",
     "GOLDEN_CONTRACTS",
     "GOLDEN_EXTERNAL_SIGNALS",
     "GOLDEN_PLANTS",
     "GOLDEN_RELATIONSHIPS",
     "GOLDEN_SUPPLIERS",
+    "CypherQuery",
+    "CypherQueryLibrary",
     "GraphSeedError",
     "NeptuneCircuitBreakerOpenError",
     "NeptuneClient",
@@ -51,6 +64,7 @@ __all__ = [
     "NeptuneQueryError",
     "NeptuneTimeoutError",
     "SeedResult",
+    "get_query",
     "get_seed_cypher_statements",
     "seed_graph",
     "verify_seed_integrity",

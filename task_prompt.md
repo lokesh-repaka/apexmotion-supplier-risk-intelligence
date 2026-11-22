@@ -1,6 +1,6 @@
 You have access to the project's authoritative documentation: `TASKS.md`, `CLAUDE.md`, `GEMINI.md`, `.agents/rules/`, and architecture specifications in `docs/` (`HLD_*.md`, `LLD_*.md`, `PRD_*.md`, `BRD_*.md`, `FRD_*.md`).
 
-Go ahead and complete **P5-2 · Graph schema seed — `Supplier`, `Component`, `Plant`, `Contract`, `NewsEvent`, `GeopoliticalRisk` nodes + all relationships**, as defined in `TASKS.md`.
+Go ahead and complete **P5-3 · Named Cypher query library (`src/graph/queries/`) — supplier-to-component, component-to-plant, tier-chain traversal**, as defined in `TASKS.md`.
 
 ---
 

@@ -82,7 +82,7 @@ Sub-tasks in the same phase that do not share files can be open at the same time
 | P5-2 · Graph schema seed — `Supplier`, `Component`, `Plant`, `Contract`, `NewsEvent`, `GeopoliticalRisk` nodes + all relationships | `feature/graph-schema-seed` | Completed ✅ |
 | P5-3 · Named Cypher query library (`src/graph/queries/`) — supplier-to-component, component-to-plant, tier-chain traversal | `feature/graph-cypher-queries` | Completed ✅ |
 | P5-4 · Supplier traversal service (`src/graph/traversal.py`) — shortest-path disruption → affected SKUs → affected plants | `feature/graph-traversal-service` | Completed ✅ |
-| P5-5 · Graph traversal unit tests — mock Neptune responses, assert 5-hop path and single-source dependency detection | `feature/graph-traversal-tests` | Pending ❌ |
+| P5-5 · Graph traversal unit tests — mock Neptune responses, assert 5-hop path and single-source dependency detection | `feature/graph-traversal-tests` | Completed ✅ |
 
 ---
 

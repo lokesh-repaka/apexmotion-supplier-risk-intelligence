@@ -204,6 +204,25 @@ RETURN p.id AS plant_id,
 ORDER BY prg.model ASC
 """.strip()
 
+QUERY_FIVE_HOP_DISRUPTION_PATH = """
+MATCH path = (origin)-[:AFFECTS|THREATENS|TIER_1_OF]->(s:Supplier {id: $supplier_id})-[:SUPPLIES|SUPPLIES_PART]->(c:Component)-[:PART_OF_BOM]->(a:Assembly)-[:ASSEMBLED_AT]->(p:Plant)-[:ALLOCATED_TO]->(prg:Program)
+RETURN coalesce(origin.id, id(origin)) AS origin_id,
+       labels(origin)[0] AS origin_type,
+       s.id AS supplier_id,
+       s.name AS supplier_name,
+       c.id AS component_id,
+       c.mpn AS mpn,
+       a.id AS assembly_id,
+       a.name AS assembly_name,
+       p.id AS plant_id,
+       p.name AS plant_name,
+       prg.id AS program_id,
+       prg.model AS program_model,
+       length(path) AS hop_count,
+       [n IN nodes(path) | coalesce(n.id, id(n))] AS path_nodes
+ORDER BY length(path) ASC
+""".strip()
+
 
 # ------------------------------------------------------------------------------
 # Query Registry & Library Engine
@@ -263,6 +282,12 @@ CYPHER_QUERIES: dict[str, CypherQuery] = {
         statement=QUERY_PLANT_TO_PROGRAMS,
         description="Retrieve vehicle model programs and capacity allocations for an assembly plant.",
         required_parameters=["plant_id"],
+    ),
+    "five_hop_disruption_path": CypherQuery(
+        name="five_hop_disruption_path",
+        statement=QUERY_FIVE_HOP_DISRUPTION_PATH,
+        description="Traverse 5-hop disruption path: External Threat/Incident -> Supplier -> Component -> Assembly -> Plant -> Program.",
+        required_parameters=["supplier_id"],
     ),
 }
 

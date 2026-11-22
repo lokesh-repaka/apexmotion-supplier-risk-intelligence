@@ -21,11 +21,11 @@
 | **Phase 3 Progress** | 5 / 5 Tasks Completed | Completed ✅ |
 | **Phase 4 Progress** | 5 / 5 Tasks Completed | Completed ✅ |
 | **Phase 5 Progress** | 5 / 5 Tasks Completed | Completed ✅ |
-| **Phase 6 Progress** | 2 / 4 Tasks Completed | In Progress 🔄 |
-| **Total Test Suites** | 28 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`, `test_localstack_bootstrap.py`, `test_redpanda_topics.py`, `test_neptune_emulation.py`, `test_makefile.py`, `test_database_models.py`, `test_database_migrations.py`, `test_database_repositories.py`, `test_token_hash_index.py`, `test_opensearch_client.py`, `test_security_rbac.py`, `test_hitl_tokens.py`, `test_demo_tokens.py`, `test_spend_tier_router.py`, `test_audit_writer.py`, `test_neptune_client.py`, `test_graph_seed.py`, `test_cypher_queries.py`, `test_supplier_traversal.py`, `test_graph_traversal_paths.py`, `test_kafka_consumer.py`, `test_kafka_producer.py`) | PASSED ✅ |
-| **Total Test Cases** | 278 unit tests | 100% Passing (0 failures) |
-| **Code Coverage (`src/`)** | **95.56%** statement coverage (`src/kafka/producer.py` at 100%) | Exceeds 80% DoD gate |
-| **Active Branch** | `feature/kafka-event-producer` $\to$ `development` | Clean |
+| **Phase 6 Progress** | 3 / 4 Tasks Completed | In Progress 🔄 |
+| **Total Test Suites** | 29 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`, `test_localstack_bootstrap.py`, `test_redpanda_topics.py`, `test_neptune_emulation.py`, `test_makefile.py`, `test_database_models.py`, `test_database_migrations.py`, `test_database_repositories.py`, `test_token_hash_index.py`, `test_opensearch_client.py`, `test_security_rbac.py`, `test_hitl_tokens.py`, `test_demo_tokens.py`, `test_spend_tier_router.py`, `test_audit_writer.py`, `test_neptune_client.py`, `test_graph_seed.py`, `test_cypher_queries.py`, `test_supplier_traversal.py`, `test_graph_traversal_paths.py`, `test_kafka_consumer.py`, `test_kafka_producer.py`, `test_kafka_schemas.py`) | PASSED ✅ |
+| **Total Test Cases** | 307 unit tests | 100% Passing (0 failures) |
+| **Code Coverage (`src/`)** | **95.95%** statement coverage (`src/kafka/schemas/` at 100%) | Exceeds 80% DoD gate |
+| **Active Branch** | `feature/kafka-event-schemas` $\to$ `development` | Clean |
 
 ---
 
@@ -287,6 +287,14 @@
     - Global thread-safe singleton accessor `get_event_producer()`.
     - Exported models, exceptions, and producer in `src/kafka/__init__.py`.
   - 30 comprehensive unit tests in `tests/unit/test_kafka_producer.py` achieving **100% statement and branch coverage** on `src/kafka/producer.py` (278 total passing tests across suite, 95.56% total coverage).
+- **P6-3 · Event Schemas (`feature/kafka-event-schemas`)**: Completed ✅
+  - `src/kafka/schemas/`: Implemented strict Pydantic v2 domain schemas for all 4 core Kafka topics:
+    * `SupplierEvent` (`supplier-events`): Inbound disruption signals (`event_id`, `event_type`, `supplier_id`, `source`, `severity`, `description`, `affected_skus`, `metadata`).
+    * `RiskAlert` / `RiskAlertEvent` (`risk-alerts`): Calculated risk assessments with `Decimal` inventory and monetary precision (`days_of_cover`, `gap_days`, `shortage_volume`, `financial_exposure`), severity thresholds, and automatic HITL derivation.
+    * `HITLRequest` / `HITLRequestEvent` (`hitl-required`): Spend approval commitments (`action_id`, `amount_usd`, `spend_tier`, `required_signers_count`, `status`, `expires_at`), strictly enforcing spend tiers (`CATEGORY_MGR` <= $25k, `PROC_DIRECTOR` <= $100k, `DUAL_VP` > $100k) and dual executive signature count.
+    * `AuditEvent` / `AuditEventSchema` (`audit-events`): Immutable forensic audit entries streaming to S3 WORM archive with automated recursive sanitization of credential keys (`token`, `password`, `kms_key`, `secret`).
+  - Base architecture: `BaseEvent` enforces `extra="forbid"`, automatic whitespace stripping, UTC timestamp enforcement, distributed trace propagation, exact Decimal string serialization, and JSON schema registry export (`model_json_schema()`).
+  - 29 comprehensive unit tests in `tests/unit/test_kafka_schemas.py` achieving **100% statement and branch coverage** on all schema modules (307 total passing tests across suite, 95.95% total coverage).
 
 ---
 
@@ -357,6 +365,8 @@
     - Streaming event consumers (`src/kafka/consumer.py`) strictly commit partition offsets manually and only after successful business handler completion or successful persistence to `<topic>.dlq`. Transient processing exceptions trigger up to 3 retried attempts before routing to the dead-letter queue. If DLQ publication fails, partition offsets are never committed, guaranteeing zero message loss and complete at-least-once delivery semantics across distributed broker partitions.
 29. **Distributed Event Publication Reliability & Precision Preservation (SEC-030)**:
     - Streaming event publishing (`src/kafka/producer.py`) strictly enforces `acks="all"`, synchronous broker confirmation (`future.get(timeout)`), and automated JSON serialization preserving `Decimal` monetary precision (BR-RULE-001) as strings without IEEE 754 float distortion. Domain partition keys (`supplier_id`, `action_id`, `entity_id`) guarantee total event ordering across broker partitions, while distributed trace identifiers (`X-Trace-ID`, `X-Client-ID`, `X-Timestamp`) ensure end-to-end observability across the Kafka event bus.
+30. **Strict Schema Boundaries, Monetary Precision & PII Sanitization (SEC-031)**:
+    - All streaming events across Apache Kafka MSK topics strictly adhere to Pydantic v2 event contracts (`src/kafka/schemas/`) with `extra="forbid"`, preventing untrusted field injection. Financial commitments and inventory metrics strictly enforce `Decimal` precision, serializing to exact strings in JSON payloads to prevent floating-point distortion. Forensic audit events automatically redact credentials (`password`, `token`, `secret`, `kms_key`), and HITL authorization requests deterministically enforce spend-tier thresholds and required dual executive sign-offs prior to message publishing.
 
 ---
 
@@ -364,5 +374,5 @@
 - **Phase 6 — Kafka Event Ingestion**:
   - **P6-1**: Kafka consumer (`src/kafka/consumer.py`) — Completed ✅ (`feature/kafka-event-consumer`).
   - **P6-2**: Kafka producer (`src/kafka/producer.py`) — Completed ✅ (`feature/kafka-event-producer`).
-  - **P6-3**: Event schemas (`src/kafka/schemas/`) — `SupplierEvent`, `RiskAlert`, `HITLRequest`, `AuditEvent` JSON schemas with Pydantic validation (`feature/kafka-event-schemas`).
+  - **P6-3**: Event schemas (`src/kafka/schemas/`) — Completed ✅ (`feature/kafka-event-schemas`).
   - **P6-4**: Consumer integration test — Testcontainers Kafka, publish 3 events, assert all 3 persisted in `risk_alerts` table (`feature/kafka-consumer-integration-test`).

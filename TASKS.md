@@ -95,7 +95,7 @@ Sub-tasks in the same phase that do not share files can be open at the same time
 |------|--------|--------|
 | P6-1 · Kafka consumer (`src/kafka/consumer.py`) — MSK consumer group, at-least-once delivery, dead-letter queue on 3 failures | `feature/kafka-event-consumer` | Completed ✅ |
 | P6-2 · Kafka producer (`src/kafka/producer.py`) — internal event publishing for `risk-alerts`, `hitl-required`, `audit-events` | `feature/kafka-event-producer` | Completed ✅ |
-| P6-3 · Event schemas (`src/kafka/schemas/`) — `SupplierEvent`, `RiskAlert`, `HITLRequest`, `AuditEvent` JSON schemas with Pydantic validation | `feature/kafka-event-schemas` | Pending ❌ |
+| P6-3 · Event schemas (`src/kafka/schemas/`) — `SupplierEvent`, `RiskAlert`, `HITLRequest`, `AuditEvent` JSON schemas with Pydantic validation | `feature/kafka-event-schemas` | Completed ✅ |
 | P6-4 · Consumer integration test — Testcontainers Kafka, publish 3 events, assert all 3 persisted in `risk_alerts` table | `feature/kafka-consumer-integration-test` | Pending ❌ |
 
 ---
@@ -305,7 +305,7 @@ Phases 4, 5, 6, 7, and 8 all depend on Phase 3 and can be developed in parallel.
 | 3 | Persistence Layer | 5 | 5 (100%) ✅ |
 | 4 | Identity, Security & HITL Tokens | 5 | 5 (100%) ✅ |
 | 5 | Knowledge Graph (Neptune) | 5 | 5 (100%) ✅ |
-| 6 | Kafka Event Ingestion | 4 | 2 (50%) 🔄 |
+| 6 | Kafka Event Ingestion | 4 | 3 (75%) 🔄 |
 | 7 | Deterministic Risk Engine | 5 | 0 (0%) ❌ |
 | 8 | LLM Foundation | 5 | 0 (0%) ❌ |
 | 9 | LangGraph Agent Workflow | 6 | 0 (0%) ❌ |
@@ -316,4 +316,4 @@ Phases 4, 5, 6, 7, and 8 all depend on Phase 3 and can be developed in parallel.
 | 14 | Unit & Integration Tests | 6 | 0 (0%) ❌ |
 | 15 | Observability | 5 | 0 (0%) ❌ |
 | 16 | Infrastructure & Delivery | 6 | 0 (0%) ❌ |
-| **Total** | | **83** | **28 (33.7%)** |
+| **Total** | | **83** | **29 (34.9%)** |

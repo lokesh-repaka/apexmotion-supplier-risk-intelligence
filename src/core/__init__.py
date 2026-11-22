@@ -1,6 +1,13 @@
 """Core utilities, configuration, logging, and security for ApexMotion platform."""
 
 from src.core.config import Settings, get_settings
+from src.core.demo_auth import (
+    DEMO_PERSONAS,
+    DemoPersona,
+    generate_all_demo_tokens,
+    generate_demo_token,
+    get_demo_persona,
+)
 from src.core.hitl_tokens import (
     HITLToken,
     HITLTokenError,
@@ -43,6 +50,11 @@ __all__ = [
     "get_current_user",
     "require_role",
     "require_any_role",
+    "DemoPersona",
+    "DEMO_PERSONAS",
+    "get_demo_persona",
+    "generate_demo_token",
+    "generate_all_demo_tokens",
     "HITLToken",
     "HITLTokenPayload",
     "HITLTokenService",

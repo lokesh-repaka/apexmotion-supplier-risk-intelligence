@@ -1,6 +1,6 @@
 You have access to the project's authoritative documentation: `TASKS.md`, `CLAUDE.md`, `GEMINI.md`, `.agents/rules/`, and architecture specifications in `docs/` (`HLD_*.md`, `LLD_*.md`, `PRD_*.md`, `BRD_*.md`, `FRD_*.md`).
 
-Go ahead and complete **P3-4 · `hitl_approvals.token_hash` unique index — prevents replay attacks at the database level**, as defined in `TASKS.md`.
+Go ahead and complete **P3-5 · OpenSearch client (`src/database/opensearch_client.py`) — k-NN vector index setup, upsert, and nearest-neighbour search**, as defined in `TASKS.md`.
 
 ---
 
@@ -151,3 +151,5 @@ Emit a structured review scorecard with prioritized, actionable feedback:
   ```bash
   git checkout development && git pull origin development
   ```
+
+* update tasks_prompt.md with next task

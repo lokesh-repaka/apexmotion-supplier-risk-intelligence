@@ -97,7 +97,7 @@ def upgrade() -> None:
         sa.UniqueConstraint("token_hash"),
     )
     op.create_index("idx_hitl_approvals_alert", "hitl_approvals", ["alert_id"])
-    op.create_index("idx_hitl_token_hash", "hitl_approvals", ["token_hash"], unique=True)
+    op.create_index("idx_hitl_approvals_token_hash", "hitl_approvals", ["token_hash"], unique=True)
 
     # --------------------------------------------------------------------------
     # 4. Table: audit_logs (Append-Only)

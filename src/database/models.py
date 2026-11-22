@@ -211,7 +211,7 @@ class HITLApproval(Base):
             "spend_tier IN ('CATEGORY_MGR', 'PROC_DIRECTOR', 'DUAL_VP')",
             name="check_spend_tier",
         ),
-        Index("idx_hitl_token_hash", "token_hash", unique=True),
+        Index("idx_hitl_approvals_token_hash", "token_hash", unique=True),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(

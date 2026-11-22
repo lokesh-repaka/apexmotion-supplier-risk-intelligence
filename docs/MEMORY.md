@@ -18,11 +18,11 @@
 |---|---|---|
 | **Phase 1 Progress** | 6 / 6 Tasks Completed | Completed ✅ |
 | **Phase 2 Progress** | 5 / 5 Tasks Completed | Completed ✅ |
-| **Phase 3 Progress** | 3 / 5 Tasks Completed | In Progress 🔄 |
-| **Total Test Suites** | 14 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`, `test_localstack_bootstrap.py`, `test_redpanda_topics.py`, `test_neptune_emulation.py`, `test_makefile.py`, `test_database_models.py`, `test_database_migrations.py`, `test_database_repositories.py`) | PASSED ✅ |
-| **Total Test Cases** | 90 unit/golden tests | 100% Passing (0 failures) |
+| **Phase 3 Progress** | 4 / 5 Tasks Completed | In Progress 🔄 |
+| **Total Test Suites** | 15 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`, `test_localstack_bootstrap.py`, `test_redpanda_topics.py`, `test_neptune_emulation.py`, `test_makefile.py`, `test_database_models.py`, `test_database_migrations.py`, `test_database_repositories.py`, `test_token_hash_index.py`) | PASSED ✅ |
+| **Total Test Cases** | 96 unit/golden tests | 100% Passing (0 failures) |
 | **Code Coverage (`src/`)** | **88%** statement coverage | Exceeds 80% DoD gate |
-| **Active Branch** | `feature/database-repository-layer` $\to$ `development` | Clean |
+| **Active Branch** | `feature/database-token-hash-index` $\to$ `development` | Clean |
 
 ---
 
@@ -135,6 +135,11 @@
   - `src/database/repositories/audit_log_repository.py`: `AuditLogRepository` strictly enforcing BR-RULE-007 immutability by overriding `update()` and `delete()` to raise `PermissionError`, plus entity, trace_id, and actor query methods.
   - `src/database/repositories/agent_run_repository.py`: `AgentRunRepository` with alert runs, Langfuse trace lookup, graph name queries, status filters, and run completion tracking.
   - 7 new unit tests in `tests/unit/test_database_repositories.py` (90 total passing tests across suite, 88.37% statement coverage).
+  - PR #13 merged into `development`.
+- **P3-4 · HITL Token Hash Unique Index & Anti-Replay Guard (`feature/database-token-hash-index`)**: Completed ✅
+  - Synchronized canonical unique index name `idx_hitl_approvals_token_hash` across SQLAlchemy models ([src/database/models.py](file:///Users/lokeshrepaka/Desktop/FDE%20Project/src/database/models.py)), baseline migration ([src/database/migrations/versions/0001_initial_schema.py](file:///Users/lokeshrepaka/Desktop/FDE%20Project/src/database/migrations/versions/0001_initial_schema.py)), and PostgreSQL DDL (`schema.sql`).
+  - Implemented `TokenReplayError`, `is_token_used()`, and `create_approval()` in [src/database/repositories/hitl_approval_repository.py](file:///Users/lokeshrepaka/Desktop/FDE%20Project/src/database/repositories/hitl_approval_repository.py) to provide defense-in-depth anti-replay interception before and during database transaction commits.
+  - 6 new adversarial unit tests in `tests/unit/test_token_hash_index.py` verifying database-level `IntegrityError` enforcement, schema catalog index introspection, repository pre-validation, cross-alert token reuse denial, and DDL/migration index synchronization (96 total passing tests across suite, 88.15% statement coverage).
 
 ---
 
@@ -169,10 +174,11 @@
     - Database schema versions tracked via Alembic baseline with offline SQL compilation support (`alembic upgrade head --sql`), dual upgrade/downgrade logic, and database-level trigger immutability.
 15. **Repository-Level Append-Only Enforcement & Anti-Replay Lookups**:
     - Repository layer guarantees that audit logs can never be mutated or deleted via code, while cryptographic token lookups allow O(1) replay detection before human approvals are processed.
+16. **Cryptographic Anti-Replay Token Immutability & Indexing**:
+    - Physical database unique index `idx_hitl_approvals_token_hash` guarantees that any re-submitted KMS ECDSA signature token is unconditionally rejected by Aurora PostgreSQL, preventing fraudulent mitigation execution.
 
 ---
 
 ## 5. Next Planned Tasks
 - **Phase 3 — Persistence Layer (Aurora PostgreSQL)**:
-  - **P3-4**: `hitl_approvals.token_hash` unique index — prevents replay attacks at the database level (`feature/database-token-hash-index`).
-  - **P3-5**: OpenSearch client (`src/database/opensearch_client.py`).
+  - **P3-5**: OpenSearch client (`src/database/opensearch_client.py`) — k-NN vector index setup, upsert, and nearest-neighbour search.

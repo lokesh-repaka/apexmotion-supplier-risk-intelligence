@@ -7,6 +7,15 @@ Exports:
 - KafkaConsumerError: Base Kafka consumer exception.
 - KafkaDLQError: Dead-letter queue publishing exception.
 - KafkaMessageProcessingError: Handler processing failure exception.
+- EventProducer: High-reliability Kafka producer with at-least-once delivery.
+- PublishedRecord: Published message metadata record.
+- EventJSONEncoder: JSON encoder preserving Decimal precision and datetime formats.
+- serialize_payload: Safe payload serializer.
+- get_event_producer: Global EventProducer singleton accessor.
+- KafkaProducerError: Base Kafka producer exception.
+- KafkaPublishTimeoutError: Broker publish timeout exception (504).
+- KafkaSerializationError: Payload serialization exception (400).
+- KafkaBrokerUnavailableError: Broker unreachable exception (503).
 """
 
 from src.kafka.consumer import (
@@ -17,12 +26,32 @@ from src.kafka.consumer import (
     KafkaDLQError,
     KafkaMessageProcessingError,
 )
+from src.kafka.producer import (
+    EventJSONEncoder,
+    EventProducer,
+    KafkaBrokerUnavailableError,
+    KafkaProducerError,
+    KafkaPublishTimeoutError,
+    KafkaSerializationError,
+    PublishedRecord,
+    get_event_producer,
+    serialize_payload,
+)
 
 __all__ = [
     "ConsumedMessage",
     "DLQMessage",
     "EventConsumer",
+    "EventJSONEncoder",
+    "EventProducer",
+    "KafkaBrokerUnavailableError",
     "KafkaConsumerError",
     "KafkaDLQError",
     "KafkaMessageProcessingError",
+    "KafkaProducerError",
+    "KafkaPublishTimeoutError",
+    "KafkaSerializationError",
+    "PublishedRecord",
+    "get_event_producer",
+    "serialize_payload",
 ]

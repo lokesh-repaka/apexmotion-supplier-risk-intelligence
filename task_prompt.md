@@ -1,6 +1,6 @@
 You have access to the project's authoritative documentation: `TASKS.md`, `CLAUDE.md`, `GEMINI.md`, `.agents/rules/`, and architecture specifications in `docs/` (`HLD_*.md`, `LLD_*.md`, `PRD_*.md`, `BRD_*.md`, `FRD_*.md`).
 
-Go ahead and complete **P6-2 · Kafka producer (`src/kafka/producer.py`) — internal event publishing for `risk-alerts`, `hitl-required`, `audit-events`**, as defined in `TASKS.md`.
+Go ahead and complete **P6-3 · Event schemas (`src/kafka/schemas/`) — `SupplierEvent`, `RiskAlert`, `HITLRequest`, `AuditEvent` JSON schemas with Pydantic validation**, as defined in `TASKS.md`.
 
 ---
 

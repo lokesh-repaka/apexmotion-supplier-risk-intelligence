@@ -18,11 +18,11 @@
 |---|---|---|
 | **Phase 1 Progress** | 6 / 6 Tasks Completed | Completed ✅ |
 | **Phase 2 Progress** | 5 / 5 Tasks Completed | Completed ✅ |
-| **Phase 3 Progress** | 2 / 5 Tasks Completed | In Progress 🔄 |
-| **Total Test Suites** | 13 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`, `test_localstack_bootstrap.py`, `test_redpanda_topics.py`, `test_neptune_emulation.py`, `test_makefile.py`, `test_database_models.py`, `test_database_migrations.py`) | PASSED ✅ |
-| **Total Test Cases** | 83 unit/golden tests | 100% Passing (0 failures) |
-| **Code Coverage (`src/`)** | **85%** statement coverage | Exceeds 80% DoD gate |
-| **Active Branch** | `feature/database-schema-migrations` $\to$ `development` | Clean |
+| **Phase 3 Progress** | 3 / 5 Tasks Completed | In Progress 🔄 |
+| **Total Test Suites** | 14 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`, `test_localstack_bootstrap.py`, `test_redpanda_topics.py`, `test_neptune_emulation.py`, `test_makefile.py`, `test_database_models.py`, `test_database_migrations.py`, `test_database_repositories.py`) | PASSED ✅ |
+| **Total Test Cases** | 90 unit/golden tests | 100% Passing (0 failures) |
+| **Code Coverage (`src/`)** | **88%** statement coverage | Exceeds 80% DoD gate |
+| **Active Branch** | `feature/database-repository-layer` $\to$ `development` | Clean |
 
 ---
 
@@ -125,6 +125,16 @@
   - `src/database/migrations/script.py.mako`: Revision template.
   - `src/database/migrations/versions/0001_initial_schema.py`: Baseline initial migration declaring all 5 tables, indexes, constraints, foreign keys, and complete `upgrade()` and `downgrade()`.
   - 6 new unit tests in `tests/unit/test_database_migrations.py` validating DDL, alembic configuration, baseline revision, and offline SQL generation (`alembic upgrade head --sql`) (83 total passing tests across suite, 85% statement coverage).
+  - PR #12 merged into `development`.
+- **P3-3 · Repository Layer — Async CRUD for All Five Tables (`feature/database-repository-layer`)**: Completed ✅
+  - `src/database/session.py`: Implemented singleton async engine, sessionmaker, and `get_db_session()` FastAPI dependency / context manager with transaction rollback and JSON serialization fallbacks for complex types.
+  - `src/database/repositories/base.py`: Generic `BaseRepository[ModelType]` providing async CRUD (`create`, `get_by_id`, `list`, `count`, `update`, `delete`).
+  - `src/database/repositories/supplier_repository.py`: `SupplierRepository` with queries by Neptune node ID, exact name, tier, country, high-risk threshold, and score updates.
+  - `src/database/repositories/risk_alert_repository.py`: `RiskAlertRepository` with queries by supplier ID, SKU, status, active alerts (`OPEN` / `INVESTIGATING`), risk level, and status transitions.
+  - `src/database/repositories/hitl_approval_repository.py`: `HITLApprovalRepository` with anti-replay lookup by `token_hash`, pending queue query, spend tier filtering, multi-signature logging (`record_signature`), and rejection handling.
+  - `src/database/repositories/audit_log_repository.py`: `AuditLogRepository` strictly enforcing BR-RULE-007 immutability by overriding `update()` and `delete()` to raise `PermissionError`, plus entity, trace_id, and actor query methods.
+  - `src/database/repositories/agent_run_repository.py`: `AgentRunRepository` with alert runs, Langfuse trace lookup, graph name queries, status filters, and run completion tracking.
+  - 7 new unit tests in `tests/unit/test_database_repositories.py` (90 total passing tests across suite, 88.37% statement coverage).
 
 ---
 
@@ -157,11 +167,12 @@
     - Aurora PostgreSQL models strictly enforce `NUMERIC(14,2)` for financial calculations, unique constraints on cryptographic `token_hash`, and programmatic append-only enforcement on audit logs.
 14. **Versioned Schema Baseline & Offline Migration Safety**:
     - Database schema versions tracked via Alembic baseline with offline SQL compilation support (`alembic upgrade head --sql`), dual upgrade/downgrade logic, and database-level trigger immutability.
+15. **Repository-Level Append-Only Enforcement & Anti-Replay Lookups**:
+    - Repository layer guarantees that audit logs can never be mutated or deleted via code, while cryptographic token lookups allow O(1) replay detection before human approvals are processed.
 
 ---
 
 ## 5. Next Planned Tasks
 - **Phase 3 — Persistence Layer (Aurora PostgreSQL)**:
-  - **P3-3**: Repository layer — async CRUD for all five tables (`src/database/repositories/`).
-  - **P3-4**: Redis caching layer (`src/database/cache.py`).
-  - **P3-5**: Database seed script (`scripts/seed_db.py`).
+  - **P3-4**: `hitl_approvals.token_hash` unique index — prevents replay attacks at the database level (`feature/database-token-hash-index`).
+  - **P3-5**: OpenSearch client (`src/database/opensearch_client.py`).

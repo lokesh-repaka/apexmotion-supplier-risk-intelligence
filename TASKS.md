@@ -52,7 +52,7 @@ Sub-tasks in the same phase that do not share files can be open at the same time
 | P3-2 · Database schema DDL (`schema.sql`) and Alembic migration baseline | `feature/database-schema-migrations` | Completed ✅ |
 | P3-3 · Repository layer — async CRUD for all five tables (`src/database/repositories/`) | `feature/database-repository-layer` | Completed ✅ |
 | P3-4 · `hitl_approvals.token_hash` unique index — prevents replay attacks at the database level | `feature/database-token-hash-index` | Completed ✅ |
-| P3-5 · OpenSearch client (`src/database/opensearch_client.py`) — k-NN vector index setup, upsert, and nearest-neighbour search | `feature/database-opensearch-client` | Pending ❌ |
+| P3-5 · OpenSearch client (`src/database/opensearch_client.py`) — k-NN vector index setup, upsert, and nearest-neighbour search | `feature/database-opensearch-client` | Completed ✅ |
 
 ---
 

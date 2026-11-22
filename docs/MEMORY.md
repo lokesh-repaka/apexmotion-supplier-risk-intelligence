@@ -18,11 +18,11 @@
 |---|---|---|
 | **Phase 1 Progress** | 6 / 6 Tasks Completed | Completed ✅ |
 | **Phase 2 Progress** | 5 / 5 Tasks Completed | Completed ✅ |
-| **Phase 3 Progress** | 4 / 5 Tasks Completed | In Progress 🔄 |
-| **Total Test Suites** | 15 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`, `test_localstack_bootstrap.py`, `test_redpanda_topics.py`, `test_neptune_emulation.py`, `test_makefile.py`, `test_database_models.py`, `test_database_migrations.py`, `test_database_repositories.py`, `test_token_hash_index.py`) | PASSED ✅ |
-| **Total Test Cases** | 96 unit/golden tests | 100% Passing (0 failures) |
+| **Phase 3 Progress** | 5 / 5 Tasks Completed | Completed ✅ |
+| **Total Test Suites** | 16 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`, `test_localstack_bootstrap.py`, `test_redpanda_topics.py`, `test_neptune_emulation.py`, `test_makefile.py`, `test_database_models.py`, `test_database_migrations.py`, `test_database_repositories.py`, `test_token_hash_index.py`, `test_opensearch_client.py`) | PASSED ✅ |
+| **Total Test Cases** | 105 unit/golden tests | 100% Passing (0 failures) |
 | **Code Coverage (`src/`)** | **88%** statement coverage | Exceeds 80% DoD gate |
-| **Active Branch** | `feature/database-token-hash-index` $\to$ `development` | Clean |
+| **Active Branch** | `feature/database-opensearch-client` $\to$ `development` | Clean |
 
 ---
 
@@ -140,6 +140,14 @@
   - Synchronized canonical unique index name `idx_hitl_approvals_token_hash` across SQLAlchemy models ([src/database/models.py](file:///Users/lokeshrepaka/Desktop/FDE%20Project/src/database/models.py)), baseline migration ([src/database/migrations/versions/0001_initial_schema.py](file:///Users/lokeshrepaka/Desktop/FDE%20Project/src/database/migrations/versions/0001_initial_schema.py)), and PostgreSQL DDL (`schema.sql`).
   - Implemented `TokenReplayError`, `is_token_used()`, and `create_approval()` in [src/database/repositories/hitl_approval_repository.py](file:///Users/lokeshrepaka/Desktop/FDE%20Project/src/database/repositories/hitl_approval_repository.py) to provide defense-in-depth anti-replay interception before and during database transaction commits.
   - 6 new adversarial unit tests in `tests/unit/test_token_hash_index.py` verifying database-level `IntegrityError` enforcement, schema catalog index introspection, repository pre-validation, cross-alert token reuse denial, and DDL/migration index synchronization (96 total passing tests across suite, 88.15% statement coverage).
+  - PR #14 merged into `development`.
+- **P3-5 · Amazon OpenSearch Vector Search Client (`feature/database-opensearch-client`)**: Completed ✅
+  - `src/database/opensearch_client.py`: Implemented asynchronous OpenSearch client supporting k-NN vector operations matching LLD Section 3.2:
+    - HNSW cosine similarity index provisioning (`create_knn_index`) with 1536-dimensional vectors, `ef_construction=256`, and `m=16`.
+    - Single and bulk document upserts (`upsert_document`, `bulk_upsert`) with automatic embedding vector binding.
+    - Semantic k-nearest-neighbour vector search (`search_knn`) with optional boolean metadata filtering (`filter_criteria`) and minimum score thresholds.
+    - Document retrieval and deletion (`get_document`, `delete_document`) with resilient 404 handling.
+  - 9 new unit tests in `tests/unit/test_opensearch_client.py` covering index provisioning, upsert, bulk indexing, filtered k-NN vector queries, error resilience, and client connection cleanup (105 total passing tests across suite, 88.49% statement coverage).
 
 ---
 
@@ -176,9 +184,12 @@
     - Repository layer guarantees that audit logs can never be mutated or deleted via code, while cryptographic token lookups allow O(1) replay detection before human approvals are processed.
 16. **Cryptographic Anti-Replay Token Immutability & Indexing**:
     - Physical database unique index `idx_hitl_approvals_token_hash` guarantees that any re-submitted KMS ECDSA signature token is unconditionally rejected by Aurora PostgreSQL, preventing fraudulent mitigation execution.
+17. **Canonical k-NN Vector Indexing & Hybrid Query Isolation**:
+    - OpenSearch document embeddings are strictly mapped to HNSW cosine similarity indices with 1536-dimensional dense vectors, combining vector distance search with boolean metadata filters without leaking raw un-sanitized supplier text.
 
 ---
 
 ## 5. Next Planned Tasks
-- **Phase 3 — Persistence Layer (Aurora PostgreSQL)**:
-  - **P3-5**: OpenSearch client (`src/database/opensearch_client.py`) — k-NN vector index setup, upsert, and nearest-neighbour search.
+- **Phase 4 — Identity, Security & HITL Token Service**:
+  - **P4-1**: Okta JWT validation and `require_role()` guard (`src/core/security.py`) — SAML 2.0 / OIDC (`feature/security-okta-jwt-rbac`).
+  - **P4-2**: AWS KMS ECDSA P-256 HITL token service (`src/core/hitl_tokens.py`).

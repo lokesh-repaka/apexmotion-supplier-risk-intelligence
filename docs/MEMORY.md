@@ -20,11 +20,11 @@
 | **Phase 2 Progress** | 5 / 5 Tasks Completed | Completed ✅ |
 | **Phase 3 Progress** | 5 / 5 Tasks Completed | Completed ✅ |
 | **Phase 4 Progress** | 5 / 5 Tasks Completed | Completed ✅ |
-| **Phase 5 Progress** | 1 / 5 Tasks Completed | In Progress 🔄 |
-| **Total Test Suites** | 19 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`, `test_localstack_bootstrap.py`, `test_redpanda_topics.py`, `test_neptune_emulation.py`, `test_makefile.py`, `test_database_models.py`, `test_database_migrations.py`, `test_database_repositories.py`, `test_token_hash_index.py`, `test_opensearch_client.py`, `test_security_rbac.py`, `test_hitl_tokens.py`, `test_neptune_client.py`) | PASSED ✅ |
-| **Total Test Cases** | 177 unit tests | 100% Passing (0 failures) |
-| **Code Coverage (`src/`)** | **93.49%** statement coverage (`src/graph/neptune_client.py` at 99%) | Exceeds 80% DoD gate |
-| **Active Branch** | `feature/graph-neptune-client` $\to$ `development` | Clean |
+| **Phase 5 Progress** | 2 / 5 Tasks Completed | In Progress 🔄 |
+| **Total Test Suites** | 20 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`, `test_localstack_bootstrap.py`, `test_redpanda_topics.py`, `test_neptune_emulation.py`, `test_makefile.py`, `test_database_models.py`, `test_database_migrations.py`, `test_database_repositories.py`, `test_token_hash_index.py`, `test_opensearch_client.py`, `test_security_rbac.py`, `test_hitl_tokens.py`, `test_neptune_client.py`, `test_graph_seed.py`) | PASSED ✅ |
+| **Total Test Cases** | 189 unit tests | 100% Passing (0 failures) |
+| **Code Coverage (`src/`)** | **93.80%** statement coverage (`src/graph/seed.py` at 97%) | Exceeds 80% DoD gate |
+| **Active Branch** | `feature/graph-schema-seed` $\to$ `development` | Clean |
 
 ---
 
@@ -213,6 +213,17 @@
     - Injectable HTTP transport for 100% offline unit testing with zero external network or AWS dependencies.
   - Exported client and structured exception hierarchy in `src/graph/__init__.py`.
   - 14 comprehensive unit tests in `tests/unit/test_neptune_client.py` achieving **99% statement coverage** on `src/graph/neptune_client.py` (177 total passing tests across suite, 93.49% total coverage).
+- **P5-2 · Graph Schema Seed (`feature/graph-schema-seed`)**: Completed ✅
+  - `src/graph/seed.py`: Implemented idempotent OpenCypher Knowledge Graph schema seeder service:
+    - Declared canonical models for core automotive entities (`Supplier`, `Component`, `Plant`, `Contract`, `NewsEvent`, `GeopoliticalRisk`, `Assembly`, `Program`).
+    - Enforced supply chain relationships (`SUPPLIES`, `SUPPLIES_PART`, `USED_BY`, `TIER_1_OF`, `PART_OF_BOM`, `ASSEMBLED_AT`, `ALLOCATED_TO`, `BOUND_BY`, `AFFECTS`, `THREATENS`).
+    - Fully represented the canonical NanoCore golden scenario: NanoCore (`SUP-NC-882`, Tier-2) supplying MCU-X91 (`CMP-MCU-X91`) to Munich Assembly Hub (`PLT-MUC-01`) via BetaElectro (`SUP-BE-101`, Tier-1) with Cleanroom fire event (`EVT-NEWS-2026-081`) and Taiwan export risk (`RISK-GEO-TW-01`).
+    - `get_seed_cypher_statements`: Generates idempotent `MERGE` statements preventing entity duplication (SEC-025).
+    - `seed_graph`: Asynchronously executes statements against `NeptuneClient` with optional graph purge (`clear_existing=True`), returning `SeedResult` metrics.
+    - `verify_seed_integrity`: Automated audit report verifying all node labels, relationship counts, and presence of golden entities.
+  - `scripts/seed_neptune.py`: CLI seeding tool supporting `--dry-run`, `--clear`, `--verify`, and host/port overrides.
+  - Synchronized `scripts/neptune_seed.cypher` with matching idempotent `MERGE` statements.
+  - 12 comprehensive unit tests in `tests/unit/test_graph_seed.py` achieving **97% statement coverage** on `src/graph/seed.py` (189 total passing tests across suite, 93.80% total coverage).
 
 ---
 
@@ -268,12 +279,15 @@
 23. **Neptune OpenCypher Resilience, Connection Pooling & Injection Defense (SEC-024)**:
     - Amazon Neptune OpenCypher queries are executed asynchronously via `httpx.AsyncClient` with bounded connection pooling (max 100 connections, 20 keepalive). All parameters are bound natively in JSON request bodies to prevent Cypher query injection. Transient network and cluster failures (429, 500, 502, 503, 504) are subject to exponential backoff retries (3 retries: 0.5s, 1.0s, 2.0s) with strict 5.0s query timeout (`GRAPH_504_TIMEOUT`). Circuit breaker pattern trips after 5 consecutive failures, fail-fasting to cached graph topology and preventing cascading dependency collapse.
 
+24. **Idempotent Graph Schema Seeding & Structural Integrity (SEC-025)**:
+    - All Amazon Neptune Knowledge Graph seeding operations are executed via deterministic OpenCypher `MERGE` clauses with parameter bindings, preventing node duplication and edge proliferation across repeated runs. The seeder service (`src/graph/seed.py`) enforces strict schema topologies across all mandatory automotive entities (`Supplier`, `Component`, `Plant`, `Contract`, `NewsEvent`, `GeopoliticalRisk`, `Assembly`, `Program`) and multi-tier relationship types (`SUPPLIES`, `SUPPLIES_PART`, `USED_BY`, `TIER_1_OF`, `PART_OF_BOM`, `ASSEMBLED_AT`, `ALLOCATED_TO`, `BOUND_BY`, `AFFECTS`, `THREATENS`), verified by programmatic integrity auditing.
+
 ---
 
 ## 5. Next Planned Tasks
 - **Phase 5 — Knowledge Graph (Amazon Neptune)**:
   - **P5-1**: Neptune OpenCypher client (`src/graph/neptune_client.py`) — connection pool, query executor, retry logic (`feature/graph-neptune-client`) [Completed ✅].
-  - **P5-2**: Graph schema seed — `Supplier`, `Component`, `Plant`, `Contract`, `NewsEvent`, `GeopoliticalRisk` nodes + all relationships (`feature/graph-schema-seed`).
+  - **P5-2**: Graph schema seed — `Supplier`, `Component`, `Plant`, `Contract`, `NewsEvent`, `GeopoliticalRisk` nodes + all relationships (`feature/graph-schema-seed`) [Completed ✅].
   - **P5-3**: Named Cypher query library (`src/graph/queries/`) — supplier-to-component, component-to-plant, tier-chain traversal (`feature/graph-cypher-queries`).
   - **P5-4**: Supplier traversal service (`src/graph/traversal.py`) — shortest-path disruption -> affected SKUs -> affected plants (`feature/graph-traversal-service`).
   - **P5-5**: Graph traversal unit tests — mock Neptune responses, assert 5-hop path and single-source dependency detection (`feature/graph-traversal-tests`).

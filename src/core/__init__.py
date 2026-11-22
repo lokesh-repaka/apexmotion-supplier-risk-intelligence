@@ -34,6 +34,16 @@ from src.core.security import (
     require_role,
     validate_jwt_token,
 )
+from src.core.spend_tier_router import (
+    SpendTierRoute,
+    can_user_approve_spend,
+    evaluate_spend_authorization,
+    get_required_roles,
+    get_required_signatures_count,
+    is_eligible_signer,
+    route_spend,
+    validate_approval_signers,
+)
 
 __all__ = [
     "Settings",
@@ -68,4 +78,12 @@ __all__ = [
     "get_spend_tier",
     "get_token_ttl",
     "compute_token_hash",
+    "SpendTierRoute",
+    "route_spend",
+    "get_required_roles",
+    "get_required_signatures_count",
+    "can_user_approve_spend",
+    "is_eligible_signer",
+    "validate_approval_signers",
+    "evaluate_spend_authorization",
 ]

@@ -66,7 +66,7 @@ Sub-tasks in the same phase that do not share files can be open at the same time
 | P4-1 · Okta JWT validation and `require_role()` guard (`src/core/security.py`) — SAML 2.0 / OIDC | `feature/security-okta-jwt-rbac` | Completed ✅ |
 | P4-2 · AWS KMS ECDSA P-256 HITL token service (`src/core/hitl_tokens.py`) — issue, sign, verify, replay detection | `feature/security-hitl-token-service` | Completed ✅ |
 | P4-3 · Demo Okta tokens for `analyst`, `category_manager`, `procurement_director`, `vp_supply_chain`, `system_admin` personas | `feature/security-demo-auth-tokens` | Completed ✅ |
-| P4-4 · Spend-tier router — maps action amount to HITL tier (`CATEGORY_MGR` ≤$25k / `PROC_DIRECTOR` ≤$100k / `DUAL_VP` >$100k) | `feature/security-spend-tier-router` | Pending ❌ |
+| P4-4 · Spend-tier router — maps action amount to HITL tier (`CATEGORY_MGR` ≤$25k / `PROC_DIRECTOR` ≤$100k / `DUAL_VP` >$100k) | `feature/security-spend-tier-router` | Completed ✅ |
 | P4-5 · Append-only audit writer (`src/core/audit.py`) — immutable `audit_logs` rows, never called inside a rollback-able transaction | `feature/security-audit-writer` | Pending ❌ |
 
 ---

@@ -110,7 +110,7 @@ Sub-tasks in the same phase that do not share files can be open at the same time
 | P7-1 · Risk calculator (`src/services/risk/calculator.py`) — Days of Cover, gap days, shortage volume, financial exposure — **all `Decimal`, zero float** | `feature/risk-calculator-core` | Completed ✅ |
 | P7-2 · Risk scorer (`src/services/risk/scorer.py`) — `CRITICAL` / `HIGH` / `MEDIUM` / `LOW` assignment from gap + exposure thresholds | `feature/risk-scorer` | Completed ✅ |
 | P7-3 · Inventory aggregation service (`src/services/risk/inventory_service.py`) — real-time stock pull from Aurora + Redis cache | `feature/risk-inventory-service` | Completed ✅ |
-| P7-4 · Alert deduplication (`src/services/alert_service.py`) — same supplier + component within 1-hour window collapses to one alert | `feature/risk-alert-deduplication` | Pending ❌ |
+| P7-4 · Alert deduplication (`src/services/alert_service.py`) — same supplier + component within 1-hour window collapses to one alert | `feature/risk-alert-deduplication` | Completed ✅ |
 | P7-5 · NanoCore golden tests — `tests/golden/nanocore_scenario.json` asserts `days_of_cover=7.68`, `shortage_volume=24420`, `financial_exposure=2448105.00` exactly | `feature/risk-nanocore-golden-tests` | Pending ❌ |
 
 ---

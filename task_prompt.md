@@ -1,6 +1,6 @@
 You have access to the project's authoritative documentation: `TASKS.md`, `CLAUDE.md`, `GEMINI.md`, `.agents/rules/`, and architecture specifications in `docs/` (`HLD_*.md`, `LLD_*.md`, `PRD_*.md`, `BRD_*.md`, `FRD_*.md`).
 
-Go ahead and complete **P7-4 · Alert deduplication (`src/services/alert_service.py`) — same supplier + component within 1-hour window collapses to one alert**, as defined in `TASKS.md`.
+Go ahead and complete **P7-5 · NanoCore golden tests — `tests/golden/nanocore_scenario.json` asserts `days_of_cover=7.68`, `shortage_volume=24420`, `financial_exposure=2448105.00` exactly**, as defined in `TASKS.md`.
 
 ---
 

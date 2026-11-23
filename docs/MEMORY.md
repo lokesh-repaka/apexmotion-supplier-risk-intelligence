@@ -22,11 +22,11 @@
 | **Phase 4 Progress** | 5 / 5 Tasks Completed | Completed ✅ |
 | **Phase 5 Progress** | 5 / 5 Tasks Completed | Completed ✅ |
 | **Phase 6 Progress** | 4 / 4 Tasks Completed | Completed ✅ |
-| **Phase 7 Progress** | 3 / 5 Tasks Completed | In Progress 🔄 |
-| **Total Test Suites** | 33 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`, `test_localstack_bootstrap.py`, `test_redpanda_topics.py`, `test_neptune_emulation.py`, `test_makefile.py`, `test_database_models.py`, `test_database_migrations.py`, `test_database_repositories.py`, `test_token_hash_index.py`, `test_opensearch_client.py`, `test_security_rbac.py`, `test_hitl_tokens.py`, `test_demo_tokens.py`, `test_spend_tier_router.py`, `test_audit_writer.py`, `test_neptune_client.py`, `test_graph_seed.py`, `test_cypher_queries.py`, `test_supplier_traversal.py`, `test_graph_traversal_paths.py`, `test_kafka_consumer.py`, `test_kafka_producer.py`, `test_kafka_schemas.py`, `test_kafka_consumer_integration.py`, `test_risk_calculator.py`, `test_risk_scorer.py`, `test_inventory_service.py`) | PASSED ✅ |
-| **Total Test Cases** | 376 tests (365 unit + 11 integration) | 100% Passing (0 failures) |
-| **Code Coverage (`src/`)** | **96.09%** statement coverage (`src/services/risk/calculator.py`, `src/services/risk/scorer.py`, `src/database/repositories/inventory_repository.py`, `src/kafka/handlers.py`, and `src/kafka/schemas/` at 100%; `src/services/risk/inventory_service.py` at 92%) | Exceeds 80% DoD gate |
-| **Active Branch** | `feature/risk-inventory-service` $\to$ `development` | Clean |
+| **Phase 7 Progress** | 4 / 5 Tasks Completed | In Progress 🔄 |
+| **Total Test Suites** | 34 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`, `test_localstack_bootstrap.py`, `test_redpanda_topics.py`, `test_neptune_emulation.py`, `test_makefile.py`, `test_database_models.py`, `test_database_migrations.py`, `test_database_repositories.py`, `test_token_hash_index.py`, `test_opensearch_client.py`, `test_security_rbac.py`, `test_hitl_tokens.py`, `test_demo_tokens.py`, `test_spend_tier_router.py`, `test_audit_writer.py`, `test_neptune_client.py`, `test_graph_seed.py`, `test_cypher_queries.py`, `test_supplier_traversal.py`, `test_graph_traversal_paths.py`, `test_kafka_consumer.py`, `test_kafka_producer.py`, `test_kafka_schemas.py`, `test_kafka_consumer_integration.py`, `test_risk_calculator.py`, `test_risk_scorer.py`, `test_inventory_service.py`, `test_alert_service.py`) | PASSED ✅ |
+| **Total Test Cases** | 397 tests (386 unit + 11 integration) | 100% Passing (0 failures) |
+| **Code Coverage (`src/`)** | **96.31%** statement coverage (`src/services/alert_service.py`, `src/services/risk/calculator.py`, `src/services/risk/scorer.py`, `src/database/repositories/inventory_repository.py`, `src/kafka/handlers.py`, and `src/kafka/schemas/` at 100%; `src/database/repositories/risk_alert_repository.py` at 96%; `src/services/risk/inventory_service.py` at 92%) | Exceeds 80% DoD gate |
+| **Active Branch** | `feature/risk-alert-deduplication` $\to$ `development` | Clean |
 
 ---
 
@@ -371,6 +371,17 @@
   - `src/database/repositories/inventory_repository.py`: Implemented async `InventoryRepository` providing CRUD, plant queries, and stock mutation operations with 100% statement coverage.
   - Exported classes and exceptions in `src/database/__init__.py`, `src/services/risk/__init__.py`, and `src/services/__init__.py`.
   - 25 comprehensive unit tests in `tests/unit/test_inventory_service.py` achieving **100% coverage** on `src/database/repositories/inventory_repository.py` and **92% coverage** on `src/services/risk/inventory_service.py`, bringing total passing test suite to 376 tests.
+- **P7-4 · Alert Deduplication (`feature/risk-alert-deduplication`)**: Completed ✅
+  - `src/services/alert_service.py`: Implemented deterministic alert deduplication service collapsing identical supplier and component disruption events within a rolling 1-hour window (`DEFAULT_DEDUPLICATION_WINDOW_SECONDS = 3600`):
+    * **The Triad of Responsibility (BR-RULE-001)**: 100% pure deterministic Python logic for window evaluation, metric comparisons, and deduplication actions. Zero LLMs.
+    * **Rolling Deduplication Window**: Identical signals for `(supplier_id, component_sku)` arriving within 1 hour collapse into a single master alert record (`AlertAction.COLLAPSED`), preventing alert storming and redundant database entries (`SEC-036`).
+    * **Severity Escalation & Metric Preservation**: If a duplicate signal arrives with worse metrics (higher severity level `CRITICAL > HIGH > MEDIUM > LOW`, higher financial exposure, lower days of cover, or larger shortage volume), the master alert escalates (`AlertAction.ESCALATED`). Milder incoming signals retain existing worst-case metrics.
+    * **Layered Redis Deduplication**: Employs fast-path key lookup (`alert:dedup:<supplier_id>:<component_sku>`) with 1-hour TTL. Catches Redis exceptions gracefully and falls back to Aurora repository query scan (`find_recent_active_alert`), guaranteeing continuous operation during cache outages.
+    * **Terminal Status Cache Eviction**: Moving alerts to terminal states (`CLOSED`, `RESOLVED`, `DISMISSED`) immediately evicts the Redis deduplication key, allowing fresh subsequent disruption signals to create new active alerts.
+    * **NanoCore Canonical Golden Verification**: 3 successive disruption signals (News cleanroom fire at T=0m, Plant MES buffer warning at T=15m, Logistics shipment delay at T=40m) collapse to exactly 1 master alert in Aurora with `$2,448,105.00` financial exposure, `7.68` days cover, and `24,420` units shortage.
+  - `src/database/repositories/risk_alert_repository.py`: Added `find_recent_active_alert(component_sku, supplier_id, window_seconds, reference_time)` with 96% coverage.
+  - Exported `AlertService`, `AlertCreateInput`, `AlertAction`, `AlertDeduplicationResult`, `AlertServiceError`, `InvalidAlertOperationError` in `src/services/__init__.py`.
+  - 21 comprehensive unit tests in `tests/unit/test_alert_service.py` achieving **100% statement and branch coverage** on `src/services/alert_service.py` (201 statements), bringing total passing test suite to 397 tests (96.31% project-wide coverage).
 
 ---
 

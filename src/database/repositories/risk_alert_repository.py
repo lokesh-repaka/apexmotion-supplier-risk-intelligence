@@ -1,6 +1,7 @@
 """Asynchronous repository for RiskAlert domain entities."""
 
 from collections.abc import Sequence
+from datetime import UTC, datetime
 from uuid import UUID
 
 from sqlalchemy import select
@@ -80,3 +81,39 @@ class RiskAlertRepository(BaseRepository[RiskAlert]):
             return None
         alert.status = new_status.upper()
         return await self.update(alert)
+
+    async def find_recent_active_alert(
+        self,
+        component_sku: str,
+        supplier_id: UUID | None,
+        window_seconds: int = 3600,
+        reference_time: datetime | None = None,
+    ) -> RiskAlert | None:
+        """Fetch the most recent active alert for (component_sku, supplier_id) within rolling window."""
+        ref = reference_time or datetime.now(UTC)
+        stmt = (
+            select(RiskAlert)
+            .where(
+                RiskAlert.component_sku == component_sku,
+                RiskAlert.status.in_(["OPEN", "INVESTIGATING"]),
+            )
+            .order_by(RiskAlert.created_at.desc())
+        )
+        if supplier_id is not None:
+            stmt = stmt.where(RiskAlert.supplier_id == supplier_id)
+        else:
+            stmt = stmt.where(RiskAlert.supplier_id.is_(None))
+
+        result = await self.session.execute(stmt)
+        candidates = result.scalars().all()
+        for candidate in candidates:
+            cand_created = candidate.created_at
+            if cand_created is None:
+                continue
+            if cand_created.tzinfo is None:
+                cand_created = cand_created.replace(tzinfo=UTC)
+            ref_tz = ref if ref.tzinfo is not None else ref.replace(tzinfo=UTC)
+            diff_seconds = (ref_tz - cand_created).total_seconds()
+            if -60.0 <= diff_seconds <= window_seconds:
+                return candidate
+        return None

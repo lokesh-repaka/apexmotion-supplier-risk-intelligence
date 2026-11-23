@@ -8,6 +8,7 @@ from src.database.models import (
     AuditLog,
     Base,
     HITLApproval,
+    InventorySnapshot,
     RiskAlert,
     Supplier,
 )
@@ -17,6 +18,7 @@ from src.database.repositories import (
     AuditLogRepository,
     BaseRepository,
     HITLApprovalRepository,
+    InventoryRepository,
     RiskAlertRepository,
     SupplierRepository,
     TokenReplayError,
@@ -34,6 +36,7 @@ __all__ = [
     "HITLApproval",
     "AuditLog",
     "AgentRun",
+    "InventorySnapshot",
     "get_async_engine",
     "get_async_session_factory",
     "get_db_session",
@@ -45,4 +48,5 @@ __all__ = [
     "TokenReplayError",
     "AuditLogRepository",
     "AgentRunRepository",
+    "InventoryRepository",
 ]

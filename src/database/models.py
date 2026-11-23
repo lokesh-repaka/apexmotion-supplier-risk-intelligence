@@ -434,3 +434,109 @@ class AgentRun(Base):
         "RiskAlert",
         back_populates="agent_runs",
     )
+
+
+class InventorySnapshot(Base):
+    """Operational inventory snapshot for component SKUs across manufacturing plants.
+
+    Maps to `inventory_snapshots` table in Aurora PostgreSQL. Provides real-time stock
+    levels, daily consumption burn rates, and inbound replenishment metrics for deterministic
+    risk calculations (BR-RULE-001).
+    """
+
+    __tablename__ = "inventory_snapshots"
+    __table_args__ = (
+        CheckConstraint("current_stock >= 0", name="check_inventory_stock_non_negative"),
+        CheckConstraint(
+            "daily_consumption_rate >= 0",
+            name="check_inventory_consumption_non_negative",
+        ),
+        CheckConstraint("unit_cost_usd >= 0", name="check_inventory_unit_cost_non_negative"),
+        Index("idx_inventory_sku_plant", "component_sku", "plant_id"),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+        doc="Primary key UUID",
+    )
+    component_sku: Mapped[str] = mapped_column(
+        String(100),
+        nullable=False,
+        index=True,
+        doc="Component stock keeping unit identifier (e.g. SKU-MCU-4402)",
+    )
+    supplier_id: Mapped[uuid.UUID | None] = mapped_column(
+        Uuid(as_uuid=True),
+        ForeignKey("suppliers.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+        doc="Associated Tier-1/Tier-2 supplier UUID",
+    )
+    plant_id: Mapped[str | None] = mapped_column(
+        String(50),
+        nullable=True,
+        default="PLT-MUC-01",
+        doc="Manufacturing plant or warehouse code (e.g. PLT-MUC-01, PLT-BLR-01)",
+    )
+    current_stock: Mapped[Decimal] = mapped_column(
+        Numeric(14, 2),
+        nullable=False,
+        default=Decimal("0.00"),
+        doc="Usable physical inventory units on-hand",
+    )
+    daily_consumption_rate: Mapped[Decimal] = mapped_column(
+        Numeric(14, 2),
+        nullable=False,
+        default=Decimal("0.00"),
+        doc="Factory daily consumption burn rate in units per day",
+    )
+    safety_stock_units: Mapped[Decimal] = mapped_column(
+        Numeric(14, 2),
+        nullable=False,
+        default=Decimal("0.00"),
+        doc="Mandatory buffer stock below which alert is triggered",
+    )
+    unit_cost_usd: Mapped[Decimal] = mapped_column(
+        Numeric(14, 2),
+        nullable=False,
+        default=Decimal("0.00"),
+        doc="Component unit procurement cost in USD",
+    )
+    inbound_eta_days: Mapped[Decimal] = mapped_column(
+        Numeric(8, 2),
+        nullable=False,
+        default=Decimal("0.00"),
+        doc="Expected days until scheduled replenishment delivery arrives",
+    )
+    inbound_shipment_units: Mapped[Decimal] = mapped_column(
+        Numeric(14, 2),
+        nullable=False,
+        default=Decimal("0.00"),
+        doc="Number of units currently in transit on open PO",
+    )
+    inbound_shipment_po: Mapped[str | None] = mapped_column(
+        String(100),
+        nullable=True,
+        doc="Inbound purchase order reference identifier (e.g. PO-88921)",
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(UTC),
+        nullable=False,
+        doc="Timestamp of inventory record initialization",
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(UTC),
+        onupdate=lambda: datetime.now(UTC),
+        nullable=False,
+        doc="Timestamp of most recent inventory balance update",
+    )
+
+    # Relationships
+    supplier: Mapped[Supplier | None] = relationship(
+        "Supplier",
+        lazy="joined",
+    )

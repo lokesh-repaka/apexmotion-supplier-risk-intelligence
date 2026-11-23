@@ -7,8 +7,10 @@ Contains:
 - Pydantic Output Schemas: Strongly-typed response models for every LLM call (P8-3).
 - VLLMClient & ConfidentialContractRouter: vLLM confidential contract client ensuring
   EU-regulated contracts route strictly to self-hosted vLLM endpoint, never to Bedrock (P8-4).
+- MockLLMClient & Fixtures: Deterministic mock LLM client returning schema fixtures for offline tests (P8-5).
 """
 
+from src.llm.fixtures import FIXTURES_DIR
 from src.llm.gateway import (
     CostReport,
     LiteLLMGateway,
@@ -21,6 +23,13 @@ from src.llm.gateway import (
     TaskType,
     calculate_token_cost,
     get_litellm_gateway,
+)
+from src.llm.mock_client import (
+    FIXTURE_SCHEMAS,
+    MockLLMClient,
+    get_fixture_model,
+    get_mock_llm_client,
+    load_fixture_json,
 )
 from src.llm.models import (
     Citation,
@@ -70,6 +79,8 @@ __all__ = [
     "ContractMetadata",
     "CostReport",
     "EU_EEA_JURISDICTIONS",
+    "FIXTURES_DIR",
+    "FIXTURE_SCHEMAS",
     "IncidentCaseDossier",
     "IncidentCategory",
     "LLMContextWindowExceededError",
@@ -81,6 +92,7 @@ __all__ = [
     "LiteLLMGateway",
     "MitigationScenario",
     "MitigationStrategyType",
+    "MockLLMClient",
     "PromptInjectionDetectedError",
     "QuarantinedReader",
     "RecommendationReport",
@@ -97,9 +109,12 @@ __all__ = [
     "VLLMTimeoutError",
     "calculate_token_cost",
     "get_contract_router",
+    "get_fixture_model",
     "get_litellm_gateway",
+    "get_mock_llm_client",
     "get_quarantined_reader",
     "get_vllm_client",
+    "load_fixture_json",
     "parse_structured_llm_response",
     "quarantined_reader",
     "sanitize",

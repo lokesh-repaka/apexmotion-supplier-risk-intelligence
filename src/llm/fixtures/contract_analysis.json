@@ -1,0 +1,42 @@
+{
+  "supplier_id": "SUP-NC-001",
+  "contract_id": "CNT-EU-2024-NC01",
+  "payment_terms": "Net 30",
+  "notice_period_days": 14,
+  "delay_penalty_percentage_per_day": "0.02",
+  "air_freight_surcharge_liability": "SUPPLIER",
+  "has_force_majeure": true,
+  "force_majeure_clause": "Section 15.2: Unforeseen facility fires and natural disasters relieve supplier of delivery obligations if notice is served within 48 hours.",
+  "alternate_suppliers_authorized": [
+    "TSMC",
+    "GlobalFoundries",
+    "Samsung Foundry"
+  ],
+  "liability_cap_usd": "5000000.00",
+  "citations": [
+    {
+      "source_id": "CNT-EU-2024-NC01",
+      "source_type": "CONTRACT",
+      "document_name": "Master Supply Agreement - NanoCore Semiconductor",
+      "page_or_section": "Section 4.1 Payment Terms",
+      "verbatim_quote": "Buyer shall remit payment within Net 30 days of electronic invoice receipt.",
+      "url_or_reference": "doc://contracts/CNT-EU-2024-NC01.pdf#page=4"
+    },
+    {
+      "source_id": "CNT-EU-2024-NC01",
+      "source_type": "CONTRACT",
+      "document_name": "Master Supply Agreement - NanoCore Semiconductor",
+      "page_or_section": "Section 7.3 Delivery Delay Notice",
+      "verbatim_quote": "Supplier shall provide at least 14 days advance written notice of anticipated delivery schedule deviations.",
+      "url_or_reference": "doc://contracts/CNT-EU-2024-NC01.pdf#page=9"
+    },
+    {
+      "source_id": "CNT-EU-2024-NC01",
+      "source_type": "CONTRACT",
+      "document_name": "Master Supply Agreement - NanoCore Semiconductor",
+      "page_or_section": "Section 8.2 Delay Penalties",
+      "verbatim_quote": "Supplier shall incur a daily delay penalty equal to 0.02% of delayed shipment value for each business day beyond agreed delivery window.",
+      "url_or_reference": "doc://contracts/CNT-EU-2024-NC01.pdf#page=11"
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "summary": "Cleanroom electrical fire at NanoCore Semiconductor Hsinchu Fab 2 halted photolithography lines with an estimated 9.0 business days recovery timeframe.",
+  "incident_category": "FACILITY_FIRE",
+  "event_date": "2026-03-01",
+  "affected_locations": [
+    "Fab 2 Cleanroom - Hsinchu Science Park, Taiwan"
+  ],
+  "confidence_score": 0.95,
+  "key_findings": [
+    "Cleanroom electrical fire triggered automated chemical suppression system",
+    "Photolithography steppers contaminated; 28nm MCU-X91 wafer production completely halted",
+    "Estimated cleanroom decontamination and recertification lead time is 9.0 business days",
+    "Tier-1 delivery ETA to European automotive manufacturing hubs delayed by at least 9 days"
+  ],
+  "citations": [
+    {
+      "source_id": "EVT-NEWS-2026-081",
+      "source_type": "NEWS",
+      "document_name": "Reuters Global Technology Digest",
+      "page_or_section": "Paragraph 1-3",
+      "verbatim_quote": "Cleanroom fire at NanoCore facility halted production of 28nm automotive grade microcontrollers with estimated 9-day recovery timeline.",
+      "url_or_reference": "https://reuters.com/tech/nanocore-fire-2026"
+    },
+    {
+      "source_id": "SEC-NC-2026-8K",
+      "source_type": "SEC_FILING",
+      "document_name": "NanoCore Form 8-K Material Event Disclosure",
+      "page_or_section": "Item 2.01",
+      "verbatim_quote": "Production at Fab 2 suspended following electrical fire in photolithography bay; active force majeure declared on automotive supply agreements.",
+      "url_or_reference": "https://sec.gov/Archives/edgar/data/nanocore-8k"
+    }
+  ],
+  "has_disruption_signal": true
+}

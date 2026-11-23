@@ -23,11 +23,11 @@
 | **Phase 5 Progress** | 5 / 5 Tasks Completed | Completed ✅ |
 | **Phase 6 Progress** | 4 / 4 Tasks Completed | Completed ✅ |
 | **Phase 7 Progress** | 5 / 5 Tasks Completed | Completed ✅ |
-| **Phase 8 Progress** | 4 / 5 Tasks Completed (80%) | In Progress 🔄 |
-| **Total Test Suites** | 39 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`, `test_localstack_bootstrap.py`, `test_redpanda_topics.py`, `test_neptune_emulation.py`, `test_makefile.py`, `test_database_models.py`, `test_database_migrations.py`, `test_database_repositories.py`, `test_token_hash_index.py`, `test_opensearch_client.py`, `test_security_rbac.py`, `test_hitl_tokens.py`, `test_demo_tokens.py`, `test_spend_tier_router.py`, `test_audit_writer.py`, `test_neptune_client.py`, `test_graph_seed.py`, `test_cypher_queries.py`, `test_supplier_traversal.py`, `test_graph_traversal_paths.py`, `test_kafka_consumer.py`, `test_kafka_producer.py`, `test_kafka_schemas.py`, `test_kafka_consumer_integration.py`, `test_risk_calculator.py`, `test_risk_scorer.py`, `test_inventory_service.py`, `test_alert_service.py`, `test_nanocore_golden.py`, `test_litellm_gateway.py`, `test_quarantined_reader.py`, `test_llm_models.py`, `test_vllm_client.py`) | PASSED ✅ |
-| **Total Test Cases** | 511 tests (492 unit + 11 integration + 8 golden) | 100% Passing (0 failures) |
-| **Code Coverage (`src/`)** | **96.98%** statement coverage (`src/llm/vllm_client.py`, `src/llm/models.py`, `src/llm/quarantined_reader.py`, `src/llm/gateway.py`, `src/services/alert_service.py`, `src/services/risk/calculator.py`, `src/services/risk/scorer.py`, `src/database/repositories/inventory_repository.py`, `src/kafka/handlers.py`, and `src/kafka/schemas/` at 100%; `src/database/repositories/risk_alert_repository.py` at 96%; `src/services/risk/inventory_service.py` at 92%) | Exceeds 80% DoD gate |
-| **Active Branch** | `feature/llm-vllm-contract-client` $\to$ `development` | Clean |
+| **Phase 8 Progress** | 5 / 5 Tasks Completed (100%) | Completed ✅ |
+| **Total Test Suites** | 40 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`, `test_localstack_bootstrap.py`, `test_redpanda_topics.py`, `test_neptune_emulation.py`, `test_makefile.py`, `test_database_models.py`, `test_database_migrations.py`, `test_database_repositories.py`, `test_token_hash_index.py`, `test_opensearch_client.py`, `test_security_rbac.py`, `test_hitl_tokens.py`, `test_demo_tokens.py`, `test_spend_tier_router.py`, `test_audit_writer.py`, `test_neptune_client.py`, `test_graph_seed.py`, `test_cypher_queries.py`, `test_supplier_traversal.py`, `test_graph_traversal_paths.py`, `test_kafka_consumer.py`, `test_kafka_producer.py`, `test_kafka_schemas.py`, `test_kafka_consumer_integration.py`, `test_risk_calculator.py`, `test_risk_scorer.py`, `test_inventory_service.py`, `test_alert_service.py`, `test_nanocore_golden.py`, `test_litellm_gateway.py`, `test_quarantined_reader.py`, `test_llm_models.py`, `test_vllm_client.py`, `test_mock_llm_client.py`) | PASSED ✅ |
+| **Total Test Cases** | 533 tests (514 unit + 11 integration + 8 golden) | 100% Passing (0 failures) |
+| **Code Coverage (`src/`)** | **97.09%** statement coverage (`src/llm/mock_client.py`, `src/llm/vllm_client.py`, `src/llm/models.py`, `src/llm/quarantined_reader.py`, `src/llm/gateway.py`, `src/services/alert_service.py`, `src/services/risk/calculator.py`, `src/services/risk/scorer.py`, `src/database/repositories/inventory_repository.py`, `src/kafka/handlers.py`, and `src/kafka/schemas/` at 100%; `src/database/repositories/risk_alert_repository.py` at 96%; `src/services/risk/inventory_service.py` at 92%) | Exceeds 80% DoD gate |
+| **Active Branch** | `feature/llm-mock-client-fixtures` $\to$ `development` | Clean |
 
 ---
 
@@ -448,6 +448,24 @@
   - `src/core/config.py`: Added `VLLM_MODEL` and `VLLM_API_KEY` configuration settings.
   - `src/llm/__init__.py`: Package exports for `VLLMClient`, `ConfidentialContractRouter`, `ContractMetadata`, `ContractClassification`, `EU_EEA_JURISDICTIONS`, exception classes, and dependency-injection singletons.
   - 36 comprehensive unit tests in `tests/unit/test_vllm_client.py` achieving **100% statement and branch coverage** on `src/llm/vllm_client.py` (223 statements), bringing total test suite to 511 tests (96.98% project-wide coverage).
+  - PR #38 merged into `development`.
+- **P8-5 · Mock LLM Client & Schema Fixture Engine (`feature/llm-mock-client-fixtures`)**: Completed ✅
+  - `src/llm/fixtures/`: Created canonical JSON fixtures strictly validating against P8-3 Pydantic schemas:
+    * `research_analysis.json`: NanoCore semiconductor cleanroom fire, 9-day disruption, 94% confidence.
+    * `contract_analysis.json`: Master supply agreement, Net 30, 14 days notice, 0.02% delay penalty, $5M liability cap.
+    * `risk_narrative.json`: Executive commentary, runway analysis, 7.68 days cover, 1.32 days shortage gap, $2,448,105 financial exposure.
+    * `recommendation_report.json`: Multi-scenario mitigation (spot buy + air freight vs. line re-allocation), dual VP sign-off gate ($285k commit).
+    * `incident_case_dossier.json`: Comprehensive forensic dossier consolidating research, contract, narrative, metrics, and recommendations.
+    * `src/llm/fixtures/__init__.py`: Fixtures directory path resolver (`FIXTURES_DIR`).
+  - `src/llm/mock_client.py`: Implemented `MockLLMClient` and fixture loading engine:
+    * **Deterministic Fixture Loader**: `load_fixture_json()` and `get_fixture_model()` parsing canonical JSON fixtures into validated Pydantic models.
+    * **Intelligent Schema Inference**: Contextually infers target schema (`ResearchAnalysis`, `ContractAnalysis`, `RiskNarrative`, `RecommendationReport`, `IncidentCaseDossier`) from domain keywords in prompt text when not explicitly provided.
+    * **FIFO Response Queue & Dynamic Overrides**: Thread-safe FIFO response queue (`enqueue_response`, `enqueue_responses`, `clear_queue`) and per-schema fixture overrides (`set_fixture`, `reset_fixtures`) for customized agent tests.
+    * **LiteLLMGateway Integration**: Integrated with `LiteLLMGateway.acomplete(response_model=...)`, delegating structured mock completions to `MockLLMClient` when `USE_MOCK_LLM=true` or `use_mock=True`.
+    * **Simulated Metrics & Telemetry**: Emits zero-cost `Decimal("0.000000")`, simulated token counts, simulated latency, active `trace_id`, and rich metadata.
+    * **Thread-Safe Dependency Injection**: Singleton accessor `get_mock_llm_client()`.
+  - `src/llm/__init__.py`: Exported all mock client, schema mapping, and fixture loader symbols.
+  - 22 comprehensive unit tests in `tests/unit/test_mock_llm_client.py` achieving **100% statement and branch coverage** on `src/llm/mock_client.py` (137 statements), bringing total test suite to 533 tests (97.09% project-wide coverage).
 
 ---
 
@@ -542,14 +560,22 @@
     - Attempting to route sovereign contracts to external providers triggers `VLLMDataSovereigntyViolationError` (HTTP 403 `DATA_SOVEREIGNTY_VIOLATION`).
     - All contract texts are hashed via SHA-256 for audit logging (BR-RULE-007), and raw text is strictly shielded from unencrypted stdout or application logs.
 
+40. **Deterministic Offline LLM Isolation & Schema-Compliant Fixtures (SEC-042, CLAUDE.md Sec 14)**:
+    - In accordance with offline-first testing mandates (CLAUDE.md Sec 14, GEMINI.md, Rule 8), automated tests must execute without external network socket I/O to Amazon Bedrock, vLLM, or external LLM endpoints.
+    - Setting `USE_MOCK_LLM=true` (or `use_mock=True`) routes all LLM gateway and agent completion requests to `MockLLMClient`, returning deterministic schema-valid JSON fixtures matching P8-3 Pydantic models (`ResearchAnalysis`, `ContractAnalysis`, `RiskNarrative`, `RecommendationReport`, `IncidentCaseDossier`).
+    - The mock client provides thread-safe FIFO response queuing, dynamic per-schema overrides, and context-aware schema inference from prompt keywords, strictly preserving `Decimal` monetary precision (BR-RULE-001) with zero cost drift.
+
 ---
 
 ## 5. Next Planned Tasks
-- **Phase 8 — LLM Foundation (LiteLLM Gateway & Guardrails)**:
-  - **P8-1**: LiteLLM gateway client (`src/llm/gateway.py`) — routes to Bedrock Claude 3.5 Sonnet/Haiku, fallback, rate limit, cost tracking (`feature/llm-litellm-gateway`). Completed ✅
-  - **P8-2**: Quarantined Reader (`src/llm/quarantined_reader.py`) — strips tags, wraps in `<untrusted_supplier_data>`, enforces max token budget, hashes to audit log (`feature/llm-quarantined-reader`). Completed ✅
-  - **P8-3**: Pydantic output schemas (`src/llm/models.py`) — typed response models for every LLM call; rejects free-text responses (`feature/llm-pydantic-output-schemas`). Completed ✅
-  - **P8-4**: vLLM confidential contract client — routes EU-regulated contracts to self-hosted vLLM endpoint, never to Bedrock (`feature/llm-vllm-contract-client`). Completed ✅
-  - **P8-5**: Mock LLM client for offline tests — returns fixture JSON matching Pydantic schemas; activated by `USE_MOCK_LLM=true` (`feature/llm-mock-client-fixtures`). Pending ❌
+- **Phase 8 — LLM Foundation (LiteLLM Gateway & Guardrails)**: Completed ✅ (5/5 tasks done)
+- **Phase 9 — Multi-Agent System (LangGraph Orchestration)**:
+  - **P9-1**: LangGraph `AgentState` and `StateGraph` skeleton (`src/agents/state.py`, `src/agents/graph.py`) (`feature/agent-langgraph-skeleton`). Pending ❌
+  - **P9-2**: Web Research Agent node (`src/agents/researcher.py`) (`feature/agent-researcher-node`). Pending ❌
+  - **P9-3**: Contract Auditor Agent node (`src/agents/contract_auditor.py`) (`feature/agent-contract-auditor`). Pending ❌
+  - **P9-4**: Risk Assessment Agent node (`src/agents/risk_analyst.py`) (`feature/agent-risk-analyst`). Pending ❌
+  - **P9-5**: Mitigation Planner Agent node (`src/agents/mitigation_planner.py`) (`feature/agent-mitigation-planner`). Pending ❌
+  - **P9-6**: Multi-agent integration test (`tests/integration/test_langgraph_pipeline.py`) (`feature/agent-pipeline-integration`). Pending ❌
+
 
 

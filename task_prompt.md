@@ -1,6 +1,6 @@
 You have access to the project's authoritative documentation: `TASKS.md`, `CLAUDE.md`, `GEMINI.md`, `.agents/rules/`, and architecture specifications in `docs/` (`HLD_*.md`, `LLD_*.md`, `PRD_*.md`, `BRD_*.md`, `FRD_*.md`).
 
-Go ahead and complete **P8-3 · Pydantic output schemas (`src/llm/models.py`) — typed response models for every LLM call; rejects free-text responses**, as defined in `TASKS.md`.
+Go ahead and complete **P8-4 · vLLM confidential contract client — routes EU-regulated contracts to self-hosted vLLM endpoint, never to Bedrock**, as defined in `TASKS.md`.
 
 ---
 

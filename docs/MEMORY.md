@@ -24,10 +24,11 @@
 | **Phase 6 Progress** | 4 / 4 Tasks Completed | Completed ✅ |
 | **Phase 7 Progress** | 5 / 5 Tasks Completed | Completed ✅ |
 | **Phase 8 Progress** | 5 / 5 Tasks Completed (100%) | Completed ✅ |
-| **Total Test Suites** | 40 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`, `test_localstack_bootstrap.py`, `test_redpanda_topics.py`, `test_neptune_emulation.py`, `test_makefile.py`, `test_database_models.py`, `test_database_migrations.py`, `test_database_repositories.py`, `test_token_hash_index.py`, `test_opensearch_client.py`, `test_security_rbac.py`, `test_hitl_tokens.py`, `test_demo_tokens.py`, `test_spend_tier_router.py`, `test_audit_writer.py`, `test_neptune_client.py`, `test_graph_seed.py`, `test_cypher_queries.py`, `test_supplier_traversal.py`, `test_graph_traversal_paths.py`, `test_kafka_consumer.py`, `test_kafka_producer.py`, `test_kafka_schemas.py`, `test_kafka_consumer_integration.py`, `test_risk_calculator.py`, `test_risk_scorer.py`, `test_inventory_service.py`, `test_alert_service.py`, `test_nanocore_golden.py`, `test_litellm_gateway.py`, `test_quarantined_reader.py`, `test_llm_models.py`, `test_vllm_client.py`, `test_mock_llm_client.py`) | PASSED ✅ |
-| **Total Test Cases** | 533 tests (514 unit + 11 integration + 8 golden) | 100% Passing (0 failures) |
-| **Code Coverage (`src/`)** | **97.09%** statement coverage (`src/llm/mock_client.py`, `src/llm/vllm_client.py`, `src/llm/models.py`, `src/llm/quarantined_reader.py`, `src/llm/gateway.py`, `src/services/alert_service.py`, `src/services/risk/calculator.py`, `src/services/risk/scorer.py`, `src/database/repositories/inventory_repository.py`, `src/kafka/handlers.py`, and `src/kafka/schemas/` at 100%; `src/database/repositories/risk_alert_repository.py` at 96%; `src/services/risk/inventory_service.py` at 92%) | Exceeds 80% DoD gate |
-| **Active Branch** | `feature/llm-mock-client-fixtures` $\to$ `development` | Clean |
+| **Phase 9 Progress** | 1 / 6 Tasks Completed (17%) | In Progress 🔄 |
+| **Total Test Suites** | 41 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`, `test_localstack_bootstrap.py`, `test_redpanda_topics.py`, `test_neptune_emulation.py`, `test_makefile.py`, `test_database_models.py`, `test_database_migrations.py`, `test_database_repositories.py`, `test_token_hash_index.py`, `test_opensearch_client.py`, `test_security_rbac.py`, `test_hitl_tokens.py`, `test_demo_tokens.py`, `test_spend_tier_router.py`, `test_audit_writer.py`, `test_neptune_client.py`, `test_graph_seed.py`, `test_cypher_queries.py`, `test_supplier_traversal.py`, `test_graph_traversal_paths.py`, `test_kafka_consumer.py`, `test_kafka_producer.py`, `test_kafka_schemas.py`, `test_kafka_consumer_integration.py`, `test_risk_calculator.py`, `test_risk_scorer.py`, `test_inventory_service.py`, `test_alert_service.py`, `test_nanocore_golden.py`, `test_litellm_gateway.py`, `test_quarantined_reader.py`, `test_llm_models.py`, `test_vllm_client.py`, `test_mock_llm_client.py`, `test_agent_graph_skeleton.py`) | PASSED ✅ |
+| **Total Test Cases** | 550 tests (531 unit + 11 integration + 8 golden) | 100% Passing (0 failures) |
+| **Code Coverage (`src/`)** | **97.24%** statement coverage (`src/agents/`, `src/llm/`, `src/services/alert_service.py`, `src/services/risk/calculator.py`, `src/services/risk/scorer.py`, `src/kafka/handlers.py`, and `src/kafka/schemas/` at 100%; `src/database/repositories/risk_alert_repository.py` at 96%; `src/services/risk/inventory_service.py` at 92%) | Exceeds 80% DoD gate |
+| **Active Branch** | `feature/agents-langgraph-skeleton` $\to$ `development` | Clean |
 
 ---
 
@@ -466,6 +467,17 @@
     * **Thread-Safe Dependency Injection**: Singleton accessor `get_mock_llm_client()`.
   - `src/llm/__init__.py`: Exported all mock client, schema mapping, and fixture loader symbols.
   - 22 comprehensive unit tests in `tests/unit/test_mock_llm_client.py` achieving **100% statement and branch coverage** on `src/llm/mock_client.py` (137 statements), bringing total test suite to 533 tests (97.09% project-wide coverage).
+  - PR #39 merged into `development`.
+
+### Phase 9: Multi-Agent System (LangGraph Orchestration)
+- **P9-1 · LangGraph AgentState and StateGraph Skeleton (`feature/agents-langgraph-skeleton`)**: Completed ✅
+  - `src/agents/state.py`: Formulated `SupplierRiskState` and `AgentState` schema using `TypedDict` with `operator.add` reducers on additive channels (`execution_path`, `errors`, `audit_events`, `evidence`). Explicitly decoupled quantitative metrics (`risk_metrics`) from qualitative narrative (`narrative`).
+  - `src/agents/graph.py`: Implemented deterministic directed acyclic graph (DAG) in LangGraph with node stubs (`triage`, `research`, `contract`, `risk`, `recommendation`, `hitl_gate`, `action`, `dismiss`) and conditional routing functions (`route_after_triage`, `route_after_risk`, `route_after_hitl_gate`).
+    * **The Triad of Responsibility (BR-RULE-001)**: Mathematical computations strictly invoke deterministic Python microservices (`RiskCalculator().calculate()`). LLMs never perform math.
+    * **HITL Spend Gate**: Consequential spend actions are conditionally halted at `hitl_gate`, transitioning to `AWAITING_APPROVAL` unless verified cryptographic tokens are present.
+  - `src/agents/orchestrator.py`: Implemented `InvestigationOrchestrator` lifecycle runner supporting stateful checkpointing via `MemorySaver` / `AsyncPostgresSaver`, suspension at HITL gates, and clean resumption upon human sign-off.
+  - `src/agents/__init__.py`: Package exports for state models, node constants, routing functions, and orchestrator.
+  - 17 unit tests in `tests/unit/test_agent_graph_skeleton.py` achieving **100% statement and branch coverage** on `src/agents/` (247 statements), bringing total test suite to 550 tests (97.24% project-wide coverage).
 
 ---
 
@@ -565,17 +577,24 @@
     - Setting `USE_MOCK_LLM=true` (or `use_mock=True`) routes all LLM gateway and agent completion requests to `MockLLMClient`, returning deterministic schema-valid JSON fixtures matching P8-3 Pydantic models (`ResearchAnalysis`, `ContractAnalysis`, `RiskNarrative`, `RecommendationReport`, `IncidentCaseDossier`).
     - The mock client provides thread-safe FIFO response queuing, dynamic per-schema overrides, and context-aware schema inference from prompt keywords, strictly preserving `Decimal` monetary precision (BR-RULE-001) with zero cost drift.
 
+41. **Deterministic Multi-Agent StateGraph DAG & Reducer Isolation (SEC-043, LLD Sec 4.2)**:
+    - Multi-agent investigation workflows are strictly orchestrated as bounded directed acyclic graphs in LangGraph (`src/agents/graph.py`).
+    - Node transitions are deterministically evaluated through pure Python conditional routing functions (`route_after_triage`, `route_after_risk`, `route_after_hitl_gate`), eliminating recursion loops and guaranteeing the 90-second investigation SLO (NFR-PERF-01).
+    - State modification is governed by strongly-typed `SupplierRiskState` channels with additive reducers (`operator.add`) for audit trails and errors.
+    - Quantitative risk calculations remain completely isolated from probabilistic agent reasoning (BR-RULE-001), and spend commitments > $0 unconditionally halt at `hitl_gate` until cryptographically verified approval tokens are submitted.
+
 ---
 
 ## 5. Next Planned Tasks
 - **Phase 8 — LLM Foundation (LiteLLM Gateway & Guardrails)**: Completed ✅ (5/5 tasks done)
 - **Phase 9 — Multi-Agent System (LangGraph Orchestration)**:
-  - **P9-1**: LangGraph `AgentState` and `StateGraph` skeleton (`src/agents/state.py`, `src/agents/graph.py`) (`feature/agent-langgraph-skeleton`). Pending ❌
-  - **P9-2**: Web Research Agent node (`src/agents/researcher.py`) (`feature/agent-researcher-node`). Pending ❌
-  - **P9-3**: Contract Auditor Agent node (`src/agents/contract_auditor.py`) (`feature/agent-contract-auditor`). Pending ❌
-  - **P9-4**: Risk Assessment Agent node (`src/agents/risk_analyst.py`) (`feature/agent-risk-analyst`). Pending ❌
-  - **P9-5**: Mitigation Planner Agent node (`src/agents/mitigation_planner.py`) (`feature/agent-mitigation-planner`). Pending ❌
-  - **P9-6**: Multi-agent integration test (`tests/integration/test_langgraph_pipeline.py`) (`feature/agent-pipeline-integration`). Pending ❌
+  - **P9-1**: LangGraph `AgentState` and `StateGraph` skeleton (`src/agents/state.py`, `src/agents/graph.py`) (`feature/agent-langgraph-skeleton`). Completed ✅
+  - **P9-2**: Triage agent node (`src/agents/nodes/triage_agent.py`) (`feature/agents-triage-node`). Pending ❌
+  - **P9-3**: Research agent node (`src/agents/nodes/research_agent.py`) (`feature/agents-research-node`). Pending ❌
+  - **P9-4**: Contract agent node (`src/agents/nodes/contract_agent.py`) (`feature/agents-contract-node`). Pending ❌
+  - **P9-5**: Risk agent node (`src/agents/nodes/risk_agent.py`) (`feature/agents-risk-node`). Pending ❌
+  - **P9-6**: Recommendation agent node (`src/agents/nodes/recommendation_agent.py`) (`feature/agents-recommendation-node`). Pending ❌
+
 
 
 

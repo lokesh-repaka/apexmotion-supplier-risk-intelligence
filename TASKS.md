@@ -137,7 +137,7 @@ Sub-tasks in the same phase that do not share files can be open at the same time
 
 | Task | Branch | Status |
 |------|--------|--------|
-| P9-1 · LangGraph `AgentState` and `StateGraph` skeleton (`src/agents/orchestrator.py`) — defines all nodes and routing edges | `feature/agents-langgraph-skeleton` | Pending ❌ |
+| P9-1 · LangGraph `AgentState` and `StateGraph` skeleton (`src/agents/orchestrator.py`) — defines all nodes and routing edges | `feature/agents-langgraph-skeleton` | Completed ✅ |
 | P9-2 · Triage agent node (`src/agents/nodes/triage_agent.py`) — classifies signal type (financial/logistics/geopolitical/news), deterministic routing, no LLM | `feature/agents-triage-node` | Pending ❌ |
 | P9-3 · Research agent node (`src/agents/nodes/research_agent.py`) — news scraper tool, SEC EDGAR tool, geopolitical API tool; all text via Quarantined Reader | `feature/agents-research-node` | Pending ❌ |
 | P9-4 · Contract agent node (`src/agents/nodes/contract_agent.py`) — extracts payment terms, force majeure clauses via vLLM; confidential docs never leave VPC | `feature/agents-contract-node` | Pending ❌ |
@@ -308,7 +308,7 @@ Phases 4, 5, 6, 7, and 8 all depend on Phase 3 and can be developed in parallel.
 | 6 | Kafka Event Ingestion | 4 | 4 (100%) ✅ |
 | 7 | Deterministic Risk Engine | 5 | 5 (100%) ✅ |
 | 8 | LLM Foundation | 5 | 5 (100%) ✅ |
-| 9 | LangGraph Agent Workflow | 6 | 0 (0%) ❌ |
+| 9 | LangGraph Agent Workflow | 6 | 1 (16.7%) 🔄 |
 | 10 | HITL Approval System | 4 | 0 (0%) ❌ |
 | 11 | FastAPI API Routes | 6 | 0 (0%) ❌ |
 | 12 | React Frontend | 6 | 0 (0%) ❌ |
@@ -316,4 +316,4 @@ Phases 4, 5, 6, 7, and 8 all depend on Phase 3 and can be developed in parallel.
 | 14 | Unit & Integration Tests | 6 | 0 (0%) ❌ |
 | 15 | Observability | 5 | 0 (0%) ❌ |
 | 16 | Infrastructure & Delivery | 6 | 0 (0%) ❌ |
-| **Total** | | **83** | **40 (48.2%)** |
+| **Total** | | **83** | **41 (49.4%)** |

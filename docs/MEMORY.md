@@ -22,11 +22,11 @@
 | **Phase 4 Progress** | 5 / 5 Tasks Completed | Completed ✅ |
 | **Phase 5 Progress** | 5 / 5 Tasks Completed | Completed ✅ |
 | **Phase 6 Progress** | 4 / 4 Tasks Completed | Completed ✅ |
-| **Phase 7 Progress** | 1 / 5 Tasks Completed | In Progress 🔄 |
-| **Total Test Suites** | 31 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`, `test_localstack_bootstrap.py`, `test_redpanda_topics.py`, `test_neptune_emulation.py`, `test_makefile.py`, `test_database_models.py`, `test_database_migrations.py`, `test_database_repositories.py`, `test_token_hash_index.py`, `test_opensearch_client.py`, `test_security_rbac.py`, `test_hitl_tokens.py`, `test_demo_tokens.py`, `test_spend_tier_router.py`, `test_audit_writer.py`, `test_neptune_client.py`, `test_graph_seed.py`, `test_cypher_queries.py`, `test_supplier_traversal.py`, `test_graph_traversal_paths.py`, `test_kafka_consumer.py`, `test_kafka_producer.py`, `test_kafka_schemas.py`, `test_kafka_consumer_integration.py`, `test_risk_calculator.py`) | PASSED ✅ |
-| **Total Test Cases** | 337 tests (326 unit + 11 integration) | 100% Passing (0 failures) |
-| **Code Coverage (`src/`)** | **96.28%** statement coverage (`src/services/risk/calculator.py`, `src/kafka/handlers.py`, and `src/kafka/schemas/` at 100%) | Exceeds 80% DoD gate |
-| **Active Branch** | `feature/risk-calculator-core` $\to$ `development` | Clean |
+| **Phase 7 Progress** | 2 / 5 Tasks Completed | In Progress 🔄 |
+| **Total Test Suites** | 32 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`, `test_localstack_bootstrap.py`, `test_redpanda_topics.py`, `test_neptune_emulation.py`, `test_makefile.py`, `test_database_models.py`, `test_database_migrations.py`, `test_database_repositories.py`, `test_token_hash_index.py`, `test_opensearch_client.py`, `test_security_rbac.py`, `test_hitl_tokens.py`, `test_demo_tokens.py`, `test_spend_tier_router.py`, `test_audit_writer.py`, `test_neptune_client.py`, `test_graph_seed.py`, `test_cypher_queries.py`, `test_supplier_traversal.py`, `test_graph_traversal_paths.py`, `test_kafka_consumer.py`, `test_kafka_producer.py`, `test_kafka_schemas.py`, `test_kafka_consumer_integration.py`, `test_risk_calculator.py`, `test_risk_scorer.py`) | PASSED ✅ |
+| **Total Test Cases** | 351 tests (340 unit + 11 integration) | 100% Passing (0 failures) |
+| **Code Coverage (`src/`)** | **96.42%** statement coverage (`src/services/risk/calculator.py`, `src/services/risk/scorer.py`, `src/kafka/handlers.py`, and `src/kafka/schemas/` at 100%) | Exceeds 80% DoD gate |
+| **Active Branch** | `feature/risk-scorer` $\to$ `development` | Clean |
 
 ---
 
@@ -336,6 +336,26 @@
     * **Cryptographic Verification**: Computes deterministic SHA-256 verification hash across all input and output parameters.
   - Exported classes and exceptions in `src/services/risk/__init__.py` and `src/services/__init__.py`.
   - 19 comprehensive unit tests in `tests/unit/test_risk_calculator.py` achieving **100% statement and branch coverage** on `src/services/risk/calculator.py` (139 statements) and **96.28%** total project coverage across 337 passing tests.
+- **P7-2 · Risk Scorer (`feature/risk-scorer`)**: Completed ✅
+  - `src/services/risk/scorer.py`: Implemented 100% deterministic supply chain risk classification engine adhering strictly to The Triad of Responsibility (BR-RULE-001) and `CLAUDE.md:428-439`:
+    * **Zero LLM Thresholds**: Severity classification operates exclusively via pure Python arithmetic without probabilistic drift or LLM hallucination.
+    * **Strict Decimal Comparisons**: Evaluates coverage gap and financial exposure against exact `Decimal` threshold boundaries:
+      - `CRITICAL`: `gap > 0` AND `financial_exposure > $1,000,000.00`
+      - `HIGH`: `gap > 0` AND `financial_exposure > $250,000.00` (up to `$1,000,000.00`)
+      - `MEDIUM`: `gap > 0` (exposure <= `$250,000.00`) OR `supplier_risk_score > 0.70`
+      - `LOW`: `gap <= 0` AND `supplier_risk_score <= 0.70`
+    * **Canonical NanoCore Reference Scenario**:
+      - Inputs: `days_of_cover = 7.68`, `eta_days = 9.00` (`gap = 1.32`), `financial_exposure = $2,448,105.00`, `supplier_risk_score = 0.885`.
+      - Output: Assigns `RiskLevel.CRITICAL`, `is_single_source = True`, requires HITL with `SpendTier.DUAL_VP`.
+    * **HITL Spend Governance Routing**: Integrates with `SpendTier` / `SpendTierRouter`:
+      - Spend <= $25,000: Category Manager approval (1-hr TTL, `SpendTier.CATEGORY_MGR`).
+      - Spend $25,001 - $100,000: Procurement Director approval (1-hr TTL, `SpendTier.PROC_DIRECTOR`).
+      - Spend > $100,000: Dual sign-off (30-min TTL, `SpendTier.DUAL_VP`).
+      - Non-zero exposure and CRITICAL/HIGH alerts unconditionally mandate human authorization.
+    * **Frozen Data Model & JSON Serialization**: `RiskScoreResult` preserves numeric precision with string `Decimal` serialization in `to_dict()`.
+    * **Strict Input Validation**: Rejects negative inventory metrics, negative exposure, and out-of-range supplier risk scores (`[0.0, 1.0]`) via `InvalidRiskScoringInputError` (HTTP 400).
+  - Exported classes, functions, and threshold constants in `src/services/risk/__init__.py` and `src/services/__init__.py`.
+  - 14 comprehensive unit tests in `tests/unit/test_risk_scorer.py` achieving **100% statement and branch coverage** on `src/services/risk/scorer.py` (110 statements) and **96.42%** total project coverage across 351 passing tests.
 
 ---
 
@@ -412,13 +432,16 @@
     - Kafka event consumers persisting data to Aurora PostgreSQL (`src/kafka/handlers.py`) guarantee strict idempotency by inspecting existing records prior to insertion and performing atomic in-place updates. Transaction boundaries strictly commit before Kafka manual offset commits, and transaction rollbacks trigger exception bubbling to consumer retries. Poisonous or corrupt messages fail gracefully into dead-letter queues (`<topic>.dlq`) without committing unhandled offsets, guaranteeing at-least-once delivery with zero duplicate database corruption.
 32. **The Triad of Responsibility & Strict Decimal Precision Invariant (SEC-033)**:
     - 100% of supply chain risk calculations (`src/services/risk/calculator.py`) run in pure deterministic Python. AI agents and LLMs are strictly forbidden from performing inventory or financial arithmetic (BR-RULE-001). All fractional, currency, and inventory numbers are represented as `Decimal` with `ROUND_HALF_UP` rounding, eliminating floating-point drift and IEEE 754 precision loss. Physical inventory constraints strictly reject negative inputs (`stock < 0`, `rate < 0`, `ETA < 0`, `cost < 0`), zero consumption is capped at 999.00 days, and every calculation emits a reproducible SHA-256 verification token.
+33. **Deterministic Risk Severity Assignment & Spend Gate Governance (SEC-034)**:
+    - Pure deterministic Python risk classification (`src/services/risk/scorer.py`) strictly assigns severity levels (`CRITICAL`, `HIGH`, `MEDIUM`, `LOW`) from exact Decimal gap and exposure thresholds (`CRITICAL`: gap > 0 and exposure > $1M; `HIGH`: gap > 0 and exposure > $250k; `MEDIUM`: gap > 0 or supplier risk score > 0.70; `LOW`: gap <= 0 and score <= 0.70). All monetary exposures are mapped deterministically to cryptographic AWS KMS HITL spend tiers (Category Manager <= $25k, Procurement Director <= $100k, Dual VP > $100k), enforcing BR-RULE-001 by completely isolating risk categorization from probabilistic AI hallucination.
 
 ---
 
 ## 5. Next Planned Tasks
 - **Phase 7 — Deterministic Risk Engine**:
   - **P7-1**: Risk calculator (`src/services/risk/calculator.py`) — Completed ✅ (`feature/risk-calculator-core`).
-  - **P7-2**: Risk scorer (`src/services/risk/scorer.py`) — `CRITICAL` / `HIGH` / `MEDIUM` / `LOW` assignment from gap + exposure thresholds (`feature/risk-scorer`).
+  - **P7-2**: Risk scorer (`src/services/risk/scorer.py`) — Completed ✅ (`feature/risk-scorer`).
   - **P7-3**: Inventory aggregation service (`src/services/risk/inventory_service.py`) — real-time stock pull from Aurora + Redis cache (`feature/risk-inventory-service`).
   - **P7-4**: Alert deduplication (`src/services/alert_service.py`) — same supplier + component within 1-hour window collapses to one alert (`feature/risk-alert-deduplication`).
   - **P7-5**: NanoCore golden tests — `tests/golden/nanocore_scenario.json` asserts `days_of_cover=7.68`, `shortage_volume=24420`, `financial_exposure=2448105.00` exactly (`feature/risk-nanocore-golden-tests`).
+

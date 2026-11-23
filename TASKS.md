@@ -126,7 +126,7 @@ Sub-tasks in the same phase that do not share files can be open at the same time
 | P8-2 · Quarantined Reader (`src/llm/quarantined_reader.py`) — strips tags, wraps in `<untrusted_supplier_data>`, enforces max token budget, hashes to audit log | `feature/llm-quarantined-reader` | Completed ✅ |
 | P8-3 · Pydantic output schemas (`src/llm/models.py`) — typed response models for every LLM call; rejects free-text responses | `feature/llm-pydantic-output-schemas` | Completed ✅ |
 | P8-4 · vLLM confidential contract client — routes EU-regulated contracts to self-hosted vLLM endpoint, never to Bedrock | `feature/llm-vllm-contract-client` | Completed ✅ |
-| P8-5 · Mock LLM client for offline tests — returns fixture JSON matching Pydantic schemas; activated by `USE_MOCK_LLM=true` | `feature/llm-mock-client-fixtures` | Pending ❌ |
+| P8-5 · Mock LLM client for offline tests — returns fixture JSON matching Pydantic schemas; activated by `USE_MOCK_LLM=true` | `feature/llm-mock-client-fixtures` | Completed ✅ |
 
 ---
 

@@ -1,0 +1,52 @@
+{
+  "alert_id": "ALT-2026-NC-001",
+  "component_sku": "SKU-MCU-4402",
+  "supplier_id": "SUP-NC-001",
+  "scenarios": [
+    {
+      "scenario_id": "SCEN-SPOT-001",
+      "title": "Spot-buy 25,000 units from GlobalFoundries broker pool",
+      "strategy_type": "SPOT_PURCHASE",
+      "description": "Execute emergency open-market spot procurement of 25,000 tested MCU-X91 microcontrollers from authorized European distribution brokers.",
+      "estimated_cost_usd": "180000.00",
+      "avoided_loss_usd": "2448105.00",
+      "net_financial_benefit_usd": "2268105.00",
+      "implementation_lead_time_days": "2.0",
+      "lead_time_reduction_days": "2.0",
+      "feasibility_score": 0.88,
+      "required_spend_tier": "DUAL_VP",
+      "target_supplier_id": "SUP-GF-002",
+      "target_sku": "SKU-MCU-4402",
+      "target_plant_id": "PLT-MUC-01",
+      "action_type": "DISPATCH_SECONDARY_PO",
+      "risk_notes": [
+        "Requires fast lab verification sample before assembly line feed",
+        "Broker lot batch testing certificate required upon tarmac arrival"
+      ]
+    },
+    {
+      "scenario_id": "SCEN-AIR-002",
+      "title": "Charter dedicated air freight for 15,000 pre-fire units",
+      "strategy_type": "LOGISTICS_ACCELERATION",
+      "description": "Charter dedicated cargo aircraft to airlift 15,000 pre-inspected inventory units from Taipei hub to Frankfurt with bonded customs clearance.",
+      "estimated_cost_usd": "65000.00",
+      "avoided_loss_usd": "1500000.00",
+      "net_financial_benefit_usd": "1435000.00",
+      "implementation_lead_time_days": "1.5",
+      "lead_time_reduction_days": "1.5",
+      "feasibility_score": 0.94,
+      "required_spend_tier": "PROC_DIRECTOR",
+      "target_supplier_id": "SUP-NC-001",
+      "target_sku": "SKU-MCU-4402",
+      "target_plant_id": "PLT-MUC-01",
+      "action_type": "AMEND_PO_AIR_FREIGHT",
+      "risk_notes": [
+        "Dependent on immediate landing slot approval at Frankfurt CargoCity"
+      ]
+    }
+  ],
+  "recommended_scenario_id": "SCEN-SPOT-001",
+  "justification": "Scenario SCEN-SPOT-001 captures a net financial benefit of $2,268,105.00 and eliminates shortage before line halt.",
+  "requires_hitl": true,
+  "governing_spend_tier": "DUAL_VP"
+}

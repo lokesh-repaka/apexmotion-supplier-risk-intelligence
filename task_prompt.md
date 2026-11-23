@@ -1,6 +1,6 @@
 You have access to the project's authoritative documentation: `TASKS.md`, `CLAUDE.md`, `GEMINI.md`, `.agents/rules/`, and architecture specifications in `docs/` (`HLD_*.md`, `LLD_*.md`, `PRD_*.md`, `BRD_*.md`, `FRD_*.md`).
 
-Go ahead and complete **P8-5 · Mock LLM client for offline tests — returns fixture JSON matching Pydantic schemas; activated by USE_MOCK_LLM=true**, as defined in `TASKS.md`.
+Go ahead and complete **P9-1 · LangGraph AgentState and StateGraph skeleton (`src/agents/state.py`, `src/agents/graph.py`) — `SupplierRiskState`, node stubs, conditional edge logic**, as defined in `TASKS.md`.
 
 ---
 

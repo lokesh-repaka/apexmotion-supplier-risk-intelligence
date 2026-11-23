@@ -1,0 +1,24 @@
+{
+  "executive_summary": "NanoCore Semiconductor cleanroom fire creates an immediate Tier-1 disruption for microcontrollers, resulting in production halt exposure at Munich Plant 1.",
+  "root_cause_analysis": "A localized cleanroom electrical fire at Hsinchu Fab 2 contaminated photolithography steppers, halting manufacturing of MCU-X91 automotive controllers.",
+  "operational_impact": "Munich assembly plant currently holds 7.68 days of cover against a 9.0-day revised supplier ETA, creating an unbuffered 1.32-day coverage gap of 24,420 units.",
+  "runway_and_exposure_commentary": "Direct inventory shortage yields $2,448,105.00 component exposure; line halt exposure at €85,000/hr yields €2,692,800.00 total operational vulnerability.",
+  "citations": [
+    {
+      "source_id": "SAP-STOCK-MUC-01",
+      "source_type": "ERP_PURCHASE_ORDER",
+      "document_name": "SAP S/4HANA Inventory Balances",
+      "page_or_section": "Storage Location 0001",
+      "verbatim_quote": "Usable stock 142,000 units against daily burn rate of 18,500 units.",
+      "url_or_reference": "sap://stock/SKU-MCU-4402"
+    },
+    {
+      "source_id": "EVT-NEWS-2026-081",
+      "source_type": "NEWS",
+      "document_name": "Reuters Global Technology Digest",
+      "page_or_section": "Paragraph 1-2",
+      "verbatim_quote": "Cleanroom fire at NanoCore facility halted production with estimated 9-day recovery timeline.",
+      "url_or_reference": "https://reuters.com/tech/nanocore-fire-2026"
+    }
+  ]
+}

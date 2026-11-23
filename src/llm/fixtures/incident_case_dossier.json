@@ -1,0 +1,111 @@
+{
+  "case_id": "CASE-2026-NC-001",
+  "supplier_id": "SUP-NC-001",
+  "component_sku": "SKU-MCU-4402",
+  "severity": "CRITICAL",
+  "research_analysis": {
+    "summary": "Cleanroom electrical fire at NanoCore Semiconductor Hsinchu Fab 2 halted photolithography lines with an estimated 9.0 business days recovery timeframe.",
+    "incident_category": "FACILITY_FIRE",
+    "event_date": "2026-03-01",
+    "affected_locations": [
+      "Fab 2 Cleanroom - Hsinchu Science Park, Taiwan"
+    ],
+    "confidence_score": 0.95,
+    "key_findings": [
+      "Cleanroom electrical fire triggered automated chemical suppression system",
+      "Photolithography steppers contaminated; 28nm MCU-X91 wafer production completely halted",
+      "Estimated cleanroom decontamination and recertification lead time is 9.0 business days",
+      "Tier-1 delivery ETA to European automotive manufacturing hubs delayed by at least 9 days"
+    ],
+    "citations": [
+      {
+        "source_id": "EVT-NEWS-2026-081",
+        "source_type": "NEWS",
+        "document_name": "Reuters Global Technology Digest",
+        "page_or_section": "Paragraph 1-3",
+        "verbatim_quote": "Cleanroom fire at NanoCore facility halted production of 28nm automotive grade microcontrollers with estimated 9-day recovery timeline.",
+        "url_or_reference": "https://reuters.com/tech/nanocore-fire-2026"
+      }
+    ],
+    "has_disruption_signal": true
+  },
+  "contract_analysis": {
+    "supplier_id": "SUP-NC-001",
+    "contract_id": "CNT-EU-2024-NC01",
+    "payment_terms": "Net 30",
+    "notice_period_days": 14,
+    "delay_penalty_percentage_per_day": "0.02",
+    "air_freight_surcharge_liability": "SUPPLIER",
+    "has_force_majeure": true,
+    "force_majeure_clause": "Section 15.2: Unforeseen facility fires and natural disasters relieve supplier of delivery obligations if notice is served within 48 hours.",
+    "alternate_suppliers_authorized": [
+      "TSMC",
+      "GlobalFoundries",
+      "Samsung Foundry"
+    ],
+    "liability_cap_usd": "5000000.00",
+    "citations": [
+      {
+        "source_id": "CNT-EU-2024-NC01",
+        "source_type": "CONTRACT",
+        "document_name": "Master Supply Agreement - NanoCore Semiconductor",
+        "page_or_section": "Section 8.2 Delay Penalties",
+        "verbatim_quote": "Supplier shall incur a daily delay penalty equal to 0.02% of delayed shipment value for each business day beyond agreed delivery window.",
+        "url_or_reference": "doc://contracts/CNT-EU-2024-NC01.pdf#page=11"
+      }
+    ]
+  },
+  "risk_narrative": {
+    "executive_summary": "NanoCore Semiconductor cleanroom fire creates an immediate Tier-1 disruption for microcontrollers, resulting in production halt exposure at Munich Plant 1.",
+    "root_cause_analysis": "A localized cleanroom electrical fire at Hsinchu Fab 2 contaminated photolithography steppers, halting manufacturing of MCU-X91 automotive controllers.",
+    "operational_impact": "Munich assembly plant currently holds 7.68 days of cover against a 9.0-day revised supplier ETA, creating an unbuffered 1.32-day coverage gap of 24,420 units.",
+    "runway_and_exposure_commentary": "Direct inventory shortage yields $2,448,105.00 component exposure; line halt exposure at €85,000/hr yields €2,692,800.00 total operational vulnerability.",
+    "citations": [
+      {
+        "source_id": "SAP-STOCK-MUC-01",
+        "source_type": "ERP_PURCHASE_ORDER",
+        "document_name": "SAP S/4HANA Inventory Balances",
+        "page_or_section": "Storage Location 0001",
+        "verbatim_quote": "Usable stock 142,000 units against daily burn rate of 18,500 units.",
+        "url_or_reference": "sap://stock/SKU-MCU-4402"
+      }
+    ]
+  },
+  "recommendations": {
+    "alert_id": "ALT-2026-NC-001",
+    "component_sku": "SKU-MCU-4402",
+    "supplier_id": "SUP-NC-001",
+    "scenarios": [
+      {
+        "scenario_id": "SCEN-SPOT-001",
+        "title": "Spot-buy 25,000 units from GlobalFoundries broker pool",
+        "strategy_type": "SPOT_PURCHASE",
+        "description": "Execute emergency open-market spot procurement of 25,000 tested MCU-X91 microcontrollers from authorized European distribution brokers.",
+        "estimated_cost_usd": "180000.00",
+        "avoided_loss_usd": "2448105.00",
+        "net_financial_benefit_usd": "2268105.00",
+        "implementation_lead_time_days": "2.0",
+        "lead_time_reduction_days": "2.0",
+        "feasibility_score": 0.88,
+        "required_spend_tier": "DUAL_VP",
+        "target_supplier_id": "SUP-GF-002",
+        "target_sku": "SKU-MCU-4402",
+        "target_plant_id": "PLT-MUC-01",
+        "action_type": "DISPATCH_SECONDARY_PO",
+        "risk_notes": [
+          "Requires fast lab verification sample before assembly line feed",
+          "Broker lot batch testing certificate required upon tarmac arrival"
+        ]
+      }
+    ],
+    "recommended_scenario_id": "SCEN-SPOT-001",
+    "justification": "Scenario SCEN-SPOT-001 captures a net financial benefit of $2,268,105.00 and eliminates shortage before line halt.",
+    "requires_hitl": true,
+    "governing_spend_tier": "DUAL_VP"
+  },
+  "days_of_cover": "7.68",
+  "shortage_gap_days": "1.32",
+  "shortage_volume": 24420,
+  "financial_exposure_usd": "2448105.00",
+  "created_at": "2026-11-23T20:00:00Z"
+}

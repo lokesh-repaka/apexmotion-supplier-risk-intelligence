@@ -376,10 +376,24 @@ class LiteLLMGateway:
         messages: list[dict[str, str]],
         model: str,
         task_type: TaskType | str,
+        response_model: type[BaseModel] | None = None,
     ) -> tuple[str, int, int]:
         """Generate deterministic offline mock responses without external calls."""
         content_input = messages[-1].get("content", "")
         task_str = str(task_type).lower()
+
+        # Check if structured fixture should be served
+        from src.llm.mock_client import get_mock_llm_client
+
+        mock_client = get_mock_llm_client()
+        target_schema = response_model or mock_client._infer_schema_from_prompt(content_input)
+        if target_schema:
+            fixture_text = mock_client._resolve_completion_content(
+                content_input, response_model=target_schema
+            )
+            prompt_tokens = max(10, len(content_input) // 4)
+            completion_tokens = max(15, len(fixture_text) // 4)
+            return fixture_text, prompt_tokens, completion_tokens
 
         if task_str in (TaskType.EXTRACTION, TaskType.TRIAGE):
             mock_text = (
@@ -405,6 +419,7 @@ class LiteLLMGateway:
         max_tokens: int = 4096,
         temperature: float = 0.0,
         use_cache: bool = True,
+        response_model: type[BaseModel] | None = None,
         **kwargs: Any,
     ) -> LLMResponse:
         """Asynchronously invoke LiteLLM completion with automated fallback and cost tracking."""
@@ -444,7 +459,7 @@ class LiteLLMGateway:
         # 2. Mock Mode (Zero live network calls)
         if self.use_mock:
             content, p_tok, c_tok = self._generate_mock_completion(
-                messages, target_model, task_type
+                messages, target_model, task_type, response_model=response_model
             )
             cost_usd = calculate_token_cost(target_model, p_tok, c_tok)
             latency_ms = (time.perf_counter() - start_time) * 1000.0

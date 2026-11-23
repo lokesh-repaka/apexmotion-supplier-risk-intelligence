@@ -19,6 +19,7 @@ from langgraph.checkpoint.base import BaseCheckpointSaver
 from langgraph.graph import END, START, StateGraph
 from langgraph.graph.state import CompiledStateGraph
 
+from src.agents.nodes.research_agent import research_node
 from src.agents.nodes.triage_agent import triage_node
 from src.agents.state import (
     SupplierRiskState,
@@ -127,37 +128,8 @@ def route_after_hitl_gate(state: SupplierRiskState) -> str:
 
 
 # ------------------------------------------------------------------------------
-# Node Handlers & Stubs (triage_node is imported from src.agents.nodes.triage_agent)
+# Node Handlers & Stubs (triage_node and research_node are imported from nodes)
 # ------------------------------------------------------------------------------
-
-
-def research_node(state: SupplierRiskState) -> dict[str, Any]:
-    """Node 2: Gather external evidence (news, SEC filings, geopolitical feeds)."""
-    logger.info(
-        "Research node analyzing disruption context for supplier: %s", state.get("supplier_id")
-    )
-
-    evidence_item = {
-        "source_id": f"SRC-NEWS-{state.get('alert_id', '001')}",
-        "source_type": "NEWS",
-        "document_name": "Industry Trade Alert",
-        "verbatim_quote": state.get("raw_signal", "Reported operational disruption"),
-        "confidence": 0.94,
-    }
-
-    research_analysis = {
-        "summary": state.get("raw_signal", "Supplier facility disruption detected"),
-        "confidence_score": 0.94,
-        "has_disruption_signal": True,
-    }
-
-    return {
-        "current_node": NODE_RESEARCH,
-        "execution_path": [NODE_RESEARCH],
-        "workflow_status": WorkflowStatus.INVESTIGATING,
-        "evidence": [evidence_item],
-        "research_analysis": research_analysis,
-    }
 
 
 def contract_node(state: SupplierRiskState) -> dict[str, Any]:

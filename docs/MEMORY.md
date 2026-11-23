@@ -24,11 +24,11 @@
 | **Phase 6 Progress** | 4 / 4 Tasks Completed | Completed ✅ |
 | **Phase 7 Progress** | 5 / 5 Tasks Completed | Completed ✅ |
 | **Phase 8 Progress** | 5 / 5 Tasks Completed (100%) | Completed ✅ |
-| **Phase 9 Progress** | 2 / 6 Tasks Completed (33.3%) | In Progress 🔄 |
-| **Total Test Suites** | 42 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`, `test_localstack_bootstrap.py`, `test_redpanda_topics.py`, `test_neptune_emulation.py`, `test_makefile.py`, `test_database_models.py`, `test_database_migrations.py`, `test_database_repositories.py`, `test_token_hash_index.py`, `test_opensearch_client.py`, `test_security_rbac.py`, `test_hitl_tokens.py`, `test_demo_tokens.py`, `test_spend_tier_router.py`, `test_audit_writer.py`, `test_neptune_client.py`, `test_graph_seed.py`, `test_cypher_queries.py`, `test_supplier_traversal.py`, `test_graph_traversal_paths.py`, `test_kafka_consumer.py`, `test_kafka_producer.py`, `test_kafka_schemas.py`, `test_kafka_consumer_integration.py`, `test_risk_calculator.py`, `test_risk_scorer.py`, `test_inventory_service.py`, `test_alert_service.py`, `test_nanocore_golden.py`, `test_litellm_gateway.py`, `test_quarantined_reader.py`, `test_llm_models.py`, `test_vllm_client.py`, `test_mock_llm_client.py`, `test_agent_graph_skeleton.py`, `test_triage_agent.py`) | PASSED ✅ |
-| **Total Test Cases** | 565 tests (546 unit + 11 integration + 8 golden) | 100% Passing (0 failures) |
-| **Code Coverage (`src/`)** | **97.31%** statement coverage (`src/agents/nodes/triage_agent.py`, `src/agents/state.py`, `src/agents/graph.py`, `src/llm/`, `src/services/alert_service.py`, `src/services/risk/calculator.py`, `src/services/risk/scorer.py`, `src/kafka/handlers.py`, and `src/kafka/schemas/` at 100%; `src/database/repositories/risk_alert_repository.py` at 96%; `src/services/risk/inventory_service.py` at 92%) | Exceeds 80% DoD gate |
-| **Active Branch** | `feature/agents-triage-node` $\to$ `development` | Clean |
+| **Phase 9 Progress** | 3 / 6 Tasks Completed (50%) | In Progress 🔄 |
+| **Total Test Suites** | 43 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`, `test_localstack_bootstrap.py`, `test_redpanda_topics.py`, `test_neptune_emulation.py`, `test_makefile.py`, `test_database_models.py`, `test_database_migrations.py`, `test_database_repositories.py`, `test_token_hash_index.py`, `test_opensearch_client.py`, `test_security_rbac.py`, `test_hitl_tokens.py`, `test_demo_tokens.py`, `test_spend_tier_router.py`, `test_audit_writer.py`, `test_neptune_client.py`, `test_graph_seed.py`, `test_cypher_queries.py`, `test_supplier_traversal.py`, `test_graph_traversal_paths.py`, `test_kafka_consumer.py`, `test_kafka_producer.py`, `test_kafka_schemas.py`, `test_kafka_consumer_integration.py`, `test_risk_calculator.py`, `test_risk_scorer.py`, `test_inventory_service.py`, `test_alert_service.py`, `test_nanocore_golden.py`, `test_litellm_gateway.py`, `test_quarantined_reader.py`, `test_llm_models.py`, `test_vllm_client.py`, `test_mock_llm_client.py`, `test_agent_graph_skeleton.py`, `test_triage_agent.py`, `test_research_agent.py`) | PASSED ✅ |
+| **Total Test Cases** | 577 tests (558 unit + 11 integration + 8 golden) | 100% Passing (0 failures) |
+| **Code Coverage (`src/`)** | **97.43%** statement coverage (`src/agents/nodes/research_agent.py`, `src/agents/tools/research_tools.py`, `src/agents/nodes/triage_agent.py`, `src/agents/state.py`, `src/agents/graph.py`, `src/llm/`, `src/services/alert_service.py`, `src/services/risk/calculator.py`, `src/services/risk/scorer.py`, `src/kafka/handlers.py`, and `src/kafka/schemas/` at 100%; `src/database/repositories/risk_alert_repository.py` at 96%; `src/services/risk/inventory_service.py` at 92%) | Exceeds 80% DoD gate |
+| **Active Branch** | `feature/agents-research-node` $\to$ `development` | Clean |
 
 ---
 
@@ -488,6 +488,19 @@
   - `src/agents/nodes/__init__.py`: Package exports for `triage_node`, `TriageAgent`, `TriageResult`, `get_triage_agent`, and node constants.
   - `src/agents/graph.py`: Connected real `triage_node` and updated `route_after_triage` to honor metadata `is_zero_impact` and pre-computed `target_nodes`.
   - 15 unit tests in `tests/unit/test_triage_agent.py` achieving **100% statement and branch coverage** on `src/agents/nodes/triage_agent.py` (112 statements), bringing total test suite to 565 tests (97.31% project-wide coverage).
+- **P9-3 · Research Agent Node (`feature/agents-research-node`)**: Completed ✅
+  - `src/agents/tools/research_tools.py`: Implemented specialized intelligence research tools with mandatory QuarantinedReader sanitization:
+    * **NewsScraperTool**: Searches external news articles and industry feeds, retrieving canonical NanoCore fab fire intelligence, trans-Pacific freight bottlenecks, and general disruption alerts.
+    * **SECEDGARTool**: Searches SEC EDGAR regulatory filings, retrieving material Form 8-K event disclosures (Item 2.01) and operational delay notices.
+    * **GeopoliticalAPITool**: Evaluates regional trade sanctions, export controls, and supply chain concentration risks (e.g. Taiwan Strait / East Asia corridor).
+    * **Mandatory Input Quarantine (CLAUDE.md Sec 8.1)**: Every tool output is strictly pre-sanitized via `QuarantinedReader`, stripping script blocks, HTML tags, ASCII control characters, and wrapping in `<untrusted_supplier_data>`.
+  - `src/agents/tools/__init__.py`: Exported all research tools, data models (`ScrapedNewsItem`, `SECDiscloseItem`, `GeopoliticalRiskItem`), and singleton accessors.
+  - `src/agents/nodes/research_agent.py`: Implemented `ResearchAgent`, `get_research_agent()`, and `research_node()`:
+    * Coordinates tools, extracts verifiable `EvidenceItem` records into state with source provenance and confidence.
+    * Synthesizes structured `ResearchAnalysis` via LiteLLM gateway (`response_model=ResearchAnalysis`), enforcing zero free-text responses (P8-3).
+    * Implemented robust deterministic fallback synthesis on LLM degradation, ensuring the investigation pipeline never halts or crashes.
+  - `src/agents/nodes/__init__.py` & `src/agents/graph.py`: Wired real `research_node` into the StateGraph DAG.
+  - 12 unit tests in `tests/unit/test_research_agent.py` achieving **100% statement and branch coverage** across `research_agent.py` and `research_tools.py` (213 statements), bringing total test suite to 577 tests (97.43% project-wide coverage).
 
 ---
 
@@ -600,6 +613,12 @@
     - Automated zero-impact blast radius detection routes benign events immediately to `NODE_DISMISS`, saving LLM compute.
     - Multi-signal disruptions (e.g., bankruptcy + fire) dynamically fan out to both `NODE_RESEARCH` and `NODE_CONTRACT` in parallel branches before converging into quantitative risk assessment (`NODE_RISK`).
 
+43. **External Intelligence Quarantine & Structured Research Synthesis (SEC-045, CLAUDE.md Sec 8.1)**:
+    - All intelligence gathering tools (`NewsScraperTool`, `SECEDGARTool`, `GeopoliticalAPITool` in `src/agents/tools/research_tools.py`) strictly enforce pre-exposure text quarantine via `QuarantinedReader`.
+    - Unsanitized external text is prohibited from mutating `SupplierRiskState` evidence channels or entering LLM prompts.
+    - Research synthesis produces strongly-typed `ResearchAnalysis` models (P8-3) with verifiable citations and source provenance.
+    - Agent execution incorporates deterministic rule-based fallback synthesis, guaranteeing uninterrupted workflow progression during LLM provider rate limits or service degradation.
+
 ---
 
 ## 5. Next Planned Tasks
@@ -607,7 +626,7 @@
 - **Phase 9 — Multi-Agent System (LangGraph Orchestration)**:
   - **P9-1**: LangGraph `AgentState` and `StateGraph` skeleton (`src/agents/state.py`, `src/agents/graph.py`) (`feature/agents-langgraph-skeleton`). Completed ✅
   - **P9-2**: Triage agent node (`src/agents/nodes/triage_agent.py`) (`feature/agents-triage-node`). Completed ✅
-  - **P9-3**: Research agent node (`src/agents/nodes/research_agent.py`) (`feature/agents-research-node`). Pending ❌
+  - **P9-3**: Research agent node (`src/agents/nodes/research_agent.py`) (`feature/agents-research-node`). Completed ✅
   - **P9-4**: Contract agent node (`src/agents/nodes/contract_agent.py`) (`feature/agents-contract-node`). Pending ❌
   - **P9-5**: Risk agent node (`src/agents/nodes/risk_agent.py`) (`feature/agents-risk-node`). Pending ❌
   - **P9-6**: Recommendation agent node (`src/agents/nodes/recommendation_agent.py`) (`feature/agents-recommendation-node`). Pending ❌

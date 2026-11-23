@@ -25,10 +25,11 @@
 | **Phase 7 Progress** | 5 / 5 Tasks Completed | Completed ✅ |
 | **Phase 8 Progress** | 5 / 5 Tasks Completed (100%) | Completed ✅ |
 | **Phase 9 Progress** | 6 / 6 Tasks Completed (100%) | Completed ✅ |
-| **Total Test Suites** | 46 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`, `test_localstack_bootstrap.py`, `test_redpanda_topics.py`, `test_neptune_emulation.py`, `test_makefile.py`, `test_database_models.py`, `test_database_migrations.py`, `test_database_repositories.py`, `test_token_hash_index.py`, `test_opensearch_client.py`, `test_security_rbac.py`, `test_hitl_tokens.py`, `test_demo_tokens.py`, `test_spend_tier_router.py`, `test_audit_writer.py`, `test_neptune_client.py`, `test_graph_seed.py`, `test_cypher_queries.py`, `test_supplier_traversal.py`, `test_graph_traversal_paths.py`, `test_kafka_consumer.py`, `test_kafka_producer.py`, `test_kafka_schemas.py`, `test_kafka_consumer_integration.py`, `test_risk_calculator.py`, `test_risk_scorer.py`, `test_inventory_service.py`, `test_alert_service.py`, `test_nanocore_golden.py`, `test_litellm_gateway.py`, `test_quarantined_reader.py`, `test_llm_models.py`, `test_vllm_client.py`, `test_mock_llm_client.py`, `test_agent_graph_skeleton.py`, `test_triage_agent.py`, `test_research_agent.py`, `test_contract_agent.py`, `test_risk_agent.py`, `test_recommendation_agent.py`) | PASSED ✅ |
-| **Total Test Cases** | 629 tests (610 unit + 11 integration + 8 golden) | 100% Passing (0 failures) |
-| **Code Coverage (`src/`)** | **97.58%** statement coverage (`src/agents/nodes/recommendation_agent.py` at 100% stmts / 100% branch, `src/agents/nodes/risk_agent.py`, `src/agents/nodes/contract_agent.py`, `src/agents/nodes/research_agent.py`, `src/agents/tools/research_tools.py`, `src/agents/nodes/triage_agent.py`, `src/agents/state.py`, `src/agents/graph.py`, `src/llm/`, `src/services/alert_service.py`, `src/services/risk/calculator.py`, `src/services/risk/scorer.py`, `src/kafka/handlers.py`, and `src/kafka/schemas/` at 100%; `src/database/repositories/risk_alert_repository.py` at 96%; `src/services/risk/inventory_service.py` at 92%) | Exceeds 80% DoD gate |
-| **Active Branch** | `feature/agents-recommendation-node` $\to$ `development` | Clean |
+| **Phase 10 Progress** | 1 / 4 Tasks Completed (25%) | In Progress 🔄 |
+| **Total Test Suites** | 47 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`, `test_localstack_bootstrap.py`, `test_redpanda_topics.py`, `test_neptune_emulation.py`, `test_makefile.py`, `test_database_models.py`, `test_database_migrations.py`, `test_database_repositories.py`, `test_token_hash_index.py`, `test_opensearch_client.py`, `test_security_rbac.py`, `test_hitl_tokens.py`, `test_demo_tokens.py`, `test_spend_tier_router.py`, `test_audit_writer.py`, `test_neptune_client.py`, `test_graph_seed.py`, `test_cypher_queries.py`, `test_supplier_traversal.py`, `test_graph_traversal_paths.py`, `test_kafka_consumer.py`, `test_kafka_producer.py`, `test_kafka_schemas.py`, `test_kafka_consumer_integration.py`, `test_risk_calculator.py`, `test_risk_scorer.py`, `test_inventory_service.py`, `test_alert_service.py`, `test_nanocore_golden.py`, `test_litellm_gateway.py`, `test_quarantined_reader.py`, `test_llm_models.py`, `test_vllm_client.py`, `test_mock_llm_client.py`, `test_agent_graph_skeleton.py`, `test_triage_agent.py`, `test_research_agent.py`, `test_contract_agent.py`, `test_risk_agent.py`, `test_recommendation_agent.py`, `test_hitl_service.py`) | PASSED ✅ |
+| **Total Test Cases** | 652 tests (633 unit + 11 integration + 8 golden) | 100% Passing (0 failures) |
+| **Code Coverage (`src/`)** | **97.65%** statement coverage (`src/services/hitl_service.py` at 98%, `src/agents/nodes/recommendation_agent.py` at 100% stmts / 100% branch, `src/agents/nodes/risk_agent.py`, `src/agents/nodes/contract_agent.py`, `src/agents/nodes/research_agent.py`, `src/agents/tools/research_tools.py`, `src/agents/nodes/triage_agent.py`, `src/agents/state.py`, `src/agents/graph.py`, `src/llm/`, `src/services/alert_service.py`, `src/services/risk/calculator.py`, `src/services/risk/scorer.py`, `src/kafka/handlers.py`, and `src/kafka/schemas/` at 100%; `src/database/repositories/risk_alert_repository.py` at 96%; `src/services/risk/inventory_service.py` at 92%) | Exceeds 80% DoD gate |
+| **Active Branch** | `feature/hitl-approval-service` $\to$ `development` | Clean |
 
 ---
 
@@ -522,6 +523,29 @@
   - `src/agents/nodes/__init__.py`: Package exports for `RiskAgent`, `get_risk_agent`, `risk_node`, and `NODE_RISK`.
   - `src/agents/graph.py`: Replaced `risk_node` stub with production implementation, connecting real deterministic calculations and narrative synthesis into the StateGraph DAG.
   - 17 unit tests in `tests/unit/test_risk_agent.py` achieving **100% statement and 100% branch coverage** on `src/agents/nodes/risk_agent.py` (137 statements, 40 branches), bringing total test suite to 606 tests (97.53% project-wide coverage).
+- **P9-6 · Recommendation Agent Node (`feature/agents-recommendation-node`)**: Completed ✅
+  - `src/agents/nodes/recommendation_agent.py`: Implemented specialist recommendation agent (`RecommendationAgent`), singleton factory (`get_recommendation_agent()`), and LangGraph node entrypoint (`recommendation_node()`):
+    * **Human-in-the-Loop Spend Tiers (BR-RULE-001)**: Any mitigation option involving financial expenditure (`estimated_cost_usd > $0.00`) mandates human authorization (`requires_hitl=True`) and deterministically resolves the governing spend tier (`get_spend_tier()`: Category Manager <= $25k, Procurement Director <= $100k, Dual VP > $100k).
+    * **The Triad of Responsibility**: Probabilistic AI proposes and ranks alternative mitigation scenarios, but is strictly prohibited from executing capital dispatch or bypassing spend gates. Workflows pause at `hitl_gate` in `WorkflowStatus.AWAITING_APPROVAL` status when human approval is required.
+    * **Strict Decimal Arithmetic Invariant**: All mitigation financial attributes preserve exact `Decimal` precision (`ROUND_HALF_UP`, 2 decimal places), enforcing `net_financial_benefit_usd == avoided_loss_usd - estimated_cost_usd` with zero float conversion.
+    * **Structured Output Validation (P8-3)**: Synthesizes `RecommendationReport` via LiteLLM gateway (`task_type=TaskType.STRUCTURED_OUTPUT`), falling back to resilient rule-based mitigation options on LLM provider errors.
+    * **LangGraph Integration**: Wired real `recommendation_node` into the StateGraph DAG, connecting into `hitl_gate`.
+  - 23 unit tests in `tests/unit/test_recommendation_agent.py` achieving **100% statement and branch coverage** (428 statements).
+
+### Phase 10: HITL Approval System
+- **P10-1 · HITL Service (`feature/hitl-approval-service`)**: Completed ✅
+  - `src/services/hitl_service.py`: Implemented centralized Human-in-the-Loop approval service (`HITLService`), data models (`ApprovalCreateInput`), custom exceptions (`HITLServiceError`, `ApprovalNotFoundError`, `UnauthorizedSignerError`, `InvalidApprovalOperationError`, `TokenReplayServiceError`, `TokenExpiredServiceError`, `TokenVerificationServiceError`), and thread-safe singleton accessor (`get_hitl_service()`):
+    * **The Triad of Responsibility (BR-RULE-001)**: Pure deterministic Python arithmetic with `Decimal` precision (`NUMERIC(14,2)`). Standard Python floats are strictly rejected with `TypeError` to prevent precision drift.
+    * **Spend Governance Tiers & Deterministic TTL**:
+      - Tier 1 (`CATEGORY_MGR`): Spend <= $25,000 (1-hour TTL, single signature).
+      - Tier 2 (`PROC_DIRECTOR`): Spend $25,001 - $100,000 (1-hour TTL, single signature).
+      - Tier 3 (`DUAL_VP`): Spend > $100,000 (30-minute TTL, dual distinct executive signatures: Director + VP Supply Chain).
+    * **Cryptographic Token Issuance & Verification**: Issues AWS KMS ECDSA P-256 tokens (`HITLTokenService`) and verifies cryptographic validity, binding parameters (action_id, alert_id, amount_usd), and expiration timestamps.
+    * **Anti-Replay Protection**: Verifies token uniqueness against Aurora PostgreSQL/SQLite `HITLApproval` repository using unique `token_hash` index, raising `TokenReplayServiceError` on repeated usage.
+    * **Dual-Approval Coordination**: Verifies two distinct executive tokens for Tier 3 spend; rejects identical signers (`UnauthorizedSignerError`) and action mismatches.
+    * **Full Database Lifecycle**: `create_approval_request`, `sign_approval` (transitions `PENDING` -> `PARTIALLY_APPROVED` -> `APPROVED`), `reject_approval`, `get_approval` (automatically transitions expired records to `EXPIRED`), and `list_pending_approvals`.
+  - Updated `src/services/__init__.py` exporting all HITL service classes and exceptions.
+  - 23 offline unit tests in `tests/unit/test_hitl_service.py` achieving **98% statement coverage** (201 statements), bringing total test suite to 652 passing tests (97.65% project-wide coverage).
 
 ---
 
@@ -658,6 +682,13 @@
     - Workflows suspend at `hitl_gate` in `WorkflowStatus.AWAITING_APPROVAL` status when human sign-off is required, routing to `END` until cryptographic ECDSA authorization tokens are provided.
     - Resilient deterministic fallback guarantees pipeline continuity during LLM provider latency or outages.
 
+47. **Cryptographic Approval Token Verification & Spend Authority Gates (SEC-049, BR-RULE-001)**:
+    - Capital authorization and operational mitigation actions are strictly gated by AWS KMS ECDSA P-256 cryptographic tokens managed by `HITLService` (`src/services/hitl_service.py`).
+    - Monetary thresholds are governed by pure Python deterministic routing (`src/core/spend_tier_router.py`), completely isolating authorization rules from LLM reasoning. Floating-point inputs are strictly rejected to prevent precision drift.
+    - Token TTL is deterministically bound: 1 hour for Tiers 1-2, and shortened to 30 minutes for Tier 3 executive dual approvals.
+    - Replay attacks are prohibited through SHA-256 unique `token_hash` indexing and verification against Aurora PostgreSQL/SQLite repositories before state transitions are committed.
+    - Dual sign-off enforces distinct executive identities (`UnauthorizedSignerError` on duplicate signers), ensuring no single actor can unilaterally dispatch Tier 3 capital commitments (> $100,000).
+
 ---
 
 ## 5. Next Planned Tasks
@@ -670,7 +701,7 @@
   - **P9-5**: Risk agent node (`src/agents/nodes/risk_agent.py`) (`feature/agents-risk-node`). Completed ✅
   - **P9-6**: Recommendation agent node (`src/agents/nodes/recommendation_agent.py`) (`feature/agents-recommendation-node`). Completed ✅
 - **Phase 10 — HITL Approval System**:
-  - **P10-1**: HITL service (`src/services/hitl_service.py`) — issues KMS ECDSA tokens, routes to correct spend tier, enforces 1-hour / 30-minute TTL (`feature/hitl-approval-service`). Pending ❌
+  - **P10-1**: HITL service (`src/services/hitl_service.py`) — issues KMS ECDSA tokens, routes to correct spend tier, enforces 1-hour / 30-minute TTL (`feature/hitl-approval-service`). Completed ✅
   - **P10-2**: Dual-approval enforcer (`feature/hitl-dual-approval-enforcer`). Pending ❌
   - **P10-3**: Token replay guard (`feature/hitl-token-replay-guard`). Pending ❌
   - **P10-4**: HITL unit tests (`feature/hitl-unit-tests`). Pending ❌

@@ -153,7 +153,7 @@ Sub-tasks in the same phase that do not share files can be open at the same time
 
 | Task | Branch | Status |
 |------|--------|--------|
-| P10-1 · HITL service (`src/services/hitl_service.py`) — issues KMS ECDSA tokens, routes to correct spend tier, enforces 1-hour / 30-minute TTL | `feature/hitl-approval-service` | Pending ❌ |
+| P10-1 · HITL service (`src/services/hitl_service.py`) — issues KMS ECDSA tokens, routes to correct spend tier, enforces 1-hour / 30-minute TTL | `feature/hitl-approval-service` | Completed ✅ |
 | P10-2 · Dual-approval enforcer — `DUAL_VP` actions require two independent token signatures before the action node executes | `feature/hitl-dual-approval-enforcer` | Pending ❌ |
 | P10-3 · Token replay guard — checks `hitl_approvals.token_hash` unique constraint, logs and alerts on replay attempt | `feature/hitl-token-replay-guard` | Pending ❌ |
 | P10-4 · HITL unit tests — valid token, expired token, replayed token, wrong action ID, dual-approval with one missing signature | `feature/hitl-unit-tests` | Pending ❌ |
@@ -309,11 +309,11 @@ Phases 4, 5, 6, 7, and 8 all depend on Phase 3 and can be developed in parallel.
 | 7 | Deterministic Risk Engine | 5 | 5 (100%) ✅ |
 | 8 | LLM Foundation | 5 | 5 (100%) ✅ |
 | 9 | LangGraph Agent Workflow | 6 | 6 (100%) ✅ |
-| 10 | HITL Approval System | 4 | 0 (0%) ❌ |
+| 10 | HITL Approval System | 4 | 1 (25%) 🔄 |
 | 11 | FastAPI API Routes | 6 | 0 (0%) ❌ |
 | 12 | React Frontend | 6 | 0 (0%) ❌ |
 | 13 | Supplier Seed Data & Golden Datasets | 4 | 0 (0%) ❌ |
 | 14 | Unit & Integration Tests | 6 | 0 (0%) ❌ |
 | 15 | Observability | 5 | 0 (0%) ❌ |
 | 16 | Infrastructure & Delivery | 6 | 0 (0%) ❌ |
-| **Total** | | **83** | **46 (55.4%)** |
+| **Total** | | **83** | **47 (56.6%)** |

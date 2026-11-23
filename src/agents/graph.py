@@ -19,6 +19,7 @@ from langgraph.checkpoint.base import BaseCheckpointSaver
 from langgraph.graph import END, START, StateGraph
 from langgraph.graph.state import CompiledStateGraph
 
+from src.agents.nodes.contract_agent import contract_node
 from src.agents.nodes.research_agent import research_node
 from src.agents.nodes.triage_agent import triage_node
 from src.agents.state import (
@@ -128,30 +129,8 @@ def route_after_hitl_gate(state: SupplierRiskState) -> str:
 
 
 # ------------------------------------------------------------------------------
-# Node Handlers & Stubs (triage_node and research_node are imported from nodes)
+# Node Handlers & Stubs (triage_node, research_node, and contract_node imported from nodes)
 # ------------------------------------------------------------------------------
-
-
-def contract_node(state: SupplierRiskState) -> dict[str, Any]:
-    """Node 3: Extract payment terms, delay penalties, and force majeure clauses."""
-    logger.info(
-        "Contract node auditing agreement clauses for supplier: %s", state.get("supplier_id")
-    )
-
-    contract_analysis = {
-        "supplier_id": state.get("supplier_id", "SUP-UNKNOWN"),
-        "payment_terms": "Net 30",
-        "notice_period_days": 14,
-        "delay_penalty_percentage_per_day": Decimal("0.02"),
-        "liability_cap_usd": Decimal("5000000.00"),
-    }
-
-    return {
-        "current_node": NODE_CONTRACT,
-        "execution_path": [NODE_CONTRACT],
-        "workflow_status": WorkflowStatus.ANALYZING_CONTRACTS,
-        "contract_analysis": contract_analysis,
-    }
 
 
 def risk_node(state: SupplierRiskState) -> dict[str, Any]:

@@ -24,11 +24,11 @@
 | **Phase 6 Progress** | 4 / 4 Tasks Completed | Completed ✅ |
 | **Phase 7 Progress** | 5 / 5 Tasks Completed | Completed ✅ |
 | **Phase 8 Progress** | 5 / 5 Tasks Completed (100%) | Completed ✅ |
-| **Phase 9 Progress** | 3 / 6 Tasks Completed (50%) | In Progress 🔄 |
-| **Total Test Suites** | 43 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`, `test_localstack_bootstrap.py`, `test_redpanda_topics.py`, `test_neptune_emulation.py`, `test_makefile.py`, `test_database_models.py`, `test_database_migrations.py`, `test_database_repositories.py`, `test_token_hash_index.py`, `test_opensearch_client.py`, `test_security_rbac.py`, `test_hitl_tokens.py`, `test_demo_tokens.py`, `test_spend_tier_router.py`, `test_audit_writer.py`, `test_neptune_client.py`, `test_graph_seed.py`, `test_cypher_queries.py`, `test_supplier_traversal.py`, `test_graph_traversal_paths.py`, `test_kafka_consumer.py`, `test_kafka_producer.py`, `test_kafka_schemas.py`, `test_kafka_consumer_integration.py`, `test_risk_calculator.py`, `test_risk_scorer.py`, `test_inventory_service.py`, `test_alert_service.py`, `test_nanocore_golden.py`, `test_litellm_gateway.py`, `test_quarantined_reader.py`, `test_llm_models.py`, `test_vllm_client.py`, `test_mock_llm_client.py`, `test_agent_graph_skeleton.py`, `test_triage_agent.py`, `test_research_agent.py`) | PASSED ✅ |
-| **Total Test Cases** | 577 tests (558 unit + 11 integration + 8 golden) | 100% Passing (0 failures) |
-| **Code Coverage (`src/`)** | **97.43%** statement coverage (`src/agents/nodes/research_agent.py`, `src/agents/tools/research_tools.py`, `src/agents/nodes/triage_agent.py`, `src/agents/state.py`, `src/agents/graph.py`, `src/llm/`, `src/services/alert_service.py`, `src/services/risk/calculator.py`, `src/services/risk/scorer.py`, `src/kafka/handlers.py`, and `src/kafka/schemas/` at 100%; `src/database/repositories/risk_alert_repository.py` at 96%; `src/services/risk/inventory_service.py` at 92%) | Exceeds 80% DoD gate |
-| **Active Branch** | `feature/agents-research-node` $\to$ `development` | Clean |
+| **Phase 9 Progress** | 4 / 6 Tasks Completed (66.7%) | In Progress 🔄 |
+| **Total Test Suites** | 44 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`, `test_localstack_bootstrap.py`, `test_redpanda_topics.py`, `test_neptune_emulation.py`, `test_makefile.py`, `test_database_models.py`, `test_database_migrations.py`, `test_database_repositories.py`, `test_token_hash_index.py`, `test_opensearch_client.py`, `test_security_rbac.py`, `test_hitl_tokens.py`, `test_demo_tokens.py`, `test_spend_tier_router.py`, `test_audit_writer.py`, `test_neptune_client.py`, `test_graph_seed.py`, `test_cypher_queries.py`, `test_supplier_traversal.py`, `test_graph_traversal_paths.py`, `test_kafka_consumer.py`, `test_kafka_producer.py`, `test_kafka_schemas.py`, `test_kafka_consumer_integration.py`, `test_risk_calculator.py`, `test_risk_scorer.py`, `test_inventory_service.py`, `test_alert_service.py`, `test_nanocore_golden.py`, `test_litellm_gateway.py`, `test_quarantined_reader.py`, `test_llm_models.py`, `test_vllm_client.py`, `test_mock_llm_client.py`, `test_agent_graph_skeleton.py`, `test_triage_agent.py`, `test_research_agent.py`, `test_contract_agent.py`) | PASSED ✅ |
+| **Total Test Cases** | 589 tests (570 unit + 11 integration + 8 golden) | 100% Passing (0 failures) |
+| **Code Coverage (`src/`)** | **97.47%** statement coverage (`src/agents/nodes/contract_agent.py`, `src/agents/nodes/research_agent.py`, `src/agents/tools/research_tools.py`, `src/agents/nodes/triage_agent.py`, `src/agents/state.py`, `src/agents/graph.py`, `src/llm/`, `src/services/alert_service.py`, `src/services/risk/calculator.py`, `src/services/risk/scorer.py`, `src/kafka/handlers.py`, and `src/kafka/schemas/` at 100%; `src/database/repositories/risk_alert_repository.py` at 96%; `src/services/risk/inventory_service.py` at 92%) | Exceeds 80% DoD gate |
+| **Active Branch** | `feature/agents-contract-node` $\to$ `development` | Clean |
 
 ---
 
@@ -501,6 +501,17 @@
     * Implemented robust deterministic fallback synthesis on LLM degradation, ensuring the investigation pipeline never halts or crashes.
   - `src/agents/nodes/__init__.py` & `src/agents/graph.py`: Wired real `research_node` into the StateGraph DAG.
   - 12 unit tests in `tests/unit/test_research_agent.py` achieving **100% statement and branch coverage** across `research_agent.py` and `research_tools.py` (213 statements), bringing total test suite to 577 tests (97.43% project-wide coverage).
+- **P9-4 · Contract Agent Node (`feature/agents-contract-node`)**: Completed ✅
+  - `src/agents/nodes/contract_agent.py`: Implemented specialist contract intelligence agent (`ContractAgent`), singleton factory (`get_contract_agent()`), and LangGraph node entrypoint (`contract_node()`):
+    * **Data Sovereignty Enforcement (NFR-SEC-02, CLAUDE.md Sec 5.2)**: Integrates `ConfidentialContractRouter` ensuring EU-regulated agreements (32 member states), GDPR-governed agreements, and contracts classified as `CONFIDENTIAL`, `HIGHLY_CONFIDENTIAL`, or `RESTRICTED` route strictly to private self-hosted vLLM GPU clusters inside the VPC. Attempting to route sovereign contracts to external Bedrock raises `VLLMDataSovereigntyViolationError` (HTTP 403 `DATA_SOVEREIGNTY_VIOLATION`).
+    * **Untrusted Input Quarantine (CLAUDE.md Sec 8.1)**: Enforces mandatory pre-exposure quarantine via `QuarantinedReader.sanitize()` on all raw contract text and riders, stripping XML/HTML script tags, control characters, and computing SHA-256 hashes for audit log tracking.
+    * **Structured Output Validation (P8-3)**: Emits typed Pydantic `ContractAnalysis` models with exact `Decimal` precision for daily delay penalties and liability caps (BR-RULE-001).
+    * **Representative Contract Text Resolution**: Provides high-fidelity contract clauses for known suppliers (NanoCore Net 30, 0.02% delay penalty, Section 15.2 force majeure fire clause, $5M cap; BetaElectro EU-governed agreement with €2.5M cap) and custom contract text in state metadata.
+    * **Resilient Deterministic Fallback Synthesis**: Automatically recovers with deterministic `ContractAnalysis` if the vLLM cluster encounters network outages or 5xx failures, ensuring continuous LangGraph pipeline operation.
+    * **LangGraph State Machine Integration**: Emits state transitions conforming to `SupplierRiskState` (`current_node="contract"`, `workflow_status=WorkflowStatus.ANALYZING_CONTRACTS`, `contract_analysis`, `evidence`, `audit_events`).
+  - `src/agents/nodes/__init__.py`: Package exports for `ContractAgent`, `get_contract_agent`, `contract_node`, and `NODE_CONTRACT`.
+  - `src/agents/graph.py`: Replaced `contract_node` stub with production implementation, connecting real contract extraction into the StateGraph DAG.
+  - 12 unit tests in `tests/unit/test_contract_agent.py` achieving **100% statement and 100% branch coverage** on `src/agents/nodes/contract_agent.py` (83 statements), bringing total test suite to 589 tests (97.47% project-wide coverage).
 
 ---
 
@@ -619,6 +630,12 @@
     - Research synthesis produces strongly-typed `ResearchAnalysis` models (P8-3) with verifiable citations and source provenance.
     - Agent execution incorporates deterministic rule-based fallback synthesis, guaranteeing uninterrupted workflow progression during LLM provider rate limits or service degradation.
 
+44. **Confidential Contract VPC Isolation, Sovereign Data Residency & Legal Extraction (SEC-046, NFR-SEC-02)**:
+    - Supplier contract analysis (`src/agents/nodes/contract_agent.py`) strictly enforces data sovereignty boundaries through `ConfidentialContractRouter`. All contracts governed by EU/EEA jurisdictions (32 member states), classified as `CONFIDENTIAL`, `HIGHLY_CONFIDENTIAL`, or `RESTRICTED`, or explicitly flagged as `is_eu_regulated` or `is_confidential` are routed exclusively to self-hosted vLLM GPU clusters within the private VPC. Attempting to route sovereign contracts to external cloud providers (Bedrock) raises `VLLMDataSovereigntyViolationError` (HTTP 403 `DATA_SOVEREIGNTY_VIOLATION`).
+    - All raw contract texts pass through `QuarantinedReader.sanitize()` with SHA-256 hashing before processing, stripping malicious injection payloads and HTML/script tags.
+    - Outputs conform strictly to Pydantic v2 `ContractAnalysis` models with exact `Decimal` precision for delay penalty percentages and liability caps (BR-RULE-001).
+    - Features deterministic fallback synthesis on vLLM service disruptions, ensuring workflow continuity without sacrificing safety.
+
 ---
 
 ## 5. Next Planned Tasks
@@ -627,7 +644,7 @@
   - **P9-1**: LangGraph `AgentState` and `StateGraph` skeleton (`src/agents/state.py`, `src/agents/graph.py`) (`feature/agents-langgraph-skeleton`). Completed ✅
   - **P9-2**: Triage agent node (`src/agents/nodes/triage_agent.py`) (`feature/agents-triage-node`). Completed ✅
   - **P9-3**: Research agent node (`src/agents/nodes/research_agent.py`) (`feature/agents-research-node`). Completed ✅
-  - **P9-4**: Contract agent node (`src/agents/nodes/contract_agent.py`) (`feature/agents-contract-node`). Pending ❌
+  - **P9-4**: Contract agent node (`src/agents/nodes/contract_agent.py`) (`feature/agents-contract-node`). Completed ✅
   - **P9-5**: Risk agent node (`src/agents/nodes/risk_agent.py`) (`feature/agents-risk-node`). Pending ❌
   - **P9-6**: Recommendation agent node (`src/agents/nodes/recommendation_agent.py`) (`feature/agents-recommendation-node`). Pending ❌
 

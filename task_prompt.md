@@ -1,6 +1,6 @@
 You have access to the project's authoritative documentation: `TASKS.md`, `CLAUDE.md`, `GEMINI.md`, `.agents/rules/`, and architecture specifications in `docs/` (`HLD_*.md`, `LLD_*.md`, `PRD_*.md`, `BRD_*.md`, `FRD_*.md`).
 
-Go ahead and complete **P8-4 · vLLM confidential contract client — routes EU-regulated contracts to self-hosted vLLM endpoint, never to Bedrock**, as defined in `TASKS.md`.
+Go ahead and complete **P8-5 · Mock LLM client for offline tests — returns fixture JSON matching Pydantic schemas; activated by USE_MOCK_LLM=true**, as defined in `TASKS.md`.
 
 ---
 

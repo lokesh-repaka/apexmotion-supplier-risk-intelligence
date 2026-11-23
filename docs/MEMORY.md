@@ -23,11 +23,11 @@
 | **Phase 5 Progress** | 5 / 5 Tasks Completed | Completed ✅ |
 | **Phase 6 Progress** | 4 / 4 Tasks Completed | Completed ✅ |
 | **Phase 7 Progress** | 5 / 5 Tasks Completed | Completed ✅ |
-| **Phase 8 Progress** | 3 / 5 Tasks Completed (60%) | In Progress 🔄 |
-| **Total Test Suites** | 38 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`, `test_localstack_bootstrap.py`, `test_redpanda_topics.py`, `test_neptune_emulation.py`, `test_makefile.py`, `test_database_models.py`, `test_database_migrations.py`, `test_database_repositories.py`, `test_token_hash_index.py`, `test_opensearch_client.py`, `test_security_rbac.py`, `test_hitl_tokens.py`, `test_demo_tokens.py`, `test_spend_tier_router.py`, `test_audit_writer.py`, `test_neptune_client.py`, `test_graph_seed.py`, `test_cypher_queries.py`, `test_supplier_traversal.py`, `test_graph_traversal_paths.py`, `test_kafka_consumer.py`, `test_kafka_producer.py`, `test_kafka_schemas.py`, `test_kafka_consumer_integration.py`, `test_risk_calculator.py`, `test_risk_scorer.py`, `test_inventory_service.py`, `test_alert_service.py`, `test_nanocore_golden.py`, `test_litellm_gateway.py`, `test_quarantined_reader.py`, `test_llm_models.py`) | PASSED ✅ |
-| **Total Test Cases** | 475 tests (456 unit + 11 integration + 8 golden) | 100% Passing (0 failures) |
-| **Code Coverage (`src/`)** | **96.81%** statement coverage (`src/llm/models.py`, `src/llm/quarantined_reader.py`, `src/llm/gateway.py`, `src/services/alert_service.py`, `src/services/risk/calculator.py`, `src/services/risk/scorer.py`, `src/database/repositories/inventory_repository.py`, `src/kafka/handlers.py`, and `src/kafka/schemas/` at 100%; `src/database/repositories/risk_alert_repository.py` at 96%; `src/services/risk/inventory_service.py` at 92%) | Exceeds 80% DoD gate |
-| **Active Branch** | `feature/llm-pydantic-output-schemas` $\to$ `development` | Clean |
+| **Phase 8 Progress** | 4 / 5 Tasks Completed (80%) | In Progress 🔄 |
+| **Total Test Suites** | 39 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`, `test_localstack_bootstrap.py`, `test_redpanda_topics.py`, `test_neptune_emulation.py`, `test_makefile.py`, `test_database_models.py`, `test_database_migrations.py`, `test_database_repositories.py`, `test_token_hash_index.py`, `test_opensearch_client.py`, `test_security_rbac.py`, `test_hitl_tokens.py`, `test_demo_tokens.py`, `test_spend_tier_router.py`, `test_audit_writer.py`, `test_neptune_client.py`, `test_graph_seed.py`, `test_cypher_queries.py`, `test_supplier_traversal.py`, `test_graph_traversal_paths.py`, `test_kafka_consumer.py`, `test_kafka_producer.py`, `test_kafka_schemas.py`, `test_kafka_consumer_integration.py`, `test_risk_calculator.py`, `test_risk_scorer.py`, `test_inventory_service.py`, `test_alert_service.py`, `test_nanocore_golden.py`, `test_litellm_gateway.py`, `test_quarantined_reader.py`, `test_llm_models.py`, `test_vllm_client.py`) | PASSED ✅ |
+| **Total Test Cases** | 511 tests (492 unit + 11 integration + 8 golden) | 100% Passing (0 failures) |
+| **Code Coverage (`src/`)** | **96.98%** statement coverage (`src/llm/vllm_client.py`, `src/llm/models.py`, `src/llm/quarantined_reader.py`, `src/llm/gateway.py`, `src/services/alert_service.py`, `src/services/risk/calculator.py`, `src/services/risk/scorer.py`, `src/database/repositories/inventory_repository.py`, `src/kafka/handlers.py`, and `src/kafka/schemas/` at 100%; `src/database/repositories/risk_alert_repository.py` at 96%; `src/services/risk/inventory_service.py` at 92%) | Exceeds 80% DoD gate |
+| **Active Branch** | `feature/llm-vllm-contract-client` $\to$ `development` | Clean |
 
 ---
 
@@ -437,6 +437,17 @@
     * **Structured Output Parsing Pipeline**: `parse_structured_llm_response()` safely strips markdown code fences (` ```json ... ``` `), parses JSON, validates against the target Pydantic model, and raises RFC 7807 compatible `StructuredOutputParsingError` (HTTP 422 `ERR_422_UNSTRUCTURED_OUTPUT`) on invalid free text.
   - `src/llm/__init__.py`: Package exports for all models, enums, exception classes, and parsing utilities.
   - 22 comprehensive unit tests in `tests/unit/test_llm_models.py` achieving **100% statement and branch coverage** on `src/llm/models.py` (172 statements), bringing total test suite to 475 tests (96.81% project-wide coverage).
+- **P8-4 · vLLM Confidential Contract Client (`feature/llm-vllm-contract-client`)**: Completed ✅
+  - `src/llm/vllm_client.py`: Implemented self-hosted vLLM confidential contract client (`VLLMClient`) and data sovereignty router (`ConfidentialContractRouter`) enforcing strict isolation of proprietary agreements:
+    * **Data Sovereignty Enforcement (NFR-SEC-02, CLAUDE.md Sec 5.2, GAP-002)**: Directs EU-regulated agreements (32 EU/EEA member states), GDPR-governed agreements, and contracts classified as `CONFIDENTIAL`, `HIGHLY_CONFIDENTIAL`, or `RESTRICTED` exclusively to the private VPC self-hosted vLLM GPU cluster (`settings.VLLM_BASE_URL="http://localhost:8080"`, `VLLM_MODEL="meta-llama/Llama-3.1-70B-Instruct"`).
+    * **Mandatory Data Sovereignty Guardrail**: Implemented strict security gate (`VLLMDataSovereigntyViolationError`, HTTP 403 `DATA_SOVEREIGNTY_VIOLATION`) unconditionally blocking any attempt to route or force sovereign contracts to external third-party multi-tenant model providers (such as Amazon Bedrock Claude).
+    * **OpenAI-Compatible vLLM Protocol**: Interfaces with `/v1/chat/completions` enforcing `response_format={"type": "json_object"}`, distributed `X-Trace-ID` propagation, and exponential retry backoff on transient cluster timeouts (HTTP 504 `VLLMTimeoutError`) and network outages (HTTP 503 `VLLMConnectionError`).
+    * **Cryptographic SHA-256 Audit Trail & Privacy Shield (BR-RULE-007)**: Computes deterministic SHA-256 contract hashes for immutable audit logging while strictly guaranteeing raw proprietary contract text is never logged unencrypted to standard output or logs.
+    * **Strict Decimal Precision Invariant (BR-RULE-001)**: Daily delay penalties, liability ceilings, and commercial terms strictly enforce `Decimal` precision with zero floating-point conversion.
+    * **Deterministic Offline Isolation (USE_MOCK_LLM=true)**: Produces deterministic schema-compliant `ContractAnalysis` payloads adhering to P8-3 models without external network or GPU cluster I/O.
+  - `src/core/config.py`: Added `VLLM_MODEL` and `VLLM_API_KEY` configuration settings.
+  - `src/llm/__init__.py`: Package exports for `VLLMClient`, `ConfidentialContractRouter`, `ContractMetadata`, `ContractClassification`, `EU_EEA_JURISDICTIONS`, exception classes, and dependency-injection singletons.
+  - 36 comprehensive unit tests in `tests/unit/test_vllm_client.py` achieving **100% statement and branch coverage** on `src/llm/vllm_client.py` (223 statements), bringing total test suite to 511 tests (96.98% project-wide coverage).
 
 ---
 
@@ -525,6 +536,11 @@
     - All external text (supplier contracts, news feeds, SEC disclosures, emails) must pass through `QuarantinedReader` before inclusion in any LLM prompt (CLAUDE.md Sec 8.1). Strips non-printable ASCII characters (`[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]`), cleans HTML/XML, neutralizes delimiter breakout tags (`</untrusted_supplier_data>`, `<untrusted_signal>`, `<system>`, `<instructions>`), detects and redacts high-risk prompt injection directives, enforces max token budgets with binary search truncation, computes deterministic SHA-256 hashes, encapsulates content in `<untrusted_supplier_data>`, and writes immutable forensic records to `audit_logs` (BR-RULE-007).
 38. **Pydantic Schema Output Enforcement & Free-Text Rejection (SEC-040)**:
     - All LLM completions consumed by agent nodes must strictly adhere to typed Pydantic v2 schemas (`Citation`, `ResearchAnalysis`, `ContractAnalysis`, `RiskNarrative`, `MitigationScenario`, `RecommendationReport`, `IncidentCaseDossier`). Free-text responses and non-JSON output are rejected with `StructuredOutputParsingError` (HTTP 422 RFC 7807). Schemas enforce `extra="forbid"` to eliminate prompt-injection attribute pollution, validate that all monetary amounts and penalties use Python `Decimal` (BR-RULE-001), guarantee net financial benefit arithmetic consistency, and forbid bypassing human spend gates (`requires_hitl=True` when cost > 0).
+39. **Confidential Contract Data Sovereignty & VPC-Only Ingestion Gate (SEC-041, NFR-SEC-02)**:
+    - Supplier contracts and agreements governed by EU/EEA jurisdictions (32 member states), classified as `CONFIDENTIAL`, `HIGHLY_CONFIDENTIAL`, or `RESTRICTED`, or explicitly flagged as `is_eu_regulated` or `is_confidential` must NEVER leave the private VPC or be transmitted to external multi-tenant model APIs (such as Amazon Bedrock Claude).
+    - Data sovereignty routing (`ConfidentialContractRouter`) directs these agreements exclusively to private self-hosted vLLM GPU clusters (2x g6e.12xlarge on AWS EKS).
+    - Attempting to route sovereign contracts to external providers triggers `VLLMDataSovereigntyViolationError` (HTTP 403 `DATA_SOVEREIGNTY_VIOLATION`).
+    - All contract texts are hashed via SHA-256 for audit logging (BR-RULE-007), and raw text is strictly shielded from unencrypted stdout or application logs.
 
 ---
 
@@ -533,7 +549,7 @@
   - **P8-1**: LiteLLM gateway client (`src/llm/gateway.py`) — routes to Bedrock Claude 3.5 Sonnet/Haiku, fallback, rate limit, cost tracking (`feature/llm-litellm-gateway`). Completed ✅
   - **P8-2**: Quarantined Reader (`src/llm/quarantined_reader.py`) — strips tags, wraps in `<untrusted_supplier_data>`, enforces max token budget, hashes to audit log (`feature/llm-quarantined-reader`). Completed ✅
   - **P8-3**: Pydantic output schemas (`src/llm/models.py`) — typed response models for every LLM call; rejects free-text responses (`feature/llm-pydantic-output-schemas`). Completed ✅
-  - **P8-4**: vLLM confidential contract client — routes EU-regulated contracts to self-hosted vLLM endpoint, never to Bedrock (`feature/llm-vllm-contract-client`).
-  - **P8-5**: Mock LLM client for offline tests — returns fixture JSON matching Pydantic schemas; activated by `USE_MOCK_LLM=true` (`feature/llm-mock-client-fixtures`).
+  - **P8-4**: vLLM confidential contract client — routes EU-regulated contracts to self-hosted vLLM endpoint, never to Bedrock (`feature/llm-vllm-contract-client`). Completed ✅
+  - **P8-5**: Mock LLM client for offline tests — returns fixture JSON matching Pydantic schemas; activated by `USE_MOCK_LLM=true` (`feature/llm-mock-client-fixtures`). Pending ❌
 
 

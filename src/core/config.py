@@ -124,6 +124,14 @@ class Settings(BaseSettings):
         default="http://localhost:8080",
         description="Self-hosted vLLM endpoint for confidential contracts",
     )
+    VLLM_MODEL: str = Field(
+        default="meta-llama/Llama-3.1-70B-Instruct",
+        description="Self-hosted vLLM model for confidential contract extraction",
+    )
+    VLLM_API_KEY: SecretStr | None = Field(
+        default=None,
+        description="Optional API key for authenticated self-hosted vLLM endpoint",
+    )
 
     # --------------------------------------------------------------------------
     # Keycloak Identity & RBAC (OIDC)

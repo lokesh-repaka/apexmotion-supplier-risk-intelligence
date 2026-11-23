@@ -1,5 +1,14 @@
 """Services package for ApexMotion platform."""
 
+from src.services.alert_service import (
+    DEFAULT_DEDUPLICATION_WINDOW_SECONDS,
+    AlertAction,
+    AlertCreateInput,
+    AlertDeduplicationResult,
+    AlertService,
+    AlertServiceError,
+    InvalidAlertOperationError,
+)
 from src.services.risk import (
     DAYS_OF_COVER_MAX_CAP,
     DEFAULT_CACHE_TTL_SECONDS,
@@ -25,8 +34,15 @@ from src.services.risk import (
 )
 
 __all__ = [
+    "AlertAction",
+    "AlertCreateInput",
+    "AlertDeduplicationResult",
+    "AlertService",
+    "AlertServiceError",
     "DAYS_OF_COVER_MAX_CAP",
     "DEFAULT_CACHE_TTL_SECONDS",
+    "DEFAULT_DEDUPLICATION_WINDOW_SECONDS",
+    "InvalidAlertOperationError",
     "InvalidInventoryInputError",
     "InvalidInventoryOperationError",
     "InvalidRiskScoringInputError",

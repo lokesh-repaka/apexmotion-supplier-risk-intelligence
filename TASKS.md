@@ -141,7 +141,7 @@ Sub-tasks in the same phase that do not share files can be open at the same time
 | P9-2 · Triage agent node (`src/agents/nodes/triage_agent.py`) — classifies signal type (financial/logistics/geopolitical/news), deterministic routing, no LLM | `feature/agents-triage-node` | Completed ✅ |
 | P9-3 · Research agent node (`src/agents/nodes/research_agent.py`) — news scraper tool, SEC EDGAR tool, geopolitical API tool; all text via Quarantined Reader | `feature/agents-research-node` | Completed ✅ |
 | P9-4 · Contract agent node (`src/agents/nodes/contract_agent.py`) — extracts payment terms, force majeure clauses via vLLM; confidential docs never leave VPC | `feature/agents-contract-node` | Completed ✅ |
-| P9-5 · Risk agent node (`src/agents/nodes/risk_agent.py`) — calls deterministic calculator first, then LLM writes narrative explaining the computed numbers | `feature/agents-risk-node` | Pending ❌ |
+| P9-5 · Risk agent node (`src/agents/nodes/risk_agent.py`) — calls deterministic calculator first, then LLM writes narrative explaining the computed numbers | `feature/agents-risk-node` | Completed ✅ |
 | P9-6 · Recommendation agent node (`src/agents/nodes/recommendation_agent.py`) — generates alternative supplier options and spot-buy actions; never auto-approves | `feature/agents-recommendation-node` | Pending ❌ |
 
 ---
@@ -308,7 +308,7 @@ Phases 4, 5, 6, 7, and 8 all depend on Phase 3 and can be developed in parallel.
 | 6 | Kafka Event Ingestion | 4 | 4 (100%) ✅ |
 | 7 | Deterministic Risk Engine | 5 | 5 (100%) ✅ |
 | 8 | LLM Foundation | 5 | 5 (100%) ✅ |
-| 9 | LangGraph Agent Workflow | 6 | 4 (66.7%) 🔄 |
+| 9 | LangGraph Agent Workflow | 6 | 5 (83.3%) 🔄 |
 | 10 | HITL Approval System | 4 | 0 (0%) ❌ |
 | 11 | FastAPI API Routes | 6 | 0 (0%) ❌ |
 | 12 | React Frontend | 6 | 0 (0%) ❌ |
@@ -316,4 +316,4 @@ Phases 4, 5, 6, 7, and 8 all depend on Phase 3 and can be developed in parallel.
 | 14 | Unit & Integration Tests | 6 | 0 (0%) ❌ |
 | 15 | Observability | 5 | 0 (0%) ❌ |
 | 16 | Infrastructure & Delivery | 6 | 0 (0%) ❌ |
-| **Total** | | **83** | **44 (53.0%)** |
+| **Total** | | **83** | **45 (54.2%)** |

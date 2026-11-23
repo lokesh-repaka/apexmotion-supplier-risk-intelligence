@@ -108,7 +108,7 @@ Sub-tasks in the same phase that do not share files can be open at the same time
 | Task | Branch | Status |
 |------|--------|--------|
 | P7-1 · Risk calculator (`src/services/risk/calculator.py`) — Days of Cover, gap days, shortage volume, financial exposure — **all `Decimal`, zero float** | `feature/risk-calculator-core` | Completed ✅ |
-| P7-2 · Risk scorer (`src/services/risk/scorer.py`) — `CRITICAL` / `HIGH` / `MEDIUM` / `LOW` assignment from gap + exposure thresholds | `feature/risk-scorer` | Pending ❌ |
+| P7-2 · Risk scorer (`src/services/risk/scorer.py`) — `CRITICAL` / `HIGH` / `MEDIUM` / `LOW` assignment from gap + exposure thresholds | `feature/risk-scorer` | Completed ✅ |
 | P7-3 · Inventory aggregation service (`src/services/risk/inventory_service.py`) — real-time stock pull from Aurora + Redis cache | `feature/risk-inventory-service` | Pending ❌ |
 | P7-4 · Alert deduplication (`src/services/alert_service.py`) — same supplier + component within 1-hour window collapses to one alert | `feature/risk-alert-deduplication` | Pending ❌ |
 | P7-5 · NanoCore golden tests — `tests/golden/nanocore_scenario.json` asserts `days_of_cover=7.68`, `shortage_volume=24420`, `financial_exposure=2448105.00` exactly | `feature/risk-nanocore-golden-tests` | Pending ❌ |
@@ -306,7 +306,7 @@ Phases 4, 5, 6, 7, and 8 all depend on Phase 3 and can be developed in parallel.
 | 4 | Identity, Security & HITL Tokens | 5 | 5 (100%) ✅ |
 | 5 | Knowledge Graph (Neptune) | 5 | 5 (100%) ✅ |
 | 6 | Kafka Event Ingestion | 4 | 4 (100%) ✅ |
-| 7 | Deterministic Risk Engine | 5 | 1 (20%) 🔄 |
+| 7 | Deterministic Risk Engine | 5 | 2 (40%) 🔄 |
 | 8 | LLM Foundation | 5 | 0 (0%) ❌ |
 | 9 | LangGraph Agent Workflow | 6 | 0 (0%) ❌ |
 | 10 | HITL Approval System | 4 | 0 (0%) ❌ |
@@ -316,4 +316,4 @@ Phases 4, 5, 6, 7, and 8 all depend on Phase 3 and can be developed in parallel.
 | 14 | Unit & Integration Tests | 6 | 0 (0%) ❌ |
 | 15 | Observability | 5 | 0 (0%) ❌ |
 | 16 | Infrastructure & Delivery | 6 | 0 (0%) ❌ |
-| **Total** | | **83** | **31 (37.3%)** |
+| **Total** | | **83** | **32 (38.6%)** |

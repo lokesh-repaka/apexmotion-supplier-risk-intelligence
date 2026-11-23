@@ -1,4 +1,3 @@
-
 """Deterministic supply chain risk calculator (P7-1).
 
 Enforces:

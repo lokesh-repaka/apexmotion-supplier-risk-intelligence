@@ -13,12 +13,28 @@ from src.services.risk.calculator import (
     RiskAssessmentResult,
     RiskCalculator,
 )
+from src.services.risk.scorer import (
+    THRESHOLD_EXPOSURE_CRITICAL,
+    THRESHOLD_EXPOSURE_HIGH,
+    THRESHOLD_SUPPLIER_RISK_MEDIUM,
+    InvalidRiskScoringInputError,
+    RiskScorer,
+    RiskScoreResult,
+    compute_risk_level,
+)
 
 __all__ = [
     "DAYS_OF_COVER_MAX_CAP",
     "DEFAULT_OPERATING_HOURS_PER_DAY",
     "InvalidInventoryInputError",
+    "InvalidRiskScoringInputError",
     "RiskAssessmentInput",
     "RiskAssessmentResult",
     "RiskCalculator",
+    "RiskScoreResult",
+    "RiskScorer",
+    "THRESHOLD_EXPOSURE_CRITICAL",
+    "THRESHOLD_EXPOSURE_HIGH",
+    "THRESHOLD_SUPPLIER_RISK_MEDIUM",
+    "compute_risk_level",
 ]

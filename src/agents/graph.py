@@ -19,6 +19,7 @@ from langgraph.checkpoint.base import BaseCheckpointSaver
 from langgraph.graph import END, START, StateGraph
 from langgraph.graph.state import CompiledStateGraph
 
+from src.agents.nodes.triage_agent import triage_node
 from src.agents.state import (
     SupplierRiskState,
     WorkflowStatus,
@@ -54,14 +55,30 @@ def route_after_triage(state: SupplierRiskState) -> list[str]:
 
     - Explicit zero blast radius or zero impact -> dismiss.
     - Active resumption with existing HITL decision -> skip to hitl_gate.
+    - Pre-computed target nodes from triage agent -> target nodes.
     - Financial or contract signals -> contract node.
     - News or geopolitical signals -> research node.
     """
-    if state.get("metadata", {}).get("zero_impact"):
+    meta = state.get("metadata") or {}
+    if (
+        meta.get("zero_impact")
+        or meta.get("is_zero_impact")
+        or state.get("workflow_status") == WorkflowStatus.DISMISSED
+    ):
         return [NODE_DISMISS]
 
     if state.get("hitl_decision") is not None:
         return [NODE_HITL_GATE]
+
+    target_nodes = meta.get("target_nodes")
+    if target_nodes:
+        valid_destinations = [
+            n
+            for n in target_nodes
+            if n in (NODE_RESEARCH, NODE_CONTRACT, NODE_DISMISS, NODE_HITL_GATE)
+        ]
+        if valid_destinations:
+            return valid_destinations
 
     sig = str(state.get("signal_type", "news")).lower().strip()
     if sig in ("financial", "contract"):
@@ -110,27 +127,8 @@ def route_after_hitl_gate(state: SupplierRiskState) -> str:
 
 
 # ------------------------------------------------------------------------------
-# Node Stubs & Logic Handlers
+# Node Handlers & Stubs (triage_node is imported from src.agents.nodes.triage_agent)
 # ------------------------------------------------------------------------------
-
-
-def triage_node(state: SupplierRiskState) -> dict[str, Any]:
-    """Node 1: Classify incoming signal and establish investigation baseline."""
-    sig = str(state.get("signal_type", "news")).lower().strip()
-    logger.info("Triage node processing signal type: %s for alert: %s", sig, state.get("alert_id"))
-
-    status = (
-        WorkflowStatus.DISMISSED
-        if state.get("metadata", {}).get("zero_impact")
-        else WorkflowStatus.TRIAGED
-    )
-
-    return {
-        "current_node": NODE_TRIAGE,
-        "execution_path": [NODE_TRIAGE],
-        "workflow_status": status,
-        "signal_type": sig,
-    }
 
 
 def research_node(state: SupplierRiskState) -> dict[str, Any]:

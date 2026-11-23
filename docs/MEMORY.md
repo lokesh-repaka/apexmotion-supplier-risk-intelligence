@@ -24,11 +24,11 @@
 | **Phase 6 Progress** | 4 / 4 Tasks Completed | Completed ✅ |
 | **Phase 7 Progress** | 5 / 5 Tasks Completed | Completed ✅ |
 | **Phase 8 Progress** | 5 / 5 Tasks Completed (100%) | Completed ✅ |
-| **Phase 9 Progress** | 1 / 6 Tasks Completed (17%) | In Progress 🔄 |
-| **Total Test Suites** | 41 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`, `test_localstack_bootstrap.py`, `test_redpanda_topics.py`, `test_neptune_emulation.py`, `test_makefile.py`, `test_database_models.py`, `test_database_migrations.py`, `test_database_repositories.py`, `test_token_hash_index.py`, `test_opensearch_client.py`, `test_security_rbac.py`, `test_hitl_tokens.py`, `test_demo_tokens.py`, `test_spend_tier_router.py`, `test_audit_writer.py`, `test_neptune_client.py`, `test_graph_seed.py`, `test_cypher_queries.py`, `test_supplier_traversal.py`, `test_graph_traversal_paths.py`, `test_kafka_consumer.py`, `test_kafka_producer.py`, `test_kafka_schemas.py`, `test_kafka_consumer_integration.py`, `test_risk_calculator.py`, `test_risk_scorer.py`, `test_inventory_service.py`, `test_alert_service.py`, `test_nanocore_golden.py`, `test_litellm_gateway.py`, `test_quarantined_reader.py`, `test_llm_models.py`, `test_vllm_client.py`, `test_mock_llm_client.py`, `test_agent_graph_skeleton.py`) | PASSED ✅ |
-| **Total Test Cases** | 550 tests (531 unit + 11 integration + 8 golden) | 100% Passing (0 failures) |
-| **Code Coverage (`src/`)** | **97.24%** statement coverage (`src/agents/`, `src/llm/`, `src/services/alert_service.py`, `src/services/risk/calculator.py`, `src/services/risk/scorer.py`, `src/kafka/handlers.py`, and `src/kafka/schemas/` at 100%; `src/database/repositories/risk_alert_repository.py` at 96%; `src/services/risk/inventory_service.py` at 92%) | Exceeds 80% DoD gate |
-| **Active Branch** | `feature/agents-langgraph-skeleton` $\to$ `development` | Clean |
+| **Phase 9 Progress** | 2 / 6 Tasks Completed (33.3%) | In Progress 🔄 |
+| **Total Test Suites** | 42 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`, `test_localstack_bootstrap.py`, `test_redpanda_topics.py`, `test_neptune_emulation.py`, `test_makefile.py`, `test_database_models.py`, `test_database_migrations.py`, `test_database_repositories.py`, `test_token_hash_index.py`, `test_opensearch_client.py`, `test_security_rbac.py`, `test_hitl_tokens.py`, `test_demo_tokens.py`, `test_spend_tier_router.py`, `test_audit_writer.py`, `test_neptune_client.py`, `test_graph_seed.py`, `test_cypher_queries.py`, `test_supplier_traversal.py`, `test_graph_traversal_paths.py`, `test_kafka_consumer.py`, `test_kafka_producer.py`, `test_kafka_schemas.py`, `test_kafka_consumer_integration.py`, `test_risk_calculator.py`, `test_risk_scorer.py`, `test_inventory_service.py`, `test_alert_service.py`, `test_nanocore_golden.py`, `test_litellm_gateway.py`, `test_quarantined_reader.py`, `test_llm_models.py`, `test_vllm_client.py`, `test_mock_llm_client.py`, `test_agent_graph_skeleton.py`, `test_triage_agent.py`) | PASSED ✅ |
+| **Total Test Cases** | 565 tests (546 unit + 11 integration + 8 golden) | 100% Passing (0 failures) |
+| **Code Coverage (`src/`)** | **97.31%** statement coverage (`src/agents/nodes/triage_agent.py`, `src/agents/state.py`, `src/agents/graph.py`, `src/llm/`, `src/services/alert_service.py`, `src/services/risk/calculator.py`, `src/services/risk/scorer.py`, `src/kafka/handlers.py`, and `src/kafka/schemas/` at 100%; `src/database/repositories/risk_alert_repository.py` at 96%; `src/services/risk/inventory_service.py` at 92%) | Exceeds 80% DoD gate |
+| **Active Branch** | `feature/agents-triage-node` $\to$ `development` | Clean |
 
 ---
 
@@ -478,6 +478,16 @@
   - `src/agents/orchestrator.py`: Implemented `InvestigationOrchestrator` lifecycle runner supporting stateful checkpointing via `MemorySaver` / `AsyncPostgresSaver`, suspension at HITL gates, and clean resumption upon human sign-off.
   - `src/agents/__init__.py`: Package exports for state models, node constants, routing functions, and orchestrator.
   - 17 unit tests in `tests/unit/test_agent_graph_skeleton.py` achieving **100% statement and branch coverage** on `src/agents/` (247 statements), bringing total test suite to 550 tests (97.24% project-wide coverage).
+- **P9-2 · Triage Agent Node (`feature/agents-triage-node`)**: Completed ✅
+  - `src/agents/nodes/triage_agent.py`: Implemented deterministic signal classifier (`TriageAgent`), immutable classification container (`TriageResult`), singleton factory (`get_triage_agent()`), and LangGraph node entrypoint (`triage_node()`):
+    * **100% Deterministic Rule & Keyword Engine (BR-RULE-001)**: Zero LLM math and zero LLM classification. Categorizes incoming disruption signals into news, financial, logistics, and geopolitical taxonomies with bounded confidence scoring (0.80 to 0.98).
+    * **Prompt Injection Defense & Quarantine (CLAUDE.md Sec 8.1 & LLD Sec 5.2)**: All untrusted text is pre-sanitized via `QuarantinedReader`, stripping control characters, script blocks, HTML/XML tags, and neutralizing delimiter breakout attacks prior to state propagation.
+    * **Early Zero-Impact Blast Radius Detection**: Automated early detection of benign or pre-cleared signals (via metadata or regex indicators), transitioning workflow to `DISMISSED` and routing directly to `NODE_DISMISS` without consuming LLM budget.
+    * **Composite Disruption Fan-Out Routing**: Multi-faceted disruptions (e.g., bankruptcy + fab fire) dynamically fan out to both `NODE_RESEARCH` and `NODE_CONTRACT` in parallel branches before converging into `NODE_RISK`.
+    * **Immutable Audit Trail Recording**: Records `SIGNAL_TRIAGED` events with detected signal type, confidence score, and target nodes into `audit_events` reducer channel.
+  - `src/agents/nodes/__init__.py`: Package exports for `triage_node`, `TriageAgent`, `TriageResult`, `get_triage_agent`, and node constants.
+  - `src/agents/graph.py`: Connected real `triage_node` and updated `route_after_triage` to honor metadata `is_zero_impact` and pre-computed `target_nodes`.
+  - 15 unit tests in `tests/unit/test_triage_agent.py` achieving **100% statement and branch coverage** on `src/agents/nodes/triage_agent.py` (112 statements), bringing total test suite to 565 tests (97.31% project-wide coverage).
 
 ---
 
@@ -583,13 +593,20 @@
     - State modification is governed by strongly-typed `SupplierRiskState` channels with additive reducers (`operator.add`) for audit trails and errors.
     - Quantitative risk calculations remain completely isolated from probabilistic agent reasoning (BR-RULE-001), and spend commitments > $0 unconditionally halt at `hitl_gate` until cryptographically verified approval tokens are submitted.
 
+42. **Deterministic Signal Triage, Input Quarantine & Multi-Path Routing (SEC-044, BR-RULE-001)**:
+    - Signal triage (`src/agents/nodes/triage_agent.py`) is 100% deterministic Python rule and keyword evaluation (zero LLM calls and zero LLM arithmetic).
+    - All untrusted disruption signals are strictly pre-sanitized through `QuarantinedReader`, stripping control characters, script/style blocks, HTML tags, and neutralizing delimiter breakout tags before mutating state.
+    - Signals are categorized into news, financial, logistics, and geopolitical taxonomies with bounded confidence scoring.
+    - Automated zero-impact blast radius detection routes benign events immediately to `NODE_DISMISS`, saving LLM compute.
+    - Multi-signal disruptions (e.g., bankruptcy + fire) dynamically fan out to both `NODE_RESEARCH` and `NODE_CONTRACT` in parallel branches before converging into quantitative risk assessment (`NODE_RISK`).
+
 ---
 
 ## 5. Next Planned Tasks
 - **Phase 8 — LLM Foundation (LiteLLM Gateway & Guardrails)**: Completed ✅ (5/5 tasks done)
 - **Phase 9 — Multi-Agent System (LangGraph Orchestration)**:
-  - **P9-1**: LangGraph `AgentState` and `StateGraph` skeleton (`src/agents/state.py`, `src/agents/graph.py`) (`feature/agent-langgraph-skeleton`). Completed ✅
-  - **P9-2**: Triage agent node (`src/agents/nodes/triage_agent.py`) (`feature/agents-triage-node`). Pending ❌
+  - **P9-1**: LangGraph `AgentState` and `StateGraph` skeleton (`src/agents/state.py`, `src/agents/graph.py`) (`feature/agents-langgraph-skeleton`). Completed ✅
+  - **P9-2**: Triage agent node (`src/agents/nodes/triage_agent.py`) (`feature/agents-triage-node`). Completed ✅
   - **P9-3**: Research agent node (`src/agents/nodes/research_agent.py`) (`feature/agents-research-node`). Pending ❌
   - **P9-4**: Contract agent node (`src/agents/nodes/contract_agent.py`) (`feature/agents-contract-node`). Pending ❌
   - **P9-5**: Risk agent node (`src/agents/nodes/risk_agent.py`) (`feature/agents-risk-node`). Pending ❌

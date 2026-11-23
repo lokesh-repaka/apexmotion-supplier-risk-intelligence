@@ -23,10 +23,11 @@
 | **Phase 5 Progress** | 5 / 5 Tasks Completed | Completed ✅ |
 | **Phase 6 Progress** | 4 / 4 Tasks Completed | Completed ✅ |
 | **Phase 7 Progress** | 5 / 5 Tasks Completed | Completed ✅ |
-| **Total Test Suites** | 35 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`, `test_localstack_bootstrap.py`, `test_redpanda_topics.py`, `test_neptune_emulation.py`, `test_makefile.py`, `test_database_models.py`, `test_database_migrations.py`, `test_database_repositories.py`, `test_token_hash_index.py`, `test_opensearch_client.py`, `test_security_rbac.py`, `test_hitl_tokens.py`, `test_demo_tokens.py`, `test_spend_tier_router.py`, `test_audit_writer.py`, `test_neptune_client.py`, `test_graph_seed.py`, `test_cypher_queries.py`, `test_supplier_traversal.py`, `test_graph_traversal_paths.py`, `test_kafka_consumer.py`, `test_kafka_producer.py`, `test_kafka_schemas.py`, `test_kafka_consumer_integration.py`, `test_risk_calculator.py`, `test_risk_scorer.py`, `test_inventory_service.py`, `test_alert_service.py`, `test_nanocore_golden.py`) | PASSED ✅ |
-| **Total Test Cases** | 405 tests (386 unit + 11 integration + 8 golden) | 100% Passing (0 failures) |
-| **Code Coverage (`src/`)** | **96.31%** statement coverage (`src/services/alert_service.py`, `src/services/risk/calculator.py`, `src/services/risk/scorer.py`, `src/database/repositories/inventory_repository.py`, `src/kafka/handlers.py`, and `src/kafka/schemas/` at 100%; `src/database/repositories/risk_alert_repository.py` at 96%; `src/services/risk/inventory_service.py` at 92%) | Exceeds 80% DoD gate |
-| **Active Branch** | `feature/risk-nanocore-golden-tests` $\to$ `development` | Clean |
+| **Phase 8 Progress** | 1 / 5 Tasks Completed (20%) | In Progress 🔄 |
+| **Total Test Suites** | 36 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`, `test_localstack_bootstrap.py`, `test_redpanda_topics.py`, `test_neptune_emulation.py`, `test_makefile.py`, `test_database_models.py`, `test_database_migrations.py`, `test_database_repositories.py`, `test_token_hash_index.py`, `test_opensearch_client.py`, `test_security_rbac.py`, `test_hitl_tokens.py`, `test_demo_tokens.py`, `test_spend_tier_router.py`, `test_audit_writer.py`, `test_neptune_client.py`, `test_graph_seed.py`, `test_cypher_queries.py`, `test_supplier_traversal.py`, `test_graph_traversal_paths.py`, `test_kafka_consumer.py`, `test_kafka_producer.py`, `test_kafka_schemas.py`, `test_kafka_consumer_integration.py`, `test_risk_calculator.py`, `test_risk_scorer.py`, `test_inventory_service.py`, `test_alert_service.py`, `test_nanocore_golden.py`, `test_litellm_gateway.py`) | PASSED ✅ |
+| **Total Test Cases** | 424 tests (405 unit + 11 integration + 8 golden) | 100% Passing (0 failures) |
+| **Code Coverage (`src/`)** | **96.55%** statement coverage (`src/llm/gateway.py`, `src/services/alert_service.py`, `src/services/risk/calculator.py`, `src/services/risk/scorer.py`, `src/database/repositories/inventory_repository.py`, `src/kafka/handlers.py`, and `src/kafka/schemas/` at 100%; `src/database/repositories/risk_alert_repository.py` at 96%; `src/services/risk/inventory_service.py` at 92%) | Exceeds 80% DoD gate |
+| **Active Branch** | `feature/llm-litellm-gateway` $\to$ `development` | Clean |
 
 ---
 
@@ -399,6 +400,21 @@
   - 8 comprehensive golden tests in `tests/golden/test_nanocore_golden.py` passing in 0.49s, bringing total test suite to 405 tests (96.31% project-wide coverage).
   - **Phase 7 (Deterministic Risk Engine) is now 100% complete (5/5 tasks).**
 
+### Phase 8: LLM Foundation (LiteLLM Gateway & Guardrails)
+- **P8-1 · LiteLLM Gateway Client (`feature/llm-litellm-gateway`)**: Completed ✅
+  - `src/llm/gateway.py`: Implemented unified LiteLLM gateway client routing completions to Amazon Bedrock Anthropic models with automated resilience, fallback, and cost metering:
+    * **Model Routing by Task Complexity**:
+      - `TaskType.SYNTHESIS` & `TaskType.GENERAL` route to Claude 3.5 Sonnet (`anthropic.claude-3-5-sonnet-20241022-v2:0`).
+      - `TaskType.TRIAGE` & `TaskType.EXTRACTION` route to Claude 3.5 Haiku (`anthropic.claude-3-5-haiku-20241022-v1:0`).
+    * **Automated Fallback & Resilience**: Transparently catches transient 429 RateLimit, 503 ServiceUnavailable, and 504 Timeout errors from the primary model and retries via the secondary model (e.g., Sonnet -> Haiku) with `is_fallback=True` without breaking caller flows.
+    * **Error Standardization**: Translates raw vendor exceptions into standard domain exceptions (`LLMRateLimitError`, `LLMTimeoutError`, `LLMServiceUnavailableError`, `LLMContextWindowExceededError`, `LLMGatewayError`).
+    * **Strict Decimal Token Cost Tracking (BR-RULE-001)**: Computes input, output, and total costs using exact `Decimal` precision quantized to `$0.000001` (micro-dollar precision) based on Bedrock rates ($3.00/$15.00 per 1M tokens for Sonnet; $0.80/$4.00 per 1M tokens for Haiku). Thread-safe cumulative ledger tracking via `get_cost_report()` and `reset_cost_tracking()`.
+    * **Offline Mock Execution**: Zero external network dependency when `use_mock=True` or `USE_MOCK_LLM=true`, enabling fast, deterministic offline testing.
+    * **In-Memory Semantic Caching**: SHA-256 prompt hashing for hit/miss caching with configurable bypass.
+    * **Distributed Trace Propagation**: Propagates context `trace_id` to response metadata.
+  - `src/llm/__init__.py`: Package exports for `LiteLLMGateway`, `LLMResponse`, `CostReport`, `TaskType`, `calculate_token_cost`, `get_litellm_gateway`, and exception classes.
+  - 19 comprehensive unit tests in `tests/unit/test_litellm_gateway.py` achieving **100% statement and branch coverage** on `src/llm/gateway.py` (235 statements), bringing total test suite to 424 tests (96.55% project-wide coverage).
+
 ---
 
 ## 4. Architectural Invariants Enforced
@@ -480,12 +496,14 @@
     - Deterministic stock aggregation in `src/services/risk/inventory_service.py` enforces strict Decimal precision across all balances, burn rates, and valuations, rejecting negative underflows with `InvalidInventoryOperationError` (BR-RULE-001). Caching adheres to LLD Section 6.1 with 30-minute TTL (1800s) and cache-through synchronization on updates. Dual circuit-breaker degradation protects against distributed partitions: Redis timeouts gracefully fall back to Aurora PostgreSQL direct queries, while database partitions fall back to Redis cached balances, preventing cascading pipeline halts.
 35. **Canonical Golden Benchmark Enforcement & Build-Failure Guard (SEC-037)**:
     - All risk engine arithmetic, severity classification, and spend-tier routing must pass the canonical NanoCore reference scenario (`tests/golden/nanocore_scenario.json`) with 100% mathematical precision (`days_of_cover=7.68`, `gap_days=1.32`, `shortage_volume=24420`, `financial_exposure=$2,448,105.00`, `factory_halt_exposure=€2,692,800.00`, `total_exposure=$5,140,905.00`, `severity=CRITICAL`, `HITL=DUAL_VP`). Per CLAUDE.md Section 14, if `test_nanocore_golden()` fails, the build fails unconditionally, ensuring zero regression of The Triad of Responsibility (BR-RULE-001).
+36. **Unified Model Routing, Automated Fallback & Exact Token Cost Tracking (SEC-038)**:
+    - Unified LiteLLM gateway (`src/llm/gateway.py`) routes completions according to task complexity (Bedrock Claude 3.5 Sonnet for synthesis/general, Claude 3.5 Haiku for triage/extraction). Automatically fails over to the fallback model on 429 RateLimit, 503 ServiceUnavailable, or 504 Timeout errors without cascading exceptions to calling workflows. Standardizes third-party exceptions into domain errors (`LLMRateLimitError`, `LLMTimeoutError`, etc.). Computes exact monetary costs in `Decimal` ($0.000001 precision per 1M tokens) enforcing BR-RULE-001, maintains running cumulative ledgers across threads, and propagates distributed `trace_id` metadata.
 
 ---
 
 ## 5. Next Planned Tasks
 - **Phase 8 — LLM Foundation (LiteLLM Gateway & Guardrails)**:
-  - **P8-1**: LiteLLM gateway client (`src/llm/gateway.py`) — routes to Bedrock Claude 3.5 Sonnet/Haiku, fallback, rate limit, cost tracking (`feature/llm-litellm-gateway`).
+  - **P8-1**: LiteLLM gateway client (`src/llm/gateway.py`) — routes to Bedrock Claude 3.5 Sonnet/Haiku, fallback, rate limit, cost tracking (`feature/llm-litellm-gateway`). Completed ✅
   - **P8-2**: Quarantined Reader (`src/llm/quarantined_reader.py`) — strips tags, wraps in `<untrusted_supplier_data>`, enforces max token budget, hashes to audit log (`feature/llm-quarantined-reader`).
   - **P8-3**: Pydantic output schemas (`src/llm/models.py`) — typed response models for every LLM call; rejects free-text responses (`feature/llm-pydantic-output-schemas`).
   - **P8-4**: vLLM confidential contract client — routes EU-regulated contracts to self-hosted vLLM endpoint, never to Bedrock (`feature/llm-vllm-contract-client`).

@@ -122,7 +122,7 @@ Sub-tasks in the same phase that do not share files can be open at the same time
 
 | Task | Branch | Status |
 |------|--------|--------|
-| P8-1 · LiteLLM gateway client (`src/llm/gateway.py`) — routes to Bedrock Claude 3.5 Sonnet/Haiku, fallback, rate limit, cost tracking | `feature/llm-litellm-gateway` | Pending ❌ |
+| P8-1 · LiteLLM gateway client (`src/llm/gateway.py`) — routes to Bedrock Claude 3.5 Sonnet/Haiku, fallback, rate limit, cost tracking | `feature/llm-litellm-gateway` | Completed ✅ |
 | P8-2 · Quarantined Reader (`src/llm/quarantined_reader.py`) — strips tags, wraps in `<untrusted_supplier_data>`, enforces max token budget, hashes to audit log | `feature/llm-quarantined-reader` | Pending ❌ |
 | P8-3 · Pydantic output schemas (`src/llm/models.py`) — typed response models for every LLM call; rejects free-text responses | `feature/llm-pydantic-output-schemas` | Pending ❌ |
 | P8-4 · vLLM confidential contract client — routes EU-regulated contracts to self-hosted vLLM endpoint, never to Bedrock | `feature/llm-vllm-contract-client` | Pending ❌ |
@@ -307,7 +307,7 @@ Phases 4, 5, 6, 7, and 8 all depend on Phase 3 and can be developed in parallel.
 | 5 | Knowledge Graph (Neptune) | 5 | 5 (100%) ✅ |
 | 6 | Kafka Event Ingestion | 4 | 4 (100%) ✅ |
 | 7 | Deterministic Risk Engine | 5 | 5 (100%) ✅ |
-| 8 | LLM Foundation | 5 | 0 (0%) ❌ |
+| 8 | LLM Foundation | 5 | 1 (20%) 🔄 |
 | 9 | LangGraph Agent Workflow | 6 | 0 (0%) ❌ |
 | 10 | HITL Approval System | 4 | 0 (0%) ❌ |
 | 11 | FastAPI API Routes | 6 | 0 (0%) ❌ |
@@ -316,4 +316,4 @@ Phases 4, 5, 6, 7, and 8 all depend on Phase 3 and can be developed in parallel.
 | 14 | Unit & Integration Tests | 6 | 0 (0%) ❌ |
 | 15 | Observability | 5 | 0 (0%) ❌ |
 | 16 | Infrastructure & Delivery | 6 | 0 (0%) ❌ |
-| **Total** | | **83** | **35 (42.2%)** |
+| **Total** | | **83** | **36 (43.4%)** |

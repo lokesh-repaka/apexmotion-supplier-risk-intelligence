@@ -5,6 +5,7 @@ Contains:
 - Model routing, fallback, rate limiting, and exact Decimal token cost tracking.
 - QuarantinedReader: Prompt injection defense, tag stripping, token budget enforcement,
   cryptographic hashing, and passive XML structural encapsulation.
+- Pydantic Output Schemas: Strongly-typed response models for every LLM call (P8-3).
 """
 
 from src.llm.gateway import (
@@ -20,6 +21,20 @@ from src.llm.gateway import (
     calculate_token_cost,
     get_litellm_gateway,
 )
+from src.llm.models import (
+    Citation,
+    CitationSourceType,
+    ContractAnalysis,
+    IncidentCaseDossier,
+    IncidentCategory,
+    MitigationScenario,
+    MitigationStrategyType,
+    RecommendationReport,
+    ResearchAnalysis,
+    RiskNarrative,
+    StructuredOutputParsingError,
+    parse_structured_llm_response,
+)
 from src.llm.quarantined_reader import (
     DEFAULT_MAX_TOKENS,
     PromptInjectionDetectedError,
@@ -32,7 +47,12 @@ from src.llm.quarantined_reader import (
 
 __all__ = [
     "DEFAULT_MAX_TOKENS",
+    "Citation",
+    "CitationSourceType",
+    "ContractAnalysis",
     "CostReport",
+    "IncidentCaseDossier",
+    "IncidentCategory",
     "LLMContextWindowExceededError",
     "LLMGatewayError",
     "LLMRateLimitError",
@@ -40,13 +60,20 @@ __all__ = [
     "LLMServiceUnavailableError",
     "LLMTimeoutError",
     "LiteLLMGateway",
+    "MitigationScenario",
+    "MitigationStrategyType",
     "PromptInjectionDetectedError",
     "QuarantinedReader",
+    "RecommendationReport",
+    "ResearchAnalysis",
+    "RiskNarrative",
     "SanitizedPayload",
+    "StructuredOutputParsingError",
     "TaskType",
     "calculate_token_cost",
     "get_litellm_gateway",
     "get_quarantined_reader",
+    "parse_structured_llm_response",
     "quarantined_reader",
     "sanitize",
 ]

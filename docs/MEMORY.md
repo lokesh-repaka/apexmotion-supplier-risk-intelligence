@@ -23,11 +23,11 @@
 | **Phase 5 Progress** | 5 / 5 Tasks Completed | Completed ✅ |
 | **Phase 6 Progress** | 4 / 4 Tasks Completed | Completed ✅ |
 | **Phase 7 Progress** | 5 / 5 Tasks Completed | Completed ✅ |
-| **Phase 8 Progress** | 2 / 5 Tasks Completed (40%) | In Progress 🔄 |
-| **Total Test Suites** | 37 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`, `test_localstack_bootstrap.py`, `test_redpanda_topics.py`, `test_neptune_emulation.py`, `test_makefile.py`, `test_database_models.py`, `test_database_migrations.py`, `test_database_repositories.py`, `test_token_hash_index.py`, `test_opensearch_client.py`, `test_security_rbac.py`, `test_hitl_tokens.py`, `test_demo_tokens.py`, `test_spend_tier_router.py`, `test_audit_writer.py`, `test_neptune_client.py`, `test_graph_seed.py`, `test_cypher_queries.py`, `test_supplier_traversal.py`, `test_graph_traversal_paths.py`, `test_kafka_consumer.py`, `test_kafka_producer.py`, `test_kafka_schemas.py`, `test_kafka_consumer_integration.py`, `test_risk_calculator.py`, `test_risk_scorer.py`, `test_inventory_service.py`, `test_alert_service.py`, `test_nanocore_golden.py`, `test_litellm_gateway.py`, `test_quarantined_reader.py`) | PASSED ✅ |
-| **Total Test Cases** | 453 tests (434 unit + 11 integration + 8 golden) | 100% Passing (0 failures) |
-| **Code Coverage (`src/`)** | **96.67%** statement coverage (`src/llm/quarantined_reader.py`, `src/llm/gateway.py`, `src/services/alert_service.py`, `src/services/risk/calculator.py`, `src/services/risk/scorer.py`, `src/database/repositories/inventory_repository.py`, `src/kafka/handlers.py`, and `src/kafka/schemas/` at 100%; `src/database/repositories/risk_alert_repository.py` at 96%; `src/services/risk/inventory_service.py` at 92%) | Exceeds 80% DoD gate |
-| **Active Branch** | `feature/llm-quarantined-reader` $\to$ `development` | Clean |
+| **Phase 8 Progress** | 3 / 5 Tasks Completed (60%) | In Progress 🔄 |
+| **Total Test Suites** | 38 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`, `test_localstack_bootstrap.py`, `test_redpanda_topics.py`, `test_neptune_emulation.py`, `test_makefile.py`, `test_database_models.py`, `test_database_migrations.py`, `test_database_repositories.py`, `test_token_hash_index.py`, `test_opensearch_client.py`, `test_security_rbac.py`, `test_hitl_tokens.py`, `test_demo_tokens.py`, `test_spend_tier_router.py`, `test_audit_writer.py`, `test_neptune_client.py`, `test_graph_seed.py`, `test_cypher_queries.py`, `test_supplier_traversal.py`, `test_graph_traversal_paths.py`, `test_kafka_consumer.py`, `test_kafka_producer.py`, `test_kafka_schemas.py`, `test_kafka_consumer_integration.py`, `test_risk_calculator.py`, `test_risk_scorer.py`, `test_inventory_service.py`, `test_alert_service.py`, `test_nanocore_golden.py`, `test_litellm_gateway.py`, `test_quarantined_reader.py`, `test_llm_models.py`) | PASSED ✅ |
+| **Total Test Cases** | 475 tests (456 unit + 11 integration + 8 golden) | 100% Passing (0 failures) |
+| **Code Coverage (`src/`)** | **96.81%** statement coverage (`src/llm/models.py`, `src/llm/quarantined_reader.py`, `src/llm/gateway.py`, `src/services/alert_service.py`, `src/services/risk/calculator.py`, `src/services/risk/scorer.py`, `src/database/repositories/inventory_repository.py`, `src/kafka/handlers.py`, and `src/kafka/schemas/` at 100%; `src/database/repositories/risk_alert_repository.py` at 96%; `src/services/risk/inventory_service.py` at 92%) | Exceeds 80% DoD gate |
+| **Active Branch** | `feature/llm-pydantic-output-schemas` $\to$ `development` | Clean |
 
 ---
 
@@ -427,6 +427,16 @@
     * **Multi-Document Evidence Extraction**: `extract(documents)` processes lists of strings or dicts, returning concatenated quarantined sections for agent synthesis prompts.
   - `src/llm/__init__.py`: Package exports for `QuarantinedReader`, `SanitizedPayload`, `PromptInjectionDetectedError`, `quarantined_reader`, `get_quarantined_reader`, and `sanitize`.
   - 29 comprehensive unit tests in `tests/unit/test_quarantined_reader.py` achieving **100% statement and branch coverage** on `src/llm/quarantined_reader.py` (131 statements), bringing total test suite to 453 tests (96.67% project-wide coverage).
+- **P8-3 · Pydantic Output Schemas (`feature/llm-pydantic-output-schemas`)**: Completed ✅
+  - `src/llm/models.py`: Engineered strongly-typed Pydantic v2 output schemas enforcing structured outputs across all agent nodes and rejecting unstructured free text:
+    * **Layering Invariants (CLAUDE.md Sec 5.2 & Sec 20.4)**: Every LLM completion strictly produces a validated Pydantic model (`Citation`, `ResearchAnalysis`, `ContractAnalysis`, `RiskNarrative`, `MitigationScenario`, `RecommendationReport`, `IncidentCaseDossier`). Free-text responses are strictly rejected.
+    * **Prompt Injection Defense (`extra='forbid'`)**: All models forbid extra attributes, preventing malicious prompt injection payloads from mutating schema boundaries or injecting unvalidated control fields.
+    * **The Triad of Responsibility (BR-RULE-001)**: Mathematical calculations are decoupled from LLMs. All financial values (costs, avoided losses, net benefits, liability caps, penalty rates) strictly enforce exact `Decimal` precision with zero floating-point drift.
+    * **Arithmetic Consistency Enforcement**: `MitigationScenario` validates that `net_financial_benefit_usd == avoided_loss_usd - estimated_cost_usd`.
+    * **Mandatory Human-in-the-Loop Gating**: `RecommendationReport` enforces that any scenario with financial spend (`estimated_cost_usd > 0`) cannot bypass human authorization (`requires_hitl=True`), and validates that `recommended_scenario_id` exists in the scenario list.
+    * **Structured Output Parsing Pipeline**: `parse_structured_llm_response()` safely strips markdown code fences (` ```json ... ``` `), parses JSON, validates against the target Pydantic model, and raises RFC 7807 compatible `StructuredOutputParsingError` (HTTP 422 `ERR_422_UNSTRUCTURED_OUTPUT`) on invalid free text.
+  - `src/llm/__init__.py`: Package exports for all models, enums, exception classes, and parsing utilities.
+  - 22 comprehensive unit tests in `tests/unit/test_llm_models.py` achieving **100% statement and branch coverage** on `src/llm/models.py` (172 statements), bringing total test suite to 475 tests (96.81% project-wide coverage).
 
 ---
 
@@ -513,6 +523,8 @@
     - Unified LiteLLM gateway (`src/llm/gateway.py`) routes completions according to task complexity (Bedrock Claude 3.5 Sonnet for synthesis/general, Claude 3.5 Haiku for triage/extraction). Automatically fails over to the fallback model on 429 RateLimit, 503 ServiceUnavailable, or 504 Timeout errors without cascading exceptions to calling workflows. Standardizes third-party exceptions into domain errors (`LLMRateLimitError`, `LLMTimeoutError`, etc.). Computes exact monetary costs in `Decimal` ($0.000001 precision per 1M tokens) enforcing BR-RULE-001, maintains running cumulative ledgers across threads, and propagates distributed `trace_id` metadata.
 37. **Untrusted External Text Quarantine & Passive XML Delimiter Encapsulation (SEC-039, BR-RULE-007)**:
     - All external text (supplier contracts, news feeds, SEC disclosures, emails) must pass through `QuarantinedReader` before inclusion in any LLM prompt (CLAUDE.md Sec 8.1). Strips non-printable ASCII characters (`[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]`), cleans HTML/XML, neutralizes delimiter breakout tags (`</untrusted_supplier_data>`, `<untrusted_signal>`, `<system>`, `<instructions>`), detects and redacts high-risk prompt injection directives, enforces max token budgets with binary search truncation, computes deterministic SHA-256 hashes, encapsulates content in `<untrusted_supplier_data>`, and writes immutable forensic records to `audit_logs` (BR-RULE-007).
+38. **Pydantic Schema Output Enforcement & Free-Text Rejection (SEC-040)**:
+    - All LLM completions consumed by agent nodes must strictly adhere to typed Pydantic v2 schemas (`Citation`, `ResearchAnalysis`, `ContractAnalysis`, `RiskNarrative`, `MitigationScenario`, `RecommendationReport`, `IncidentCaseDossier`). Free-text responses and non-JSON output are rejected with `StructuredOutputParsingError` (HTTP 422 RFC 7807). Schemas enforce `extra="forbid"` to eliminate prompt-injection attribute pollution, validate that all monetary amounts and penalties use Python `Decimal` (BR-RULE-001), guarantee net financial benefit arithmetic consistency, and forbid bypassing human spend gates (`requires_hitl=True` when cost > 0).
 
 ---
 
@@ -520,7 +532,7 @@
 - **Phase 8 — LLM Foundation (LiteLLM Gateway & Guardrails)**:
   - **P8-1**: LiteLLM gateway client (`src/llm/gateway.py`) — routes to Bedrock Claude 3.5 Sonnet/Haiku, fallback, rate limit, cost tracking (`feature/llm-litellm-gateway`). Completed ✅
   - **P8-2**: Quarantined Reader (`src/llm/quarantined_reader.py`) — strips tags, wraps in `<untrusted_supplier_data>`, enforces max token budget, hashes to audit log (`feature/llm-quarantined-reader`). Completed ✅
-  - **P8-3**: Pydantic output schemas (`src/llm/models.py`) — typed response models for every LLM call; rejects free-text responses (`feature/llm-pydantic-output-schemas`).
+  - **P8-3**: Pydantic output schemas (`src/llm/models.py`) — typed response models for every LLM call; rejects free-text responses (`feature/llm-pydantic-output-schemas`). Completed ✅
   - **P8-4**: vLLM confidential contract client — routes EU-regulated contracts to self-hosted vLLM endpoint, never to Bedrock (`feature/llm-vllm-contract-client`).
   - **P8-5**: Mock LLM client for offline tests — returns fixture JSON matching Pydantic schemas; activated by `USE_MOCK_LLM=true` (`feature/llm-mock-client-fixtures`).
 

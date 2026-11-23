@@ -1,6 +1,6 @@
 You have access to the project's authoritative documentation: `TASKS.md`, `CLAUDE.md`, `GEMINI.md`, `.agents/rules/`, and architecture specifications in `docs/` (`HLD_*.md`, `LLD_*.md`, `PRD_*.md`, `BRD_*.md`, `FRD_*.md`).
 
-Go ahead and complete **P9-5 · Risk agent node (`src/agents/nodes/risk_agent.py`) — calls deterministic calculator first, then LLM writes narrative explaining the computed numbers**, as defined in `TASKS.md`.
+Go ahead and complete **P9-6 · Recommendation agent node (`src/agents/nodes/recommendation_agent.py`) — generates alternative supplier options and spot-buy actions; never auto-approves**, as defined in `TASKS.md`.
 
 ---
 

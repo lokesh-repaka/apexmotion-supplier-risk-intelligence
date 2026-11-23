@@ -409,14 +409,15 @@ async def test_end_to_end_financial_contract_flow() -> None:
     assert result["contract_analysis"]["payment_terms"] == "Net 30"
 
 
-def test_risk_node_and_recommendation_fallbacks() -> None:
+@pytest.mark.asyncio
+async def test_risk_node_and_recommendation_fallbacks() -> None:
     """Verify fallback paths in risk and recommendation nodes when inputs or types vary."""
     # 1. Direct call to risk_node without prior metrics or stock inputs
     empty_state = create_initial_state(
         alert_id="ALT-EMPTY",
         supplier_id="SUP-EMPTY",
     )
-    risk_out = risk_node(empty_state)
+    risk_out = await risk_node(empty_state)
     assert risk_out["risk_metrics"]["days_of_cover"] == Decimal("10.00")
     assert risk_out["severity"] == RiskLevel.LOW
 

@@ -21,6 +21,7 @@ from langgraph.graph.state import CompiledStateGraph
 
 from src.agents.nodes.contract_agent import contract_node
 from src.agents.nodes.research_agent import research_node
+from src.agents.nodes.risk_agent import risk_node
 from src.agents.nodes.triage_agent import triage_node
 from src.agents.state import (
     SupplierRiskState,
@@ -28,8 +29,6 @@ from src.agents.state import (
 )
 from src.core.hitl_tokens import get_spend_tier
 from src.core.logging import get_logger
-from src.kafka.schemas.risk_alert import RiskLevel
-from src.services.risk.calculator import RiskAssessmentInput, RiskCalculator
 
 logger = get_logger("apexmotion.agents.graph")
 
@@ -129,79 +128,8 @@ def route_after_hitl_gate(state: SupplierRiskState) -> str:
 
 
 # ------------------------------------------------------------------------------
-# Node Handlers & Stubs (triage_node, research_node, and contract_node imported from nodes)
+# Node Handlers & Stubs (triage_node, research_node, contract_node, and risk_node imported from nodes)
 # ------------------------------------------------------------------------------
-
-
-def risk_node(state: SupplierRiskState) -> dict[str, Any]:
-    """Node 4: Execute deterministic Python risk calculations (BR-RULE-001).
-
-    Computes Days of Cover, Shortage Gap, Shortage Volume, and Financial Exposure.
-    Strictly isolated from probabilistic LLM arithmetic.
-    """
-    logger.info(
-        "Risk node executing deterministic calculations for alert: %s", state.get("alert_id")
-    )
-
-    metrics = state.get("risk_metrics")
-
-    # If raw stock and rates are present, execute the canonical calculation engine
-    if metrics is None and (
-        state.get("current_stock") is not None
-        and state.get("daily_consumption_rate") is not None
-        and state.get("eta_days") is not None
-        and state.get("unit_cost_usd") is not None
-    ):
-        calc_input = RiskAssessmentInput(
-            current_stock=state["current_stock"],  # type: ignore[arg-type]
-            daily_consumption_rate=state["daily_consumption_rate"],  # type: ignore[arg-type]
-            eta_days=state["eta_days"],  # type: ignore[arg-type]
-            unit_cost_usd=state["unit_cost_usd"],  # type: ignore[arg-type]
-            supplier_id=state.get("supplier_id"),
-            component_sku=state.get("component_sku"),
-        )
-        calc_res = RiskCalculator().calculate(calc_input)
-        metrics = {
-            "days_of_cover": calc_res.days_of_cover,
-            "gap_days": calc_res.gap_days,
-            "shortage_volume": calc_res.shortage_volume,
-            "financial_exposure": calc_res.financial_exposure,
-            "factory_halt_exposure": calc_res.factory_halt_exposure,
-            "total_exposure": calc_res.total_exposure,
-            "is_shortage": calc_res.is_shortage,
-            "calculation_hash": calc_res.calculation_hash,
-        }
-
-    # Default fallback if metrics missing
-    if metrics is None:
-        metrics = {
-            "days_of_cover": Decimal("10.00"),
-            "gap_days": Decimal("0.00"),
-            "shortage_volume": 0,
-            "financial_exposure": Decimal("0.00"),
-            "is_shortage": False,
-        }
-
-    severity = (
-        RiskLevel.CRITICAL
-        if metrics.get("financial_exposure", Decimal("0")) > Decimal("1000000.00")
-        else RiskLevel.LOW
-    )
-
-    narrative = (
-        f"Automated risk analysis: Days of cover computed at {metrics.get('days_of_cover')} days. "
-        f"Projected shortage gap: {metrics.get('gap_days')} days. "
-        f"Financial exposure: ${metrics.get('financial_exposure', Decimal('0.00'))} USD."
-    )
-
-    return {
-        "current_node": NODE_RISK,
-        "execution_path": [NODE_RISK],
-        "workflow_status": WorkflowStatus.CALCULATING_RISK,
-        "risk_metrics": metrics,
-        "severity": severity,
-        "narrative": narrative,
-    }
 
 
 def recommendation_node(state: SupplierRiskState) -> dict[str, Any]:

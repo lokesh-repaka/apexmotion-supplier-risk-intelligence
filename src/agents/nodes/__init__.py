@@ -4,6 +4,7 @@ Provides specialized deterministic and LLM-assisted workflow nodes:
 - triage_node: Deterministic signal classification, prompt quarantine, and fan-out routing (P9-2).
 - research_node: Specialized intelligence gathering via News, SEC EDGAR, Geopolitical tools (P9-3).
 - contract_node: Confidential contract clause extraction via vLLM with data sovereignty enforcement (P9-4).
+- risk_node: Deterministic supply chain risk calculation and qualitative narrative synthesis (P9-5).
 """
 
 from src.agents.nodes.contract_agent import (
@@ -17,6 +18,12 @@ from src.agents.nodes.research_agent import (
     ResearchAgent,
     get_research_agent,
     research_node,
+)
+from src.agents.nodes.risk_agent import (
+    NODE_RISK,
+    RiskAgent,
+    get_risk_agent,
+    risk_node,
 )
 from src.agents.nodes.triage_agent import (
     NODE_DISMISS,
@@ -32,14 +39,18 @@ __all__ = [
     "NODE_CONTRACT",
     "NODE_DISMISS",
     "NODE_RESEARCH",
+    "NODE_RISK",
     "NODE_TRIAGE",
     "ResearchAgent",
+    "RiskAgent",
     "TriageAgent",
     "TriageResult",
     "contract_node",
     "get_contract_agent",
     "get_research_agent",
+    "get_risk_agent",
     "get_triage_agent",
     "research_node",
+    "risk_node",
     "triage_node",
 ]

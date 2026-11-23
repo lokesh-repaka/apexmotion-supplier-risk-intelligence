@@ -24,11 +24,11 @@
 | **Phase 6 Progress** | 4 / 4 Tasks Completed | Completed ✅ |
 | **Phase 7 Progress** | 5 / 5 Tasks Completed | Completed ✅ |
 | **Phase 8 Progress** | 5 / 5 Tasks Completed (100%) | Completed ✅ |
-| **Phase 9 Progress** | 4 / 6 Tasks Completed (66.7%) | In Progress 🔄 |
-| **Total Test Suites** | 44 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`, `test_localstack_bootstrap.py`, `test_redpanda_topics.py`, `test_neptune_emulation.py`, `test_makefile.py`, `test_database_models.py`, `test_database_migrations.py`, `test_database_repositories.py`, `test_token_hash_index.py`, `test_opensearch_client.py`, `test_security_rbac.py`, `test_hitl_tokens.py`, `test_demo_tokens.py`, `test_spend_tier_router.py`, `test_audit_writer.py`, `test_neptune_client.py`, `test_graph_seed.py`, `test_cypher_queries.py`, `test_supplier_traversal.py`, `test_graph_traversal_paths.py`, `test_kafka_consumer.py`, `test_kafka_producer.py`, `test_kafka_schemas.py`, `test_kafka_consumer_integration.py`, `test_risk_calculator.py`, `test_risk_scorer.py`, `test_inventory_service.py`, `test_alert_service.py`, `test_nanocore_golden.py`, `test_litellm_gateway.py`, `test_quarantined_reader.py`, `test_llm_models.py`, `test_vllm_client.py`, `test_mock_llm_client.py`, `test_agent_graph_skeleton.py`, `test_triage_agent.py`, `test_research_agent.py`, `test_contract_agent.py`) | PASSED ✅ |
-| **Total Test Cases** | 589 tests (570 unit + 11 integration + 8 golden) | 100% Passing (0 failures) |
-| **Code Coverage (`src/`)** | **97.47%** statement coverage (`src/agents/nodes/contract_agent.py`, `src/agents/nodes/research_agent.py`, `src/agents/tools/research_tools.py`, `src/agents/nodes/triage_agent.py`, `src/agents/state.py`, `src/agents/graph.py`, `src/llm/`, `src/services/alert_service.py`, `src/services/risk/calculator.py`, `src/services/risk/scorer.py`, `src/kafka/handlers.py`, and `src/kafka/schemas/` at 100%; `src/database/repositories/risk_alert_repository.py` at 96%; `src/services/risk/inventory_service.py` at 92%) | Exceeds 80% DoD gate |
-| **Active Branch** | `feature/agents-contract-node` $\to$ `development` | Clean |
+| **Phase 9 Progress** | 5 / 6 Tasks Completed (83.3%) | In Progress 🔄 |
+| **Total Test Suites** | 45 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`, `test_localstack_bootstrap.py`, `test_redpanda_topics.py`, `test_neptune_emulation.py`, `test_makefile.py`, `test_database_models.py`, `test_database_migrations.py`, `test_database_repositories.py`, `test_token_hash_index.py`, `test_opensearch_client.py`, `test_security_rbac.py`, `test_hitl_tokens.py`, `test_demo_tokens.py`, `test_spend_tier_router.py`, `test_audit_writer.py`, `test_neptune_client.py`, `test_graph_seed.py`, `test_cypher_queries.py`, `test_supplier_traversal.py`, `test_graph_traversal_paths.py`, `test_kafka_consumer.py`, `test_kafka_producer.py`, `test_kafka_schemas.py`, `test_kafka_consumer_integration.py`, `test_risk_calculator.py`, `test_risk_scorer.py`, `test_inventory_service.py`, `test_alert_service.py`, `test_nanocore_golden.py`, `test_litellm_gateway.py`, `test_quarantined_reader.py`, `test_llm_models.py`, `test_vllm_client.py`, `test_mock_llm_client.py`, `test_agent_graph_skeleton.py`, `test_triage_agent.py`, `test_research_agent.py`, `test_contract_agent.py`, `test_risk_agent.py`) | PASSED ✅ |
+| **Total Test Cases** | 606 tests (587 unit + 11 integration + 8 golden) | 100% Passing (0 failures) |
+| **Code Coverage (`src/`)** | **97.53%** statement coverage (`src/agents/nodes/risk_agent.py`, `src/agents/nodes/contract_agent.py`, `src/agents/nodes/research_agent.py`, `src/agents/tools/research_tools.py`, `src/agents/nodes/triage_agent.py`, `src/agents/state.py`, `src/agents/graph.py`, `src/llm/`, `src/services/alert_service.py`, `src/services/risk/calculator.py`, `src/services/risk/scorer.py`, `src/kafka/handlers.py`, and `src/kafka/schemas/` at 100%; `src/database/repositories/risk_alert_repository.py` at 96%; `src/services/risk/inventory_service.py` at 92%) | Exceeds 80% DoD gate |
+| **Active Branch** | `feature/agents-risk-node` $\to$ `development` | Clean |
 
 ---
 
@@ -512,6 +512,16 @@
   - `src/agents/nodes/__init__.py`: Package exports for `ContractAgent`, `get_contract_agent`, `contract_node`, and `NODE_CONTRACT`.
   - `src/agents/graph.py`: Replaced `contract_node` stub with production implementation, connecting real contract extraction into the StateGraph DAG.
   - 12 unit tests in `tests/unit/test_contract_agent.py` achieving **100% statement and 100% branch coverage** on `src/agents/nodes/contract_agent.py` (83 statements), bringing total test suite to 589 tests (97.47% project-wide coverage).
+- **P9-5 · Risk Agent Node (`feature/agents-risk-node`)**: Completed ✅
+  - `src/agents/nodes/risk_agent.py`: Implemented specialist risk intelligence agent (`RiskAgent`), singleton factory (`get_risk_agent()`), and LangGraph node entrypoint (`risk_node()`):
+    * **The Triad of Responsibility (BR-RULE-001)**: 100% of arithmetic calculations (Days of Cover, Coverage Gap, Shortage Volume, Direct Financial Exposure, Factory Line Halt Exposure, Total Exposure) are performed strictly by deterministic microservices (`RiskCalculator` and `RiskScorer`). LLMs are strictly forbidden from executing arithmetic.
+    * **Strict Decimal Precision Invariant**: All inventory and monetary calculations preserve exact `Decimal` precision (`ROUND_HALF_UP`, 2 decimal places), eliminating floating-point drift and reproducing the canonical NanoCore Golden Scenario with bit-for-bit exactness (`days_of_cover=7.68`, `gap_days=1.32`, `shortage_volume=24420`, `financial_exposure=$2,448,105.00`, `factory_halt_exposure=€2,692,800.00`, `total_exposure=$5,140,905.00`, `severity=CRITICAL`).
+    * **Pydantic Structured Output Validation (P8-3)**: Synthesizes qualitative executive narrative explaining the deterministic numbers via LiteLLM gateway (`task_type=TaskType.SYNTHESIS`, Claude 3.5 Sonnet) enforcing `RiskNarrative` schema (`executive_summary`, `root_cause_analysis`, `operational_impact`, `runway_and_exposure_commentary`, and grounding `citations`).
+    * **Resilient Deterministic Fallback Synthesis**: Automatically recovers with deterministic, grounded `RiskNarrative` on LLM timeouts or service disruptions, ensuring zero pipeline halts.
+    * **LangGraph State Machine Integration**: Emits state transitions conforming to `SupplierRiskState` (`current_node="risk"`, `workflow_status=WorkflowStatus.CALCULATING_RISK`, `risk_metrics`, `severity`, `narrative`, `risk_narrative`, `evidence`, `audit_events`).
+  - `src/agents/nodes/__init__.py`: Package exports for `RiskAgent`, `get_risk_agent`, `risk_node`, and `NODE_RISK`.
+  - `src/agents/graph.py`: Replaced `risk_node` stub with production implementation, connecting real deterministic calculations and narrative synthesis into the StateGraph DAG.
+  - 17 unit tests in `tests/unit/test_risk_agent.py` achieving **100% statement and 100% branch coverage** on `src/agents/nodes/risk_agent.py` (137 statements, 40 branches), bringing total test suite to 606 tests (97.53% project-wide coverage).
 
 ---
 
@@ -636,6 +646,11 @@
     - Outputs conform strictly to Pydantic v2 `ContractAnalysis` models with exact `Decimal` precision for delay penalty percentages and liability caps (BR-RULE-001).
     - Features deterministic fallback synthesis on vLLM service disruptions, ensuring workflow continuity without sacrificing safety.
 
+45. **The Triad of Separation & Qualitative Narrative Synthesis (SEC-047, BR-RULE-001)**:
+    - Risk assessment (`src/agents/nodes/risk_agent.py`) strictly enforces the architectural boundary between deterministic computation and qualitative AI explanation. 100% of arithmetic calculations (`days_of_cover`, `gap_days`, `shortage_volume`, `financial_exposure`, `factory_halt_exposure`, `total_exposure`) run in pure deterministic Python microservices (`RiskCalculator` and `RiskScorer`) using exact `Decimal` precision.
+    - LLMs and probabilistic agents are strictly forbidden from performing arithmetic. Pre-computed mathematical outputs and severity ratings are passed to LiteLLM Gateway (`TaskType.SYNTHESIS`, Claude 3.5 Sonnet) solely to contextualize the operational impact into typed Pydantic `RiskNarrative` models (`executive_summary`, `root_cause_analysis`, `operational_impact`, `runway_and_exposure_commentary`, `citations`).
+    - Deterministic rule-based fallback synthesis guarantees that LLM timeout or degradation never halts the StateGraph pipeline.
+
 ---
 
 ## 5. Next Planned Tasks
@@ -645,7 +660,7 @@
   - **P9-2**: Triage agent node (`src/agents/nodes/triage_agent.py`) (`feature/agents-triage-node`). Completed ✅
   - **P9-3**: Research agent node (`src/agents/nodes/research_agent.py`) (`feature/agents-research-node`). Completed ✅
   - **P9-4**: Contract agent node (`src/agents/nodes/contract_agent.py`) (`feature/agents-contract-node`). Completed ✅
-  - **P9-5**: Risk agent node (`src/agents/nodes/risk_agent.py`) (`feature/agents-risk-node`). Pending ❌
+  - **P9-5**: Risk agent node (`src/agents/nodes/risk_agent.py`) (`feature/agents-risk-node`). Completed ✅
   - **P9-6**: Recommendation agent node (`src/agents/nodes/recommendation_agent.py`) (`feature/agents-recommendation-node`). Pending ❌
 
 

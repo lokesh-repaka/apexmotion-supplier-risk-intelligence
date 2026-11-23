@@ -10,6 +10,7 @@ from src.database.repositories.hitl_approval_repository import (
     HITLApprovalRepository,
     TokenReplayError,
 )
+from src.database.repositories.inventory_repository import InventoryRepository
 from src.database.repositories.risk_alert_repository import RiskAlertRepository
 from src.database.repositories.supplier_repository import SupplierRepository
 
@@ -21,4 +22,5 @@ __all__ = [
     "TokenReplayError",
     "AuditLogRepository",
     "AgentRunRepository",
+    "InventoryRepository",
 ]

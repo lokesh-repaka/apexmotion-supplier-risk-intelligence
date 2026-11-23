@@ -22,11 +22,11 @@
 | **Phase 4 Progress** | 5 / 5 Tasks Completed | Completed ✅ |
 | **Phase 5 Progress** | 5 / 5 Tasks Completed | Completed ✅ |
 | **Phase 6 Progress** | 4 / 4 Tasks Completed | Completed ✅ |
-| **Phase 7 Progress** | 2 / 5 Tasks Completed | In Progress 🔄 |
-| **Total Test Suites** | 32 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`, `test_localstack_bootstrap.py`, `test_redpanda_topics.py`, `test_neptune_emulation.py`, `test_makefile.py`, `test_database_models.py`, `test_database_migrations.py`, `test_database_repositories.py`, `test_token_hash_index.py`, `test_opensearch_client.py`, `test_security_rbac.py`, `test_hitl_tokens.py`, `test_demo_tokens.py`, `test_spend_tier_router.py`, `test_audit_writer.py`, `test_neptune_client.py`, `test_graph_seed.py`, `test_cypher_queries.py`, `test_supplier_traversal.py`, `test_graph_traversal_paths.py`, `test_kafka_consumer.py`, `test_kafka_producer.py`, `test_kafka_schemas.py`, `test_kafka_consumer_integration.py`, `test_risk_calculator.py`, `test_risk_scorer.py`) | PASSED ✅ |
-| **Total Test Cases** | 351 tests (340 unit + 11 integration) | 100% Passing (0 failures) |
-| **Code Coverage (`src/`)** | **96.42%** statement coverage (`src/services/risk/calculator.py`, `src/services/risk/scorer.py`, `src/kafka/handlers.py`, and `src/kafka/schemas/` at 100%) | Exceeds 80% DoD gate |
-| **Active Branch** | `feature/risk-scorer` $\to$ `development` | Clean |
+| **Phase 7 Progress** | 3 / 5 Tasks Completed | In Progress 🔄 |
+| **Total Test Suites** | 33 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`, `test_localstack_bootstrap.py`, `test_redpanda_topics.py`, `test_neptune_emulation.py`, `test_makefile.py`, `test_database_models.py`, `test_database_migrations.py`, `test_database_repositories.py`, `test_token_hash_index.py`, `test_opensearch_client.py`, `test_security_rbac.py`, `test_hitl_tokens.py`, `test_demo_tokens.py`, `test_spend_tier_router.py`, `test_audit_writer.py`, `test_neptune_client.py`, `test_graph_seed.py`, `test_cypher_queries.py`, `test_supplier_traversal.py`, `test_graph_traversal_paths.py`, `test_kafka_consumer.py`, `test_kafka_producer.py`, `test_kafka_schemas.py`, `test_kafka_consumer_integration.py`, `test_risk_calculator.py`, `test_risk_scorer.py`, `test_inventory_service.py`) | PASSED ✅ |
+| **Total Test Cases** | 376 tests (365 unit + 11 integration) | 100% Passing (0 failures) |
+| **Code Coverage (`src/`)** | **96.09%** statement coverage (`src/services/risk/calculator.py`, `src/services/risk/scorer.py`, `src/database/repositories/inventory_repository.py`, `src/kafka/handlers.py`, and `src/kafka/schemas/` at 100%; `src/services/risk/inventory_service.py` at 92%) | Exceeds 80% DoD gate |
+| **Active Branch** | `feature/risk-inventory-service` $\to$ `development` | Clean |
 
 ---
 
@@ -356,6 +356,21 @@
     * **Strict Input Validation**: Rejects negative inventory metrics, negative exposure, and out-of-range supplier risk scores (`[0.0, 1.0]`) via `InvalidRiskScoringInputError` (HTTP 400).
   - Exported classes, functions, and threshold constants in `src/services/risk/__init__.py` and `src/services/__init__.py`.
   - 14 comprehensive unit tests in `tests/unit/test_risk_scorer.py` achieving **100% statement and branch coverage** on `src/services/risk/scorer.py` (110 statements) and **96.42%** total project coverage across 351 passing tests.
+- **P7-3 · Inventory Aggregation Service (`feature/risk-inventory-service`)**: Completed ✅
+  - `src/services/risk/inventory_service.py`: Implemented deterministic inventory aggregation service pulling real-time stock balances, burn rates, and replenishment metrics from Aurora PostgreSQL with Redis caching.
+    * **The Triad of Responsibility (BR-RULE-001)**: 100% deterministic pure Python math and data aggregation with zero LLM math or probabilistic hallucination.
+    * **Layered Read-Through Caching**: Checks Redis cache first with 30-minute default TTL (`DEFAULT_CACHE_TTL_SECONDS = 1800` per LLD Section 6.1: `CACHE_TTL: 30m`), returning cached records with `data_source="REDIS_CACHE"` and `is_cached=True`.
+    * **Cache Invalidation & Write-Through**: Explicit cache purge on stock updates, plant invalidation, and `force_refresh=True` bypass.
+    * **Dual Fault-Tolerant Circuit Breaker**:
+      - Redis connection outage / network partition transparently degrades to Aurora database queries without crashing the pipeline.
+      - Aurora database partition degrades to Redis cached balance (LLD Section 6.1 circuit breaker fallback: `Load cached inventory balance from Redis`).
+    * **Multi-Plant Stock Aggregation**: `PlantInventoryAggregate` combines usable stock, daily burn, and safety buffers across Munich (`PLT-MUC-01`), Bengaluru (`PLT-BLR-01`), and Pune (`PLT-PUN-01`), computing composite days of cover.
+    * **Physical Inventory Constraints**: Prevents negative inventory underflow mutations (`current_stock + delta < 0`) via `InvalidInventoryOperationError` (HTTP 400).
+    * **Risk Assessment Bridge**: `assess_component_risk()` seamlessly bridges inventory records to `RiskCalculator`, reproducing exact NanoCore metrics (7.68 days cover, 1.32 days gap, $2,448,105.00 exposure).
+  - `src/database/models.py`: Declared `InventorySnapshot` model mapping to `inventory_snapshots` table in Aurora with check constraints on non-negative stock, consumption, and cost.
+  - `src/database/repositories/inventory_repository.py`: Implemented async `InventoryRepository` providing CRUD, plant queries, and stock mutation operations with 100% statement coverage.
+  - Exported classes and exceptions in `src/database/__init__.py`, `src/services/risk/__init__.py`, and `src/services/__init__.py`.
+  - 25 comprehensive unit tests in `tests/unit/test_inventory_service.py` achieving **100% coverage** on `src/database/repositories/inventory_repository.py` and **92% coverage** on `src/services/risk/inventory_service.py`, bringing total passing test suite to 376 tests.
 
 ---
 
@@ -434,6 +449,8 @@
     - 100% of supply chain risk calculations (`src/services/risk/calculator.py`) run in pure deterministic Python. AI agents and LLMs are strictly forbidden from performing inventory or financial arithmetic (BR-RULE-001). All fractional, currency, and inventory numbers are represented as `Decimal` with `ROUND_HALF_UP` rounding, eliminating floating-point drift and IEEE 754 precision loss. Physical inventory constraints strictly reject negative inputs (`stock < 0`, `rate < 0`, `ETA < 0`, `cost < 0`), zero consumption is capped at 999.00 days, and every calculation emits a reproducible SHA-256 verification token.
 33. **Deterministic Risk Severity Assignment & Spend Gate Governance (SEC-034)**:
     - Pure deterministic Python risk classification (`src/services/risk/scorer.py`) strictly assigns severity levels (`CRITICAL`, `HIGH`, `MEDIUM`, `LOW`) from exact Decimal gap and exposure thresholds (`CRITICAL`: gap > 0 and exposure > $1M; `HIGH`: gap > 0 and exposure > $250k; `MEDIUM`: gap > 0 or supplier risk score > 0.70; `LOW`: gap <= 0 and score <= 0.70). All monetary exposures are mapped deterministically to cryptographic AWS KMS HITL spend tiers (Category Manager <= $25k, Procurement Director <= $100k, Dual VP > $100k), enforcing BR-RULE-001 by completely isolating risk categorization from probabilistic AI hallucination.
+34. **Physical Inventory Underflow, Layered Caching & Outage Resilience (SEC-035)**:
+    - Deterministic stock aggregation in `src/services/risk/inventory_service.py` enforces strict Decimal precision across all balances, burn rates, and valuations, rejecting negative underflows with `InvalidInventoryOperationError` (BR-RULE-001). Caching adheres to LLD Section 6.1 with 30-minute TTL (1800s) and cache-through synchronization on updates. Dual circuit-breaker degradation protects against distributed partitions: Redis timeouts gracefully fall back to Aurora PostgreSQL direct queries, while database partitions fall back to Redis cached balances, preventing cascading pipeline halts.
 
 ---
 
@@ -441,7 +458,7 @@
 - **Phase 7 — Deterministic Risk Engine**:
   - **P7-1**: Risk calculator (`src/services/risk/calculator.py`) — Completed ✅ (`feature/risk-calculator-core`).
   - **P7-2**: Risk scorer (`src/services/risk/scorer.py`) — Completed ✅ (`feature/risk-scorer`).
-  - **P7-3**: Inventory aggregation service (`src/services/risk/inventory_service.py`) — real-time stock pull from Aurora + Redis cache (`feature/risk-inventory-service`).
+  - **P7-3**: Inventory aggregation service (`src/services/risk/inventory_service.py`) — Completed ✅ (`feature/risk-inventory-service`).
   - **P7-4**: Alert deduplication (`src/services/alert_service.py`) — same supplier + component within 1-hour window collapses to one alert (`feature/risk-alert-deduplication`).
   - **P7-5**: NanoCore golden tests — `tests/golden/nanocore_scenario.json` asserts `days_of_cover=7.68`, `shortage_volume=24420`, `financial_exposure=2448105.00` exactly (`feature/risk-nanocore-golden-tests`).
 

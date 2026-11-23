@@ -13,6 +13,17 @@ from src.services.risk.calculator import (
     RiskAssessmentResult,
     RiskCalculator,
 )
+from src.services.risk.inventory_service import (
+    DEFAULT_CACHE_TTL_SECONDS,
+    NANOCORE_CANONICAL_SKU,
+    REFERENCE_INVENTORY_REGISTRY,
+    InvalidInventoryOperationError,
+    InventoryNotFoundError,
+    InventoryRecord,
+    InventoryService,
+    InventoryServiceError,
+    PlantInventoryAggregate,
+)
 from src.services.risk.scorer import (
     THRESHOLD_EXPOSURE_CRITICAL,
     THRESHOLD_EXPOSURE_HIGH,
@@ -25,9 +36,18 @@ from src.services.risk.scorer import (
 
 __all__ = [
     "DAYS_OF_COVER_MAX_CAP",
+    "DEFAULT_CACHE_TTL_SECONDS",
     "DEFAULT_OPERATING_HOURS_PER_DAY",
     "InvalidInventoryInputError",
+    "InvalidInventoryOperationError",
     "InvalidRiskScoringInputError",
+    "InventoryNotFoundError",
+    "InventoryRecord",
+    "InventoryService",
+    "InventoryServiceError",
+    "NANOCORE_CANONICAL_SKU",
+    "PlantInventoryAggregate",
+    "REFERENCE_INVENTORY_REGISTRY",
     "RiskAssessmentInput",
     "RiskAssessmentResult",
     "RiskCalculator",

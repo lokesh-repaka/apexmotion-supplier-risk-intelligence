@@ -288,8 +288,8 @@ Phases 4, 5, 6, 7, and 8 all depend on Phase 3 and can be developed in parallel.
 | Task Phases | Delivery Milestone | Target Week | Status |
 |-------------|-------------------|-------------|--------|
 | P1 + P2 + P3 + P4 (partial) | **POC Foundation** — skeleton, local stack, DB, auth wired | Week 3 | Completed ✅ |
-| P4 + P5 + P6 + P7 + P8 | **Risk Engine Ready** — Neptune, Kafka, deterministic calc, LLM gateway | Week 6 | In Progress 🔄 |
-| P9 + P10 + P11 + P13 | **Phase 1 POC** — NanoCore simulation live, HITL demo, all API routes | Week 10 | Pending ❌ |
+| P4 + P5 + P6 + P7 + P8 | **Risk Engine Ready** — Neptune, Kafka, deterministic calc, LLM gateway | Week 6 | Completed ✅ |
+| P9 + P10 + P11 + P13 | **Phase 1 POC** — NanoCore simulation live, HITL demo, all API routes | Week 10 | In Progress 🔄 |
 | P12 + P14 + P15 | **MVP Frontend & Test Coverage** — React UI, golden tests green, observability on | Week 16 | Pending ❌ |
 | P11 (live Tier-1 connectors) + Production data | **Phase 2 MVP** — Bengaluru, Pune, Munich suppliers live | Week 22 | Pending ❌ |
 | P16 | **Phase 3 Production** — EKS full deploy, Mexico, Vietnam, US live | Week 30 | Pending ❌ |
@@ -307,7 +307,7 @@ Phases 4, 5, 6, 7, and 8 all depend on Phase 3 and can be developed in parallel.
 | 5 | Knowledge Graph (Neptune) | 5 | 5 (100%) ✅ |
 | 6 | Kafka Event Ingestion | 4 | 4 (100%) ✅ |
 | 7 | Deterministic Risk Engine | 5 | 5 (100%) ✅ |
-| 8 | LLM Foundation | 5 | 3 (60%) 🔄 |
+| 8 | LLM Foundation | 5 | 5 (100%) ✅ |
 | 9 | LangGraph Agent Workflow | 6 | 0 (0%) ❌ |
 | 10 | HITL Approval System | 4 | 0 (0%) ❌ |
 | 11 | FastAPI API Routes | 6 | 0 (0%) ❌ |
@@ -316,4 +316,4 @@ Phases 4, 5, 6, 7, and 8 all depend on Phase 3 and can be developed in parallel.
 | 14 | Unit & Integration Tests | 6 | 0 (0%) ❌ |
 | 15 | Observability | 5 | 0 (0%) ❌ |
 | 16 | Infrastructure & Delivery | 6 | 0 (0%) ❌ |
-| **Total** | | **83** | **38 (45.8%)** |
+| **Total** | | **83** | **40 (48.2%)** |

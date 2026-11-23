@@ -1,6 +1,6 @@
 You have access to the project's authoritative documentation: `TASKS.md`, `CLAUDE.md`, `GEMINI.md`, `.agents/rules/`, and architecture specifications in `docs/` (`HLD_*.md`, `LLD_*.md`, `PRD_*.md`, `BRD_*.md`, `FRD_*.md`).
 
-Go ahead and complete **P10-1 · HITL service (`src/services/hitl_service.py`) — issues KMS ECDSA tokens, routes to correct spend tier, enforces 1-hour / 30-minute TTL**, as defined in `TASKS.md`.
+Go ahead and complete **P10-2 · Dual-approval enforcer — `DUAL_VP` actions require two independent token signatures before the action node executes**, as defined in `TASKS.md`.
 
 ---
 

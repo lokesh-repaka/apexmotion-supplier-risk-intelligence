@@ -20,6 +20,7 @@ from langgraph.graph import END, START, StateGraph
 from langgraph.graph.state import CompiledStateGraph
 
 from src.agents.nodes.contract_agent import contract_node
+from src.agents.nodes.recommendation_agent import recommendation_node
 from src.agents.nodes.research_agent import research_node
 from src.agents.nodes.risk_agent import risk_node
 from src.agents.nodes.triage_agent import triage_node
@@ -27,7 +28,6 @@ from src.agents.state import (
     SupplierRiskState,
     WorkflowStatus,
 )
-from src.core.hitl_tokens import get_spend_tier
 from src.core.logging import get_logger
 
 logger = get_logger("apexmotion.agents.graph")
@@ -128,45 +128,8 @@ def route_after_hitl_gate(state: SupplierRiskState) -> str:
 
 
 # ------------------------------------------------------------------------------
-# Node Handlers & Stubs (triage_node, research_node, contract_node, and risk_node imported from nodes)
+# Node Handlers & Stubs (triage, research, contract, risk, and recommendation imported from nodes)
 # ------------------------------------------------------------------------------
-
-
-def recommendation_node(state: SupplierRiskState) -> dict[str, Any]:
-    """Node 5: Formulate procurement mitigation options and map governing spend tier."""
-    logger.info(
-        "Recommendation node generating mitigation scenarios for alert: %s", state.get("alert_id")
-    )
-
-    metrics = state.get("risk_metrics") or {}
-    financial_exposure = metrics.get("financial_exposure", Decimal("0.00"))
-    if not isinstance(financial_exposure, Decimal):
-        financial_exposure = Decimal(str(financial_exposure))
-
-    # Scenario formulation
-    scenario_cost = min(financial_exposure, Decimal("285000.00"))
-    spend_tier = get_spend_tier(scenario_cost) if scenario_cost > Decimal("0.00") else None
-    requires_hitl = scenario_cost > Decimal("0.00")
-
-    scenarios = [
-        {
-            "scenario_id": f"SCEN-{state.get('alert_id', '001')}-01",
-            "title": "Emergency Spot-Buy and Expedited Air Freight",
-            "cost_usd": scenario_cost,
-            "governing_spend_tier": spend_tier,
-            "requires_hitl": requires_hitl,
-        }
-    ]
-
-    return {
-        "current_node": NODE_RECOMMENDATION,
-        "execution_path": [NODE_RECOMMENDATION],
-        "workflow_status": WorkflowStatus.PLANNING,
-        "recommendations": scenarios,
-        "recommended_action_id": scenarios[0]["scenario_id"],
-        "governing_spend_tier": spend_tier,
-        "requires_hitl": requires_hitl,
-    }
 
 
 def hitl_gate_node(state: SupplierRiskState) -> dict[str, Any]:

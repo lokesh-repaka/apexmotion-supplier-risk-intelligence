@@ -203,6 +203,21 @@ class MockLLMClient:
         """Contextually infer target Pydantic schema based on prompt domain terminology."""
         text_lower = prompt_text.lower()
 
+        # Recommendation Report detection
+        if any(
+            kw in text_lower
+            for kw in (
+                "recommendationreport",
+                "recommendation_report",
+                "recommendation_agent",
+                "mitigation scenarios",
+                "mitigation options",
+                "ranked mitigation",
+                "recommendation report",
+            )
+        ):
+            return RecommendationReport
+
         # Contract Analysis detection
         if any(
             kw in text_lower
@@ -219,21 +234,6 @@ class MockLLMClient:
             )
         ):
             return ContractAnalysis
-
-        # Recommendation Report detection
-        if any(
-            kw in text_lower
-            for kw in (
-                "recommendationreport",
-                "recommendation_report",
-                "recommendation_agent",
-                "mitigation scenarios",
-                "mitigation options",
-                "ranked mitigation",
-                "recommendation report",
-            )
-        ):
-            return RecommendationReport
 
         # Risk Narrative detection
         if any(

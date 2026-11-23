@@ -24,11 +24,11 @@
 | **Phase 6 Progress** | 4 / 4 Tasks Completed | Completed ✅ |
 | **Phase 7 Progress** | 5 / 5 Tasks Completed | Completed ✅ |
 | **Phase 8 Progress** | 5 / 5 Tasks Completed (100%) | Completed ✅ |
-| **Phase 9 Progress** | 5 / 6 Tasks Completed (83.3%) | In Progress 🔄 |
-| **Total Test Suites** | 45 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`, `test_localstack_bootstrap.py`, `test_redpanda_topics.py`, `test_neptune_emulation.py`, `test_makefile.py`, `test_database_models.py`, `test_database_migrations.py`, `test_database_repositories.py`, `test_token_hash_index.py`, `test_opensearch_client.py`, `test_security_rbac.py`, `test_hitl_tokens.py`, `test_demo_tokens.py`, `test_spend_tier_router.py`, `test_audit_writer.py`, `test_neptune_client.py`, `test_graph_seed.py`, `test_cypher_queries.py`, `test_supplier_traversal.py`, `test_graph_traversal_paths.py`, `test_kafka_consumer.py`, `test_kafka_producer.py`, `test_kafka_schemas.py`, `test_kafka_consumer_integration.py`, `test_risk_calculator.py`, `test_risk_scorer.py`, `test_inventory_service.py`, `test_alert_service.py`, `test_nanocore_golden.py`, `test_litellm_gateway.py`, `test_quarantined_reader.py`, `test_llm_models.py`, `test_vllm_client.py`, `test_mock_llm_client.py`, `test_agent_graph_skeleton.py`, `test_triage_agent.py`, `test_research_agent.py`, `test_contract_agent.py`, `test_risk_agent.py`) | PASSED ✅ |
-| **Total Test Cases** | 606 tests (587 unit + 11 integration + 8 golden) | 100% Passing (0 failures) |
-| **Code Coverage (`src/`)** | **97.53%** statement coverage (`src/agents/nodes/risk_agent.py`, `src/agents/nodes/contract_agent.py`, `src/agents/nodes/research_agent.py`, `src/agents/tools/research_tools.py`, `src/agents/nodes/triage_agent.py`, `src/agents/state.py`, `src/agents/graph.py`, `src/llm/`, `src/services/alert_service.py`, `src/services/risk/calculator.py`, `src/services/risk/scorer.py`, `src/kafka/handlers.py`, and `src/kafka/schemas/` at 100%; `src/database/repositories/risk_alert_repository.py` at 96%; `src/services/risk/inventory_service.py` at 92%) | Exceeds 80% DoD gate |
-| **Active Branch** | `feature/agents-risk-node` $\to$ `development` | Clean |
+| **Phase 9 Progress** | 6 / 6 Tasks Completed (100%) | Completed ✅ |
+| **Total Test Suites** | 46 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`, `test_localstack_bootstrap.py`, `test_redpanda_topics.py`, `test_neptune_emulation.py`, `test_makefile.py`, `test_database_models.py`, `test_database_migrations.py`, `test_database_repositories.py`, `test_token_hash_index.py`, `test_opensearch_client.py`, `test_security_rbac.py`, `test_hitl_tokens.py`, `test_demo_tokens.py`, `test_spend_tier_router.py`, `test_audit_writer.py`, `test_neptune_client.py`, `test_graph_seed.py`, `test_cypher_queries.py`, `test_supplier_traversal.py`, `test_graph_traversal_paths.py`, `test_kafka_consumer.py`, `test_kafka_producer.py`, `test_kafka_schemas.py`, `test_kafka_consumer_integration.py`, `test_risk_calculator.py`, `test_risk_scorer.py`, `test_inventory_service.py`, `test_alert_service.py`, `test_nanocore_golden.py`, `test_litellm_gateway.py`, `test_quarantined_reader.py`, `test_llm_models.py`, `test_vllm_client.py`, `test_mock_llm_client.py`, `test_agent_graph_skeleton.py`, `test_triage_agent.py`, `test_research_agent.py`, `test_contract_agent.py`, `test_risk_agent.py`, `test_recommendation_agent.py`) | PASSED ✅ |
+| **Total Test Cases** | 629 tests (610 unit + 11 integration + 8 golden) | 100% Passing (0 failures) |
+| **Code Coverage (`src/`)** | **97.58%** statement coverage (`src/agents/nodes/recommendation_agent.py` at 100% stmts / 100% branch, `src/agents/nodes/risk_agent.py`, `src/agents/nodes/contract_agent.py`, `src/agents/nodes/research_agent.py`, `src/agents/tools/research_tools.py`, `src/agents/nodes/triage_agent.py`, `src/agents/state.py`, `src/agents/graph.py`, `src/llm/`, `src/services/alert_service.py`, `src/services/risk/calculator.py`, `src/services/risk/scorer.py`, `src/kafka/handlers.py`, and `src/kafka/schemas/` at 100%; `src/database/repositories/risk_alert_repository.py` at 96%; `src/services/risk/inventory_service.py` at 92%) | Exceeds 80% DoD gate |
+| **Active Branch** | `feature/agents-recommendation-node` $\to$ `development` | Clean |
 
 ---
 
@@ -651,17 +651,29 @@
     - LLMs and probabilistic agents are strictly forbidden from performing arithmetic. Pre-computed mathematical outputs and severity ratings are passed to LiteLLM Gateway (`TaskType.SYNTHESIS`, Claude 3.5 Sonnet) solely to contextualize the operational impact into typed Pydantic `RiskNarrative` models (`executive_summary`, `root_cause_analysis`, `operational_impact`, `runway_and_exposure_commentary`, `citations`).
     - Deterministic rule-based fallback synthesis guarantees that LLM timeout or degradation never halts the StateGraph pipeline.
 
+46. **Mitigation Option Formulation & Spend Tier Governance (SEC-048, BR-RULE-001)**:
+    - Recommendation formulation (`src/agents/nodes/recommendation_agent.py`) enforces strict Human-in-the-Loop spend gates. While generative AI proposes and ranks alternative mitigation scenarios (e.g., spot-buys from broker networks, expedited air freight charters, regional buffer reallocations), probabilistic models are strictly forbidden from auto-approving or auto-executing financial commitments.
+    - Any mitigation scenario with financial spend (`estimated_cost_usd > $0.00`) mandates human authorization (`requires_hitl=True`) and deterministically resolves governing spend tiers (`get_spend_tier()`: Category Manager <= $25k, Procurement Director <= $100k, Dual VP > $100k).
+    - Mathematical consistency enforces exact `Decimal` precision where `net_financial_benefit_usd == avoided_loss_usd - estimated_cost_usd`.
+    - Workflows suspend at `hitl_gate` in `WorkflowStatus.AWAITING_APPROVAL` status when human sign-off is required, routing to `END` until cryptographic ECDSA authorization tokens are provided.
+    - Resilient deterministic fallback guarantees pipeline continuity during LLM provider latency or outages.
+
 ---
 
 ## 5. Next Planned Tasks
 - **Phase 8 — LLM Foundation (LiteLLM Gateway & Guardrails)**: Completed ✅ (5/5 tasks done)
-- **Phase 9 — Multi-Agent System (LangGraph Orchestration)**:
+- **Phase 9 — Multi-Agent System (LangGraph Orchestration)**: Completed ✅ (6/6 tasks done)
   - **P9-1**: LangGraph `AgentState` and `StateGraph` skeleton (`src/agents/state.py`, `src/agents/graph.py`) (`feature/agents-langgraph-skeleton`). Completed ✅
   - **P9-2**: Triage agent node (`src/agents/nodes/triage_agent.py`) (`feature/agents-triage-node`). Completed ✅
   - **P9-3**: Research agent node (`src/agents/nodes/research_agent.py`) (`feature/agents-research-node`). Completed ✅
   - **P9-4**: Contract agent node (`src/agents/nodes/contract_agent.py`) (`feature/agents-contract-node`). Completed ✅
   - **P9-5**: Risk agent node (`src/agents/nodes/risk_agent.py`) (`feature/agents-risk-node`). Completed ✅
-  - **P9-6**: Recommendation agent node (`src/agents/nodes/recommendation_agent.py`) (`feature/agents-recommendation-node`). Pending ❌
+  - **P9-6**: Recommendation agent node (`src/agents/nodes/recommendation_agent.py`) (`feature/agents-recommendation-node`). Completed ✅
+- **Phase 10 — HITL Approval System**:
+  - **P10-1**: HITL service (`src/services/hitl_service.py`) — issues KMS ECDSA tokens, routes to correct spend tier, enforces 1-hour / 30-minute TTL (`feature/hitl-approval-service`). Pending ❌
+  - **P10-2**: Dual-approval enforcer (`feature/hitl-dual-approval-enforcer`). Pending ❌
+  - **P10-3**: Token replay guard (`feature/hitl-token-replay-guard`). Pending ❌
+  - **P10-4**: HITL unit tests (`feature/hitl-unit-tests`). Pending ❌
 
 
 

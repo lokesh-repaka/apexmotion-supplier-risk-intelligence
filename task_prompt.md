@@ -1,6 +1,6 @@
 You have access to the project's authoritative documentation: `TASKS.md`, `CLAUDE.md`, `GEMINI.md`, `.agents/rules/`, and architecture specifications in `docs/` (`HLD_*.md`, `LLD_*.md`, `PRD_*.md`, `BRD_*.md`, `FRD_*.md`).
 
-Go ahead and complete **P7-5 · NanoCore golden tests — `tests/golden/nanocore_scenario.json` asserts `days_of_cover=7.68`, `shortage_volume=24420`, `financial_exposure=2448105.00` exactly**, as defined in `TASKS.md`.
+Go ahead and complete **P8-1 · LiteLLM gateway client (`src/llm/gateway.py`) — routes to Bedrock Claude 3.5 Sonnet/Haiku, fallback, rate limit, cost tracking**, as defined in `TASKS.md`.
 
 ---
 

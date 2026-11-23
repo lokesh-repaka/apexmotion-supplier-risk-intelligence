@@ -22,11 +22,11 @@
 | **Phase 4 Progress** | 5 / 5 Tasks Completed | Completed ✅ |
 | **Phase 5 Progress** | 5 / 5 Tasks Completed | Completed ✅ |
 | **Phase 6 Progress** | 4 / 4 Tasks Completed | Completed ✅ |
-| **Phase 7 Progress** | 4 / 5 Tasks Completed | In Progress 🔄 |
-| **Total Test Suites** | 34 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`, `test_localstack_bootstrap.py`, `test_redpanda_topics.py`, `test_neptune_emulation.py`, `test_makefile.py`, `test_database_models.py`, `test_database_migrations.py`, `test_database_repositories.py`, `test_token_hash_index.py`, `test_opensearch_client.py`, `test_security_rbac.py`, `test_hitl_tokens.py`, `test_demo_tokens.py`, `test_spend_tier_router.py`, `test_audit_writer.py`, `test_neptune_client.py`, `test_graph_seed.py`, `test_cypher_queries.py`, `test_supplier_traversal.py`, `test_graph_traversal_paths.py`, `test_kafka_consumer.py`, `test_kafka_producer.py`, `test_kafka_schemas.py`, `test_kafka_consumer_integration.py`, `test_risk_calculator.py`, `test_risk_scorer.py`, `test_inventory_service.py`, `test_alert_service.py`) | PASSED ✅ |
-| **Total Test Cases** | 397 tests (386 unit + 11 integration) | 100% Passing (0 failures) |
+| **Phase 7 Progress** | 5 / 5 Tasks Completed | Completed ✅ |
+| **Total Test Suites** | 35 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`, `test_localstack_bootstrap.py`, `test_redpanda_topics.py`, `test_neptune_emulation.py`, `test_makefile.py`, `test_database_models.py`, `test_database_migrations.py`, `test_database_repositories.py`, `test_token_hash_index.py`, `test_opensearch_client.py`, `test_security_rbac.py`, `test_hitl_tokens.py`, `test_demo_tokens.py`, `test_spend_tier_router.py`, `test_audit_writer.py`, `test_neptune_client.py`, `test_graph_seed.py`, `test_cypher_queries.py`, `test_supplier_traversal.py`, `test_graph_traversal_paths.py`, `test_kafka_consumer.py`, `test_kafka_producer.py`, `test_kafka_schemas.py`, `test_kafka_consumer_integration.py`, `test_risk_calculator.py`, `test_risk_scorer.py`, `test_inventory_service.py`, `test_alert_service.py`, `test_nanocore_golden.py`) | PASSED ✅ |
+| **Total Test Cases** | 405 tests (386 unit + 11 integration + 8 golden) | 100% Passing (0 failures) |
 | **Code Coverage (`src/`)** | **96.31%** statement coverage (`src/services/alert_service.py`, `src/services/risk/calculator.py`, `src/services/risk/scorer.py`, `src/database/repositories/inventory_repository.py`, `src/kafka/handlers.py`, and `src/kafka/schemas/` at 100%; `src/database/repositories/risk_alert_repository.py` at 96%; `src/services/risk/inventory_service.py` at 92%) | Exceeds 80% DoD gate |
-| **Active Branch** | `feature/risk-alert-deduplication` $\to$ `development` | Clean |
+| **Active Branch** | `feature/risk-nanocore-golden-tests` $\to$ `development` | Clean |
 
 ---
 
@@ -382,6 +382,22 @@
   - `src/database/repositories/risk_alert_repository.py`: Added `find_recent_active_alert(component_sku, supplier_id, window_seconds, reference_time)` with 96% coverage.
   - Exported `AlertService`, `AlertCreateInput`, `AlertAction`, `AlertDeduplicationResult`, `AlertServiceError`, `InvalidAlertOperationError` in `src/services/__init__.py`.
   - 21 comprehensive unit tests in `tests/unit/test_alert_service.py` achieving **100% statement and branch coverage** on `src/services/alert_service.py` (201 statements), bringing total passing test suite to 397 tests (96.31% project-wide coverage).
+- **P7-5 · NanoCore Golden Tests (`feature/risk-nanocore-golden-tests`)**: Completed ✅
+  - `tests/golden/test_nanocore_golden.py`: Implemented canonical golden dataset test suite mandated by CLAUDE.md Section 14 and GEMINI.md Section 2:
+    * **Direct Golden File Assertions (`tests/golden/nanocore_scenario.json`)**:
+      - Days of Cover: `7.68` days (`142,000 / 18,500 = 7.6756... -> 7.68`)
+      - Coverage Gap: `1.32` days (`9.00 - 7.68 = 1.32`)
+      - Shortage Volume: `24,420` units (`1.32 * 18,500 = 24,420`)
+      - Direct Financial Exposure: `$2,448,105.00` (`24,420 * $100.25 = $2,448,105.00`)
+      - Factory Line Halt Exposure: `€2,692,800.00` (`1.32 days * 24 hrs * €85,000.00/hr = €2,692,800.00`)
+      - Total Financial Exposure: `$5,140,905.00` (`$2,448,105.00 + €2,692,800.00`)
+      - Risk Severity Level: `CRITICAL`
+      - HITL Spend Governance: `DUAL_VP` (2 distinct signatures, 30-min TTL)
+    * **The Triad of Responsibility (BR-RULE-001)**: 100% pure deterministic Python arithmetic; zero float drift; exact `Decimal` precision with `ROUND_HALF_UP` rounding.
+    * **Cryptographic Hash Reproducibility**: SHA-256 calculation hash is bit-for-bit reproducible across identical executions and sensitive to single-unit deviations.
+    * **Deviation Resistance Guard**: Any rounding or calculation deviation strictly triggers build assertion failure (`CLAUDE.md:733`).
+  - 8 comprehensive golden tests in `tests/golden/test_nanocore_golden.py` passing in 0.49s, bringing total test suite to 405 tests (96.31% project-wide coverage).
+  - **Phase 7 (Deterministic Risk Engine) is now 100% complete (5/5 tasks).**
 
 ---
 
@@ -462,14 +478,17 @@
     - Pure deterministic Python risk classification (`src/services/risk/scorer.py`) strictly assigns severity levels (`CRITICAL`, `HIGH`, `MEDIUM`, `LOW`) from exact Decimal gap and exposure thresholds (`CRITICAL`: gap > 0 and exposure > $1M; `HIGH`: gap > 0 and exposure > $250k; `MEDIUM`: gap > 0 or supplier risk score > 0.70; `LOW`: gap <= 0 and score <= 0.70). All monetary exposures are mapped deterministically to cryptographic AWS KMS HITL spend tiers (Category Manager <= $25k, Procurement Director <= $100k, Dual VP > $100k), enforcing BR-RULE-001 by completely isolating risk categorization from probabilistic AI hallucination.
 34. **Physical Inventory Underflow, Layered Caching & Outage Resilience (SEC-035)**:
     - Deterministic stock aggregation in `src/services/risk/inventory_service.py` enforces strict Decimal precision across all balances, burn rates, and valuations, rejecting negative underflows with `InvalidInventoryOperationError` (BR-RULE-001). Caching adheres to LLD Section 6.1 with 30-minute TTL (1800s) and cache-through synchronization on updates. Dual circuit-breaker degradation protects against distributed partitions: Redis timeouts gracefully fall back to Aurora PostgreSQL direct queries, while database partitions fall back to Redis cached balances, preventing cascading pipeline halts.
+35. **Canonical Golden Benchmark Enforcement & Build-Failure Guard (SEC-037)**:
+    - All risk engine arithmetic, severity classification, and spend-tier routing must pass the canonical NanoCore reference scenario (`tests/golden/nanocore_scenario.json`) with 100% mathematical precision (`days_of_cover=7.68`, `gap_days=1.32`, `shortage_volume=24420`, `financial_exposure=$2,448,105.00`, `factory_halt_exposure=€2,692,800.00`, `total_exposure=$5,140,905.00`, `severity=CRITICAL`, `HITL=DUAL_VP`). Per CLAUDE.md Section 14, if `test_nanocore_golden()` fails, the build fails unconditionally, ensuring zero regression of The Triad of Responsibility (BR-RULE-001).
 
 ---
 
 ## 5. Next Planned Tasks
-- **Phase 7 — Deterministic Risk Engine**:
-  - **P7-1**: Risk calculator (`src/services/risk/calculator.py`) — Completed ✅ (`feature/risk-calculator-core`).
-  - **P7-2**: Risk scorer (`src/services/risk/scorer.py`) — Completed ✅ (`feature/risk-scorer`).
-  - **P7-3**: Inventory aggregation service (`src/services/risk/inventory_service.py`) — Completed ✅ (`feature/risk-inventory-service`).
-  - **P7-4**: Alert deduplication (`src/services/alert_service.py`) — same supplier + component within 1-hour window collapses to one alert (`feature/risk-alert-deduplication`).
-  - **P7-5**: NanoCore golden tests — `tests/golden/nanocore_scenario.json` asserts `days_of_cover=7.68`, `shortage_volume=24420`, `financial_exposure=2448105.00` exactly (`feature/risk-nanocore-golden-tests`).
+- **Phase 8 — LLM Foundation (LiteLLM Gateway & Guardrails)**:
+  - **P8-1**: LiteLLM gateway client (`src/llm/gateway.py`) — routes to Bedrock Claude 3.5 Sonnet/Haiku, fallback, rate limit, cost tracking (`feature/llm-litellm-gateway`).
+  - **P8-2**: Quarantined Reader (`src/llm/quarantined_reader.py`) — strips tags, wraps in `<untrusted_supplier_data>`, enforces max token budget, hashes to audit log (`feature/llm-quarantined-reader`).
+  - **P8-3**: Pydantic output schemas (`src/llm/models.py`) — typed response models for every LLM call; rejects free-text responses (`feature/llm-pydantic-output-schemas`).
+  - **P8-4**: vLLM confidential contract client — routes EU-regulated contracts to self-hosted vLLM endpoint, never to Bedrock (`feature/llm-vllm-contract-client`).
+  - **P8-5**: Mock LLM client for offline tests — returns fixture JSON matching Pydantic schemas; activated by `USE_MOCK_LLM=true` (`feature/llm-mock-client-fixtures`).
+
 

@@ -21,6 +21,7 @@ import {
   CITATION_REGISTRY,
   useInvestigationStore,
 } from '../../stores/useInvestigationStore';
+import { useApprovalStore } from '../../stores/useApprovalStore';
 import { AgentNarrative } from './AgentNarrative';
 import { CitationModal } from './CitationModal';
 import { DeterministicProofCard } from './DeterministicProofCard';
@@ -231,7 +232,17 @@ export const InvestigationPanel: React.FC<InvestigationPanelProps> = ({
             onProceedToApproval={
               onNavigateToApproval
                 ? (scen) => onNavigateToApproval(scen as unknown as Record<string, unknown>)
-                : undefined
+                : (scen) => {
+                    useApprovalStore.getState().openModalForScenario({
+                      scenario_id: scen.scenario_id,
+                      scenario_type: scen.scenario_type,
+                      title: scen.title,
+                      description: scen.description,
+                      estimated_cost_usd: scen.estimated_cost_usd,
+                      spend_tier: scen.spend_tier,
+                      requires_hitl: scen.requires_hitl,
+                    });
+                  }
             }
           />
         </div>

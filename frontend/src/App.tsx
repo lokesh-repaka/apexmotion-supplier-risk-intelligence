@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
+import { HITLApprovalModal } from './components/HITLApprovalModal/HITLApprovalModal';
+import { ApprovalQueueTable } from './components/HITLApprovalModal/ApprovalQueueTable';
 import { InvestigationPage } from './pages/InvestigationPage';
 import { RiskDashboardPage } from './pages/RiskDashboardPage';
 
-export type AppView = 'dashboard' | 'investigation';
+export type AppView = 'dashboard' | 'investigation' | 'approvals';
 
 export const App: React.FC = () => {
   const [activeView, setActiveView] = useState<AppView>('dashboard');
@@ -34,13 +36,24 @@ export const App: React.FC = () => {
           >
             Investigation Case Dossier
           </button>
+          <button
+            type="button"
+            onClick={() => setActiveView('approvals')}
+            className={`px-3 py-1.5 rounded-lg font-semibold transition-colors ${
+              activeView === 'approvals'
+                ? 'bg-sky-600 text-white shadow-sm'
+                : 'text-slate-400 hover:text-white hover:bg-slate-800'
+            }`}
+          >
+            HITL Spend Approvals
+          </button>
         </div>
 
         <div className="hidden md:flex items-center gap-2 text-[11px] font-mono text-slate-400">
           <span>Triad Invariant:</span>
           <span className="text-emerald-400 font-semibold">100% Python Risk Math</span>
           <span className="text-slate-600">&bull;</span>
-          <span className="text-sky-400 font-semibold">Grounded Multi-Agent Dossier</span>
+          <span className="text-sky-400 font-semibold">KMS ECDSA P-256 HITL Spend Gating</span>
         </div>
       </nav>
 
@@ -48,10 +61,17 @@ export const App: React.FC = () => {
       <div className="flex-1">
         {activeView === 'dashboard' ? (
           <RiskDashboardPage onNavigateToInvestigation={() => setActiveView('investigation')} />
-        ) : (
+        ) : activeView === 'investigation' ? (
           <InvestigationPage onBackToDashboard={() => setActiveView('dashboard')} />
+        ) : (
+          <main className="p-6 max-w-[1720px] w-full mx-auto space-y-6">
+            <ApprovalQueueTable />
+          </main>
         )}
       </div>
+
+      {/* Global HITL Spend Authorization Modal */}
+      <HITLApprovalModal />
     </div>
   );
 };

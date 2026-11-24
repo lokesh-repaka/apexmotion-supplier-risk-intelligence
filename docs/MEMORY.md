@@ -27,9 +27,9 @@
 | **Phase 9 Progress** | 6 / 6 Tasks Completed (100%) | Completed ✅ |
 | **Phase 10 Progress** | 4 / 4 Tasks Completed (100%) | Completed ✅ |
 | **Phase 11 Progress** | 6 / 6 Tasks Completed (100%) | Completed ✅ |
-| **Phase 12 Progress** | 3 / 6 Tasks Completed (50.0%) | In Progress 🔄 |
-| **Total Test Suites** | 64 (56 Python suites + 8 Frontend suites: `types.test.ts`, `client.test.ts`, `routes.test.ts`, `useAlertWebSocket.test.ts`, `useRiskStore.test.ts`, `RiskDashboard.test.ts`, `useInvestigationStore.test.ts`, `InvestigationPanel.test.ts`) | PASSED ✅ |
-| **Total Test Cases** | 886 tests (816 Python [797 unit + 11 integration + 8 golden] + 70 Frontend unit) | 100% Passing (0 failures) |
+| **Phase 12 Progress** | 4 / 6 Tasks Completed (66.7%) | In Progress 🔄 |
+| **Total Test Suites** | 66 (56 Python suites + 10 Frontend suites: `types.test.ts`, `client.test.ts`, `routes.test.ts`, `useAlertWebSocket.test.ts`, `useRiskStore.test.ts`, `RiskDashboard.test.ts`, `useInvestigationStore.test.ts`, `InvestigationPanel.test.ts`, `useApprovalStore.test.ts`, `HITLApprovalModal.test.ts`) | PASSED ✅ |
+| **Total Test Cases** | 902 tests (816 Python [797 unit + 11 integration + 8 golden] + 86 Frontend unit) | 100% Passing (0 failures) |
 | **Code Coverage (`src/`)** | **95.48%** statement coverage (6,952 statements, 314 missed; exceeds 80% DoD gate) | Exceeds 80% DoD gate |
 | **Active Branch** | `development` | Clean |
 
@@ -804,16 +804,25 @@
     - **Comprehensive Test Suite**: 12 new unit tests in Vitest across `useInvestigationStore.test.ts` and `InvestigationPanel.test.ts` with 100% pass rate, bringing total project test count to 886 passed tests (816 Python + 70 Frontend across 64 test suites).
     - **Phase 12 (React Frontend) progress is now 3/6 (50.0%).**
 
+60. **HITL Cryptographic Spend Gate, Anti-Replay Defense, and Multi-Executive Dual Sign-off Governance (SEC-062, BR-RULE-001, BR-RULE-004, CLAUDE.md Sec 5.2, Sec 10 & Sec 20)**:
+    - **Spend Tier Resolution & Threshold Router (`frontend/src/components/HITLApprovalModal/SpendTierBadge.tsx`)**: Enforces the 3-tier spend governance hierarchy under Rule BR-RULE-004: Tier 1 (<= $25,000) routes to Category Manager; Tier 2 ($25,001 - $100,000) routes to Procurement Director; Tier 3 (> $100,000) routes to Dual Executive VP sign-off.
+    - **Dual-Approval Progress Tracking (`frontend/src/components/HITLApprovalModal/DualApprovalProgress.tsx`)**: Enforces two distinct signing slots for > $100,000 actions (Signature 1: Procurement Director; Signature 2: VP Supply Chain). Tracks progression across `PENDING` (0/2), `PARTIALLY_APPROVED` (1/2), and `APPROVED` (2/2), preventing single-signature bypass of high-value capital commitments.
+    - **Cryptographic ECDSA P-256 Token Form (`frontend/src/components/HITLApprovalModal/ECDSATokenForm.tsx`)**: Accepts and validates AWS KMS ECDSA P-256 signatures or JWT authorization tokens. Requires mandatory user attestation checking that certified deterministic arithmetic (Days of Cover = 7.68d, Gap = 1.32d, Exposure = $2,448,105) has been reviewed before token dispatch.
+    - **Anti-Replay & Error Diagnostics**: Intercepts HTTP 409 `TOKEN_REPLAY`, 401 `TOKEN_EXPIRED`, 401 `TOKEN_SIGNATURE_INVALID`, and 409 `DUPLICATE_SIGNER` envelopes, rendering specific user-facing alerts while preventing invalid state mutations.
+    - **Persistent Approval Queue Table (`frontend/src/components/HITLApprovalModal/ApprovalQueueTable.tsx`)**: Lists pending, partially approved, and sealed approvals with status filters, monetary values, and direct authorization triggers.
+    - **Comprehensive Test Suite**: 16 new unit tests in Vitest across `useApprovalStore.test.ts` and `HITLApprovalModal.test.ts` with 100% pass rate, bringing total project test count to 902 passed tests (816 Python + 86 Frontend across 66 test suites).
+    - **Phase 12 (React Frontend) progress is now 4/6 (66.7%).**
+
 ---
 
 ## 5. Next Planned Tasks
 - **Phase 11 — FastAPI API Routes**: Completed ✅ (6/6 tasks done)
-- **Phase 12 — React Frontend**: In Progress 🔄 (3/6 tasks done)
+- **Phase 12 — React Frontend**: In Progress 🔄 (4/6 tasks done)
   - **P12-1**: Typed API client (`frontend/src/api/`) — axios + Zod schemas for all backend routes; WebSocket hook for live alerts (`feature/frontend-api-client`). Completed ✅
   - **P12-2**: Risk Dashboard page — supplier risk table, severity heat-map, Kafka-driven live alert feed, Zustand store (`feature/frontend-risk-dashboard`). Completed ✅
   - **P12-3**: Investigation Panel — trigger investigation, poll status, display agent narrative + evidence cards (`feature/frontend-investigation-panel`). Completed ✅
-  - **P12-4**: HITL Approval Modal — spend tier badge, ECDSA token submission form, dual-approval progress indicator (`feature/frontend-hitl-approval-modal`). Next 🔄
-  - **P12-5**: Supplier Graph Visualiser — Neptune subgraph rendered as interactive force-directed graph (D3 or React Flow) (`feature/frontend-supplier-graph-viz`). Pending ❌
+  - **P12-4**: HITL Approval Modal — spend tier badge, ECDSA token submission form, dual-approval progress indicator (`feature/frontend-hitl-approval-modal`). Completed ✅
+  - **P12-5**: Supplier Graph Visualiser — Neptune subgraph rendered as interactive force-directed graph (D3 or React Flow) (`feature/frontend-supplier-graph-viz`). Next 🔄
   - **P12-6**: Audit Trail Viewer — chronological immutable timeline per alert; role-aware UI (hide approve button for `analyst`) (`feature/frontend-audit-trail-viewer`). Pending ❌
 
 

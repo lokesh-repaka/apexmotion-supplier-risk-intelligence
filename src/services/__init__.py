@@ -33,11 +33,6 @@ from src.services.hitl_service import (
     UnauthorizedSignerError,
     get_hitl_service,
 )
-from src.services.investigation_service import (
-    InvestigationRecord,
-    InvestigationService,
-    get_investigation_service,
-)
 from src.services.risk import (
     DAYS_OF_COVER_MAX_CAP,
     DEFAULT_CACHE_TTL_SECONDS,
@@ -99,8 +94,6 @@ __all__ = [
     "InventoryRecord",
     "InventoryService",
     "InventoryServiceError",
-    "InvestigationRecord",
-    "InvestigationService",
     "NANOCORE_CANONICAL_SKU",
     "PlantInventoryAggregate",
     "REFERENCE_INVENTORY_REGISTRY",
@@ -124,6 +117,5 @@ __all__ = [
     "compute_risk_level",
     "get_dual_approval_enforcer",
     "get_hitl_service",
-    "get_investigation_service",
     "get_token_replay_guard",
 ]

@@ -4,8 +4,9 @@ import { ApprovalQueueTable } from './components/HITLApprovalModal/ApprovalQueue
 import { InvestigationPage } from './pages/InvestigationPage';
 import { RiskDashboardPage } from './pages/RiskDashboardPage';
 import { SupplierGraphPage } from './pages/SupplierGraphPage';
+import { AuditTrailPage } from './pages/AuditTrailPage';
 
-export type AppView = 'dashboard' | 'investigation' | 'graph' | 'approvals';
+export type AppView = 'dashboard' | 'graph' | 'investigation' | 'approvals' | 'audit';
 
 export const App: React.FC = () => {
   const [activeView, setActiveView] = useState<AppView>('dashboard');
@@ -59,6 +60,17 @@ export const App: React.FC = () => {
           >
             HITL Spend Approvals
           </button>
+          <button
+            type="button"
+            onClick={() => setActiveView('audit')}
+            className={`px-3 py-1.5 rounded-lg font-semibold transition-colors ${
+              activeView === 'audit'
+                ? 'bg-sky-600 text-white shadow-sm'
+                : 'text-slate-400 hover:text-white hover:bg-slate-800'
+            }`}
+          >
+            WORM Audit Ledger
+          </button>
         </div>
 
         <div className="hidden md:flex items-center gap-2 text-[11px] font-mono text-slate-400">
@@ -80,10 +92,16 @@ export const App: React.FC = () => {
           />
         ) : activeView === 'investigation' ? (
           <InvestigationPage onBackToDashboard={() => setActiveView('dashboard')} />
-        ) : (
+        ) : activeView === 'approvals' ? (
           <main className="p-6 max-w-[1720px] w-full mx-auto space-y-6">
             <ApprovalQueueTable />
           </main>
+        ) : (
+          <AuditTrailPage
+            onBackToDashboard={() => setActiveView('dashboard')}
+            onNavigateToInvestigation={() => setActiveView('investigation')}
+            onNavigateToApprovals={() => setActiveView('approvals')}
+          />
         )}
       </div>
 

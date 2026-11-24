@@ -16,6 +16,8 @@ from src.api.schemas.investigation import (
 from src.api.schemas.risk import (
     AlertAcknowledgeRequest,
     AlertAcknowledgeResponse,
+    AuditLogListResponse,
+    AuditLogResponse,
     RiskAlertListResponse,
     RiskAlertResponse,
     RiskEvaluationRequest,
@@ -37,6 +39,8 @@ __all__ = [
     "ApprovalRejectResponse",
     "ApprovalSignRequest",
     "ApprovalSignResponse",
+    "AuditLogListResponse",
+    "AuditLogResponse",
     "InvestigationDetailResponse",
     "InvestigationStartRequest",
     "InvestigationStartResponse",

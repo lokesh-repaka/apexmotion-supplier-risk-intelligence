@@ -5,3 +5,4 @@
 export * from './RiskDashboardPage';
 export * from './InvestigationPage';
 export * from './SupplierGraphPage';
+export * from './AuditTrailPage';

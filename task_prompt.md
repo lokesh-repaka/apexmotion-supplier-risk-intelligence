@@ -1,6 +1,6 @@
 You have access to the project's authoritative documentation: `TASKS.md`, `CLAUDE.md`, `GEMINI.md`, `.agents/rules/`, and architecture specifications in `docs/` (`HLD_*.md`, `LLD_*.md`, `PRD_*.md`, `BRD_*.md`, `FRD_*.md`).
 
-Go ahead and complete **P12-6 · Audit Trail Viewer (`frontend/src/components/AuditTrail/`, `frontend/src/pages/AuditTrailPage.tsx`) — chronological immutable timeline per alert; role-aware UI (hide approve button for `analyst`)**, as defined in `TASKS.md`.
+Go ahead and complete **P13-1 · Supplier seed script (`src/database/seed_dev.py`) — 50 Tier-1 suppliers (10 countries), 200 components, 20 plants, NanoCore scenario loaded**, as defined in `TASKS.md`.
 
 ---
 

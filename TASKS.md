@@ -188,7 +188,7 @@ Sub-tasks in the same phase that do not share files can be open at the same time
 | P12-3 · Investigation Panel — trigger investigation, poll status, display agent narrative + evidence cards | `feature/frontend-investigation-panel` | Completed ✅ |
 | P12-4 · HITL Approval Modal — spend tier badge, ECDSA token submission form, dual-approval progress indicator | `feature/frontend-hitl-approval-modal` | Completed ✅ |
 | P12-5 · Supplier Graph Visualiser — Neptune subgraph rendered as interactive force-directed graph (D3 or React Flow) | `feature/frontend-supplier-graph-viz` | Completed ✅ |
-| P12-6 · Audit Trail Viewer — chronological immutable timeline per alert; role-aware UI (hide approve button for `analyst`) | `feature/frontend-audit-trail-viewer` | Pending ❌ |
+| P12-6 · Audit Trail Viewer — chronological immutable timeline per alert; role-aware UI (hide approve button for `analyst`) | `feature/frontend-audit-trail-viewer` | Completed ✅ |
 
 ---
 
@@ -311,9 +311,9 @@ Phases 4, 5, 6, 7, and 8 all depend on Phase 3 and can be developed in parallel.
 | 9 | LangGraph Agent Workflow | 6 | 6 (100%) ✅ |
 | 10 | HITL Approval System | 4 | 4 (100%) ✅ |
 | 11 | FastAPI API Routes | 6 | 6 (100%) ✅ |
-| 12 | React Frontend | 6 | 5 (83.3%) 🔄 |
+| 12 | React Frontend | 6 | 6 (100%) ✅ |
 | 13 | Supplier Seed Data & Golden Datasets | 4 | 0 (0%) ❌ |
 | 14 | Unit & Integration Tests | 6 | 0 (0%) ❌ |
 | 15 | Observability | 5 | 0 (0%) ❌ |
 | 16 | Infrastructure & Delivery | 6 | 0 (0%) ❌ |
-| **Total** | | **83** | **61 (73.5%)** |
+| **Total** | | **83** | **62 (74.7%)** |

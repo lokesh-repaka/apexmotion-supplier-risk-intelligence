@@ -43,7 +43,7 @@ from sqlalchemy.ext.asyncio import (
 )
 from src.api.main import app
 from src.core.security import UserRole, create_access_token
-from src.database.models import Base, RiskAlert
+from src.database.models import AuditLog, Base, RiskAlert
 from src.database.session import get_db_session
 
 # ------------------------------------------------------------------------------
@@ -752,6 +752,83 @@ async def test_list_alerts_invalid_supplier_uuid(
     """Verify filtering by invalid supplier_id raises 400 VALIDATION_ERROR."""
     response = await client.get(
         "/api/v1/alerts?supplier_id=invalid-uuid", headers=auth_headers_analyst
+    )
+    assert response.status_code == 400
+    assert response.json()["error"]["code"] == "VALIDATION_ERROR"
+
+
+# ------------------------------------------------------------------------------
+# 5. Alert Audit Trail Tests: GET /api/v1/alerts/{alert_id}/audit
+# ------------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_get_alert_audit_trail_success(
+    client: AsyncClient,
+    db_session: AsyncSession,
+    auth_headers_analyst: dict[str, str],
+) -> None:
+    """Verify retrieving chronological audit trail for an existing alert succeeds."""
+    alert = RiskAlert(
+        component_sku="AUDIT-SKU-001",
+        risk_level="HIGH",
+        status="OPEN",
+    )
+    db_session.add(alert)
+    await db_session.commit()
+    await db_session.refresh(alert)
+
+    # Insert mock audit log for this alert
+    audit_entry = AuditLog(
+        entity_type="RISK_ALERT",
+        entity_id=alert.id,
+        action="ALERT_ACKNOWLEDGED",
+        actor_id=uuid.uuid4(),
+        before_state={"status": "OPEN"},
+        after_state={"status": "ACKNOWLEDGED"},
+        trace_id="tr-test-audit-001",
+    )
+    db_session.add(audit_entry)
+    await db_session.commit()
+
+    response = await client.get(
+        f"/api/v1/alerts/{alert.id}/audit",
+        headers=auth_headers_analyst,
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["total"] == 1
+    assert data["entity_type"] == "RISK_ALERT"
+    assert data["entity_id"] == str(alert.id)
+    assert len(data["items"]) == 1
+    assert data["items"][0]["action"] == "ALERT_ACKNOWLEDGED"
+    assert data["items"][0]["trace_id"] == "tr-test-audit-001"
+
+
+@pytest.mark.asyncio
+async def test_get_alert_audit_trail_not_found_404(
+    client: AsyncClient,
+    auth_headers_analyst: dict[str, str],
+) -> None:
+    """Verify querying audit trail for non-existent alert returns 404 NOT_FOUND."""
+    fake_id = str(uuid.uuid4())
+    response = await client.get(
+        f"/api/v1/alerts/{fake_id}/audit",
+        headers=auth_headers_analyst,
+    )
+    assert response.status_code == 404
+    assert response.json()["error"]["code"] == "NOT_FOUND"
+
+
+@pytest.mark.asyncio
+async def test_get_alert_audit_trail_invalid_uuid_400(
+    client: AsyncClient,
+    auth_headers_analyst: dict[str, str],
+) -> None:
+    """Verify querying audit trail with malformed UUID returns 400 VALIDATION_ERROR."""
+    response = await client.get(
+        "/api/v1/alerts/not-a-valid-uuid/audit",
+        headers=auth_headers_analyst,
     )
     assert response.status_code == 400
     assert response.json()["error"]["code"] == "VALIDATION_ERROR"

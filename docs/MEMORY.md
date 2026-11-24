@@ -732,7 +732,17 @@
     - **Decoupled Database Sessions & Thread Safety**: Background workers use isolated database sessions from `get_async_session_factory()` to update `AgentRun` records upon completion or failure, avoiding session sharing across async request contexts.
     - **Multi-Level State Resilience**: Three-tier lookup architecture resolves investigations via: (1) active in-memory record cache; (2) LangGraph `MemorySaver` checkpointer state tuples; (3) Aurora PostgreSQL `AgentRun` database records.
     - **Forensic Audit & Error Containment**: All lifecycle events (`INVESTIGATION_STARTED`, `INVESTIGATION_COMPLETED`, `INVESTIGATION_FAILED`) emit append-only audit logs via `write_audit_log()`. Graph execution exceptions transition status to `FAILED` without leaking internal tracebacks.
-    - **Comprehensive Test Suite**: 11 unit tests in `tests/unit/test_investigation_routes.py` (96% route coverage, 87% service coverage, 100% pass), bringing full platform test suite to 737 tests passing (96.88% total coverage).
+    - **Comprehensive Test Suite**: 11 unit tests in `tests/unit/test_investigation_routes.py` (96% route coverage, 87% service coverage, 100% pass).
+
+53. **Cryptographic Approval Routes, Anti-Replay Gate, and Multi-Tier HITL Governance (SEC-055, BR-RULE-001, BR-RULE-007, CLAUDE.md Sec 5.2 & Sec 20)**:
+    - **The Triad of Responsibility & Deterministic Routing**: Route handlers in `src/api/routes/approval_routes.py` strictly decouple HTTP ingress/RBAC from spend math and signing logic, delegating token validation to `HITLService`, `DualApprovalEnforcer`, and `TokenReplayGuard`.
+    - **Approval Queue Feed (`GET /api/v1/approvals`)**: Gated by `require_role(UserRole.CATEGORY_MANAGER)`, permitting Category Managers, Directors, VPs, and Admins while strictly rejecting read-only `analyst` with HTTP 403 `INSUFFICIENT_ROLE`. Supports status and spend tier filtering with auto-expiration of stale records.
+    - **Detail Inspection (`GET /api/v1/approvals/{id}`)**: Validates UUID format and evaluates dynamic TTL expiration on pending records.
+    - **Cryptographic Token Submission (`POST /api/v1/approvals/{id}/sign`)**: Validates AWS KMS ECDSA P-256 tokens against action ID, alert ID, and exact Decimal spend amounts. Rejects unauthorized signer roles (`403 INSUFFICIENT_ROLE`), replayed tokens (`409 TOKEN_REPLAY`), expired tokens (`400 TOKEN_EXPIRED`), and parameter mismatches (`400 TOKEN_BINDING_MISMATCH`).
+    - **Dual-Approval Enforcement (Tier 3 > $100k)**: Prohibits single-signature capital bypass; initial signature moves state to `PARTIALLY_APPROVED`, second distinct signature moves to `APPROVED`. Self-signing / duplicate signers are rejected (`409 DUPLICATE_SIGNER`).
+    - **Rejection & Aliases**: `POST /api/v1/approvals/{id}/reject` enforces mandatory justification. `POST /api/v1/cases/{case_id}/approve` provides backward compatibility.
+    - **Forensic WORM Audit Trails**: Dispatches append-only audit logs via `write_audit_log()` on token submission (`APPROVAL_SIGNED`, `APPROVAL_NOTES_ATTACHED`) and rejection (`APPROVAL_REJECTED`).
+    - **Comprehensive Test Suite**: 18 unit tests in `tests/unit/test_approval_routes.py` with 100% pass rate under zero external I/O, bringing total test suite to 744 passed tests (95.19% project-wide coverage).
 
 ---
 
@@ -753,7 +763,9 @@
 - **Phase 11 — FastAPI API Routes**:
   - **P11-1**: Fast-track / Full-track pipeline routes (`src/api/routes/risk_routes.py`) (`feature/api-alert-routes`). Completed ✅
   - **P11-2**: Investigation routes — `POST /api/v1/investigations/start`, `GET /api/v1/investigations/{id}` (`feature/api-investigation-routes`). Completed ✅
-  - **P11-3**: Approval routes — `GET /api/v1/approvals` (HITL queue), `POST /api/v1/approvals/{id}/sign` (ECDSA token submission) (`feature/api-approval-routes`). Next 🔄
+  - **P11-3**: Approval routes — `GET /api/v1/approvals` (HITL queue), `POST /api/v1/approvals/{id}/sign` (ECDSA token submission) (`feature/api-approval-routes`). Completed ✅
+  - **P11-4**: Supplier routes — `GET /api/v1/suppliers/{id}/risk`, `GET /api/v1/suppliers/{id}/graph` (Neptune subgraph) (`feature/api-supplier-routes`). Next 🔄
+
 
 
 

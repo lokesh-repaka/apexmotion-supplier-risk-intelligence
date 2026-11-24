@@ -1,6 +1,6 @@
 You have access to the project's authoritative documentation: `TASKS.md`, `CLAUDE.md`, `GEMINI.md`, `.agents/rules/`, and architecture specifications in `docs/` (`HLD_*.md`, `LLD_*.md`, `PRD_*.md`, `BRD_*.md`, `FRD_*.md`).
 
-Go ahead and complete **P11-4 · Supplier routes (`src/api/routes/supplier_routes.py`) — `GET /api/v1/suppliers/{id}/risk`, `GET /api/v1/suppliers/{id}/graph` (Neptune subgraph)**, as defined in `TASKS.md`.
+Go ahead and complete **P11-5 · WebSocket handler (`src/api/routes/websocket_routes.py`) — real-time alert push to frontend on new `risk-alerts` Kafka message**, as defined in `TASKS.md`.
 
 ---
 

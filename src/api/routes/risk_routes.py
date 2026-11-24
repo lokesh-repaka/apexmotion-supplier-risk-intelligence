@@ -27,6 +27,8 @@ from src.api.exceptions import (
 from src.api.schemas.risk import (
     AlertAcknowledgeRequest,
     AlertAcknowledgeResponse,
+    AuditLogListResponse,
+    AuditLogResponse,
     RiskAlertListResponse,
     RiskAlertResponse,
     RiskEvaluationRequest,
@@ -37,6 +39,7 @@ from src.core.hitl_tokens import get_spend_tier
 from src.core.logging import get_logger, get_trace_id
 from src.core.security import AuthenticatedUser, UserRole, require_role
 from src.database.models import RiskAlert
+from src.database.repositories.audit_log_repository import AuditLogRepository
 from src.database.repositories.risk_alert_repository import RiskAlertRepository
 from src.database.session import get_db_session
 from src.services.risk import (
@@ -482,3 +485,59 @@ async def acknowledge_risk_alert(
         acknowledged_at=datetime.now(UTC),
         notes=notes_val,
     )
+
+
+# ------------------------------------------------------------------------------
+# 5. Alert Audit Trail: GET /api/v1/alerts/{alert_id}/audit
+# ------------------------------------------------------------------------------
+
+
+@router.get(
+    "/api/v1/alerts/{alert_id}/audit",
+    response_model=AuditLogListResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Get chronological immutable audit trail for a specific risk alert",
+)
+async def get_alert_audit_trail(
+    alert_id: str,
+    current_user: Annotated[AuthenticatedUser, Depends(require_role(UserRole.ANALYST))],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+) -> AuditLogListResponse:
+    """Fetch immutable chronological forensic audit trail for a risk alert (BR-RULE-007).
+
+    Read access is permitted to Analysts and higher roles.
+    """
+    a_uuid = _parse_uuid(alert_id, "alert_id")
+    logger.debug("Fetching audit trail for alert '%s' (user: %s)", alert_id, current_user.user_id)
+
+    # Verify alert exists
+    alert_repo = RiskAlertRepository(session)
+    alert = await alert_repo.get_by_id(a_uuid)
+    if alert is None:
+        raise NotFoundException(f"Risk alert '{alert_id}' not found.")
+
+    audit_repo = AuditLogRepository(session)
+    records = await audit_repo.get_by_entity(entity_type="RISK_ALERT", entity_id=a_uuid)
+
+    items = [
+        AuditLogResponse(
+            id=r.id,
+            entity_type=r.entity_type,
+            entity_id=str(r.entity_id),
+            action=r.action,
+            actor_id=str(r.actor_id),
+            before_state=r.before_state,
+            after_state=r.after_state,
+            trace_id=r.trace_id,
+            created_at=r.created_at,
+        )
+        for r in records
+    ]
+
+    return AuditLogListResponse(
+        items=items,
+        total=len(items),
+        entity_id=str(a_uuid),
+        entity_type="RISK_ALERT",
+    )
+

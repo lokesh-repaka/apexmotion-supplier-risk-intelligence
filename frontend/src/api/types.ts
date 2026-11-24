@@ -472,3 +472,31 @@ export const WebSocketServerMessageSchema = z.discriminatedUnion('type', [
 ]);
 
 export type WebSocketServerMessage = z.infer<typeof WebSocketServerMessageSchema>;
+
+// =============================================================================
+// 8. Forensic Audit Log Schemas (src/core/audit.py & src/api/routes/risk_routes.py)
+// =============================================================================
+
+export const AuditLogResponseSchema = z.object({
+  id: z.union([z.number(), z.string()]),
+  entity_type: z.string(),
+  entity_id: z.string(),
+  action: z.string(),
+  actor_id: z.string(),
+  before_state: z.record(z.unknown()).nullable().optional(),
+  after_state: z.record(z.unknown()).nullable().optional(),
+  trace_id: z.string().nullable().optional(),
+  created_at: z.string(),
+});
+
+export type AuditLogResponse = z.infer<typeof AuditLogResponseSchema>;
+
+export const AuditLogListResponseSchema = z.object({
+  items: z.array(AuditLogResponseSchema).default([]),
+  total: z.number().int().min(0).default(0),
+  entity_id: z.string().nullable().optional(),
+  entity_type: z.string().nullable().optional(),
+});
+
+export type AuditLogListResponse = z.infer<typeof AuditLogListResponseSchema>;
+

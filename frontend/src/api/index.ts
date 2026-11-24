@@ -14,3 +14,4 @@ export * from './routes/risk';
 export * from './routes/investigations';
 export * from './routes/approvals';
 export * from './routes/suppliers';
+export * from './routes/audit';

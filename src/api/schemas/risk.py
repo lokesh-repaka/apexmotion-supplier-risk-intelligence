@@ -2,7 +2,7 @@
 
 from datetime import UTC, datetime
 from decimal import Decimal
-from typing import Literal
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -169,3 +169,31 @@ class AlertAcknowledgeResponse(BaseModel):
         description="Acknowledgement timestamp in UTC",
     )
     notes: str | None = Field(default=None, description="Recorded acknowledgement notes")
+
+
+class AuditLogResponse(BaseModel):
+    """Immutable forensic audit log entry schema (BR-RULE-007)."""
+
+    model_config = ConfigDict(extra="ignore")
+
+    id: int = Field(..., description="Monotonic sequential audit record identifier")
+    entity_type: str = Field(..., description="Target domain entity type")
+    entity_id: str = Field(..., description="Entity UUID or identifier")
+    action: str = Field(..., description="Recorded action verb")
+    actor_id: str = Field(..., description="Initiating actor or service UUID")
+    before_state: dict[str, Any] | None = Field(default=None, description="Pre-action entity state")
+    after_state: dict[str, Any] | None = Field(default=None, description="Post-action entity state")
+    trace_id: str | None = Field(default=None, description="Distributed trace context identifier")
+    created_at: datetime = Field(..., description="Immutable UTC creation timestamp")
+
+
+class AuditLogListResponse(BaseModel):
+    """Collection response of audit log entries."""
+
+    model_config = ConfigDict(extra="ignore")
+
+    items: list[AuditLogResponse] = Field(default_factory=list, description="List of audit log records")
+    total: int = Field(default=0, ge=0, description="Total matching audit records")
+    entity_id: str | None = Field(default=None, description="Entity identifier filter")
+    entity_type: str | None = Field(default=None, description="Entity domain category")
+

@@ -540,4 +540,3 @@ async def get_alert_audit_trail(
         entity_id=str(a_uuid),
         entity_type="RISK_ALERT",
     )
-

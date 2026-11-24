@@ -832,4 +832,3 @@ async def test_get_alert_audit_trail_invalid_uuid_400(
     )
     assert response.status_code == 400
     assert response.json()["error"]["code"] == "VALIDATION_ERROR"
-

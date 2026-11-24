@@ -192,8 +192,9 @@ class AuditLogListResponse(BaseModel):
 
     model_config = ConfigDict(extra="ignore")
 
-    items: list[AuditLogResponse] = Field(default_factory=list, description="List of audit log records")
+    items: list[AuditLogResponse] = Field(
+        default_factory=list, description="List of audit log records"
+    )
     total: int = Field(default=0, ge=0, description="Total matching audit records")
     entity_id: str | None = Field(default=None, description="Entity identifier filter")
     entity_type: str | None = Field(default=None, description="Entity domain category")
-

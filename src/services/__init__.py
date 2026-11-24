@@ -56,6 +56,13 @@ from src.services.risk import (
     RiskScoreResult,
     compute_risk_level,
 )
+from src.services.token_replay_guard import (
+    TokenReplayCheckResult,
+    TokenReplayGuard,
+    TokenReplayGuardError,
+    TokenReplaySecurityAlert,
+    get_token_replay_guard,
+)
 
 __all__ = [
     "AlertAction",
@@ -99,6 +106,10 @@ __all__ = [
     "THRESHOLD_EXPOSURE_HIGH",
     "THRESHOLD_SUPPLIER_RISK_MEDIUM",
     "TokenExpiredServiceError",
+    "TokenReplayCheckResult",
+    "TokenReplayGuard",
+    "TokenReplayGuardError",
+    "TokenReplaySecurityAlert",
     "TokenReplayServiceError",
     "TokenVerificationServiceError",
     "UnauthorizedSignerError",
@@ -106,4 +117,5 @@ __all__ = [
     "compute_risk_level",
     "get_dual_approval_enforcer",
     "get_hitl_service",
+    "get_token_replay_guard",
 ]

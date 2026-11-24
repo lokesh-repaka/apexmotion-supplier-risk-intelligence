@@ -167,7 +167,7 @@ Sub-tasks in the same phase that do not share files can be open at the same time
 
 | Task | Branch | Status |
 |------|--------|--------|
-| P11-1 · Alert routes — `GET /api/v1/alerts`, `GET /api/v1/alerts/{id}`, `POST /api/v1/alerts/{id}/acknowledge` | `feature/api-alert-routes` | Pending ❌ |
+| P11-1 · Alert routes — `GET /api/v1/alerts`, `GET /api/v1/alerts/{id}`, `POST /api/v1/alerts/{id}/acknowledge` | `feature/api-alert-routes` | Completed ✅ |
 | P11-2 · Investigation routes — `POST /api/v1/investigations/start`, `GET /api/v1/investigations/{id}` (async polling) | `feature/api-investigation-routes` | Pending ❌ |
 | P11-3 · Approval routes — `GET /api/v1/approvals` (HITL queue), `POST /api/v1/approvals/{id}/sign` (ECDSA token submission) | `feature/api-approval-routes` | Pending ❌ |
 | P11-4 · Supplier routes — `GET /api/v1/suppliers/{id}/risk`, `GET /api/v1/suppliers/{id}/graph` (Neptune subgraph) | `feature/api-supplier-routes` | Pending ❌ |

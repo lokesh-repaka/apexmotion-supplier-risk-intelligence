@@ -184,7 +184,7 @@ Sub-tasks in the same phase that do not share files can be open at the same time
 | Task | Branch | Status |
 |------|--------|--------|
 | P12-1 · Typed API client (`frontend/src/api/`) — axios + Zod schemas for all backend routes; WebSocket hook for live alerts | `feature/frontend-api-client` | Completed ✅ |
-| P12-2 · Risk Dashboard page — supplier risk table, severity heat-map, Kafka-driven live alert feed, Zustand store | `feature/frontend-risk-dashboard` | Pending ❌ |
+| P12-2 · Risk Dashboard page — supplier risk table, severity heat-map, Kafka-driven live alert feed, Zustand store | `feature/frontend-risk-dashboard` | Completed ✅ |
 | P12-3 · Investigation Panel — trigger investigation, poll status, display agent narrative + evidence cards | `feature/frontend-investigation-panel` | Pending ❌ |
 | P12-4 · HITL Approval Modal — spend tier badge, ECDSA token submission form, dual-approval progress indicator | `feature/frontend-hitl-approval-modal` | Pending ❌ |
 | P12-5 · Supplier Graph Visualiser — Neptune subgraph rendered as interactive force-directed graph (D3 or React Flow) | `feature/frontend-supplier-graph-viz` | Pending ❌ |
@@ -311,9 +311,9 @@ Phases 4, 5, 6, 7, and 8 all depend on Phase 3 and can be developed in parallel.
 | 9 | LangGraph Agent Workflow | 6 | 6 (100%) ✅ |
 | 10 | HITL Approval System | 4 | 4 (100%) ✅ |
 | 11 | FastAPI API Routes | 6 | 6 (100%) ✅ |
-| 12 | React Frontend | 6 | 1 (16.7%) 🔄 |
+| 12 | React Frontend | 6 | 2 (33.3%) 🔄 |
 | 13 | Supplier Seed Data & Golden Datasets | 4 | 0 (0%) ❌ |
 | 14 | Unit & Integration Tests | 6 | 0 (0%) ❌ |
 | 15 | Observability | 5 | 0 (0%) ❌ |
 | 16 | Infrastructure & Delivery | 6 | 0 (0%) ❌ |
-| **Total** | | **83** | **57 (68.7%)** |
+| **Total** | | **83** | **58 (69.9%)** |

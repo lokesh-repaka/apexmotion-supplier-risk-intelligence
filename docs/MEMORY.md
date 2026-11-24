@@ -27,9 +27,9 @@
 | **Phase 9 Progress** | 6 / 6 Tasks Completed (100%) | Completed ✅ |
 | **Phase 10 Progress** | 4 / 4 Tasks Completed (100%) | Completed ✅ |
 | **Phase 11 Progress** | 6 / 6 Tasks Completed (100%) | Completed ✅ |
-| **Phase 12 Progress** | 1 / 6 Tasks Completed (16.7%) | In Progress 🔄 |
-| **Total Test Suites** | 60 (56 Python suites + 4 Frontend suites: `types.test.ts`, `client.test.ts`, `routes.test.ts`, `useAlertWebSocket.test.ts`) | PASSED ✅ |
-| **Total Test Cases** | 860 tests (816 Python [797 unit + 11 integration + 8 golden] + 44 Frontend unit) | 100% Passing (0 failures) |
+| **Phase 12 Progress** | 2 / 6 Tasks Completed (33.3%) | In Progress 🔄 |
+| **Total Test Suites** | 62 (56 Python suites + 6 Frontend suites: `types.test.ts`, `client.test.ts`, `routes.test.ts`, `useAlertWebSocket.test.ts`, `useRiskStore.test.ts`, `RiskDashboard.test.ts`) | PASSED ✅ |
+| **Total Test Cases** | 874 tests (816 Python [797 unit + 11 integration + 8 golden] + 58 Frontend unit) | 100% Passing (0 failures) |
 | **Code Coverage (`src/`)** | **95.48%** statement coverage (6,952 statements, 314 missed; exceeds 80% DoD gate) | Exceeds 80% DoD gate |
 | **Active Branch** | `development` | Clean |
 
@@ -784,14 +784,23 @@
     - **Comprehensive Test Suite**: 44 unit tests in Vitest across 4 test suites (`types.test.ts`, `client.test.ts`, `routes.test.ts`, `useAlertWebSocket.test.ts`) with 100% pass rate, bringing total project test count to 860 passed tests.
     - **Phase 12 (React Frontend) progress is now 1/6 (16.7%).**
 
+58. **Risk Dashboard State Management, Cross-Tier Disruption Heat-Mapping, and Kafka-Driven Live Streaming UI (SEC-060, BR-RULE-001, CLAUDE.md Sec 5.2, Sec 10 & Sec 20)**:
+    - **Deterministic Client-Side Aggregations (`frontend/src/stores/useRiskStore.ts`)**: Implemented `computeDashboardKPIs` summing financial exposure using `BigInt` integer cents to strictly eliminate floating-point precision drift. Adheres to the Triad of Responsibility (BR-RULE-001) where all risk numbers originate from the deterministic backend Python engine.
+    - **Real-Time Stream Buffer Governance**: Capped live alert buffer at 50 items with automated deduplication, preventing unbounded DOM allocation during high-throughput Kafka disruption events.
+    - **Multi-Faceted Supplier Risk Matrix (`frontend/src/components/RiskDashboard/SupplierRiskTable.tsx`)**: Engineered interactive table with real-time text search across supplier legal name, Neptune node ID, ISO country code, and impacted component SKUs. Supports multi-tier filtering (Tier 1, Tier 2, Tier 3) and categorical risk severity gating.
+    - **Interactive Disruption Severity Heat-Map (`frontend/src/components/RiskDashboard/SeverityHeatMap.tsx`)**: Engineered 4x3 matrix visualizing cross-tier disruption intensity across CRITICAL, HIGH, MEDIUM, and LOW risk levels. Supports one-click cell filtering linking directly to the supplier risk matrix.
+    - **Reactive Kafka-Driven Alert Feed (`frontend/src/components/AlertFeed/AlertFeed.tsx`)**: Integrated real-time WebSocket alert push with live connection health pulse ("● MSK KAFKA LIVE"), 4-metric grid (Days of Cover, Shortage Volume, Exposure, Gap), HITL spend tier indicator, and inline alert acknowledgment.
+    - **Comprehensive Test Suite**: 14 new unit tests in Vitest across `useRiskStore.test.ts` and `RiskDashboard.test.ts` with 100% pass rate, bringing total project test count to 874 passed tests (816 Python + 58 Frontend).
+    - **Phase 12 (React Frontend) progress is now 2/6 (33.3%).**
+
 ---
 
 ## 5. Next Planned Tasks
 - **Phase 11 — FastAPI API Routes**: Completed ✅ (6/6 tasks done)
-- **Phase 12 — React Frontend**: In Progress 🔄 (1/6 tasks done)
+- **Phase 12 — React Frontend**: In Progress 🔄 (2/6 tasks done)
   - **P12-1**: Typed API client (`frontend/src/api/`) — axios + Zod schemas for all backend routes; WebSocket hook for live alerts (`feature/frontend-api-client`). Completed ✅
-  - **P12-2**: Risk Dashboard page — supplier risk table, severity heat-map, Kafka-driven live alert feed, Zustand store (`feature/frontend-risk-dashboard`). Next 🔄
-  - **P12-3**: Investigation Panel — trigger investigation, poll status, display agent narrative + evidence cards (`feature/frontend-investigation-panel`). Pending ❌
+  - **P12-2**: Risk Dashboard page — supplier risk table, severity heat-map, Kafka-driven live alert feed, Zustand store (`feature/frontend-risk-dashboard`). Completed ✅
+  - **P12-3**: Investigation Panel — trigger investigation, poll status, display agent narrative + evidence cards (`feature/frontend-investigation-panel`). Next 🔄
   - **P12-4**: HITL Approval Modal — spend tier badge, ECDSA token submission form, dual-approval progress indicator (`feature/frontend-hitl-approval-modal`). Pending ❌
   - **P12-5**: Supplier Graph Visualiser — Neptune subgraph rendered as interactive force-directed graph (D3 or React Flow) (`feature/frontend-supplier-graph-viz`). Pending ❌
   - **P12-6**: Audit Trail Viewer — chronological immutable timeline per alert; role-aware UI (hide approve button for `analyst`) (`feature/frontend-audit-trail-viewer`). Pending ❌

@@ -28,9 +28,10 @@
 | **Phase 10 Progress** | 4 / 4 Tasks Completed (100%) | Completed ✅ |
 | **Phase 11 Progress** | 6 / 6 Tasks Completed (100%) | Completed ✅ |
 | **Phase 12 Progress** | 6 / 6 Tasks Completed (100%) | Completed ✅ |
-| **Total Test Suites** | 70 (56 Python suites + 14 Frontend suites: `types.test.ts`, `client.test.ts`, `routes.test.ts`, `useAlertWebSocket.test.ts`, `useRiskStore.test.ts`, `RiskDashboard.test.ts`, `useInvestigationStore.test.ts`, `InvestigationPanel.test.ts`, `useApprovalStore.test.ts`, `HITLApprovalModal.test.ts`, `useGraphStore.test.ts`, `SupplierGraph.test.ts`, `useAuditStore.test.ts`, `AuditTrail.test.ts`) | PASSED ✅ |
-| **Total Test Cases** | 935 tests (819 Python [797 unit + 11 integration + 8 golden + 3 API] + 116 Frontend unit) | 100% Passing (0 failures) |
-| **Code Coverage (`src/`)** | **95.48%** statement coverage (6,952 statements, 314 missed; exceeds 80% DoD gate) | Exceeds 80% DoD gate |
+| **Phase 13 Progress** | 1 / 4 Tasks Completed (25.0%) | In Progress 🔄 |
+| **Total Test Suites** | 71 (57 Python suites + 14 Frontend suites) | PASSED ✅ |
+| **Total Test Cases** | 946 tests (830 Python [808 unit + 11 integration + 8 golden + 3 API] + 116 Frontend unit) | 100% Passing (0 failures) |
+| **Code Coverage (`src/`)** | **95.00%** statement coverage (7,187 statements, 359 missed; exceeds 80% DoD gate) | Exceeds 80% DoD gate |
 | **Active Branch** | `development` | Clean |
 
 ---
@@ -835,16 +836,27 @@
     - **Comprehensive Test Suite**: 17 new tests (14 Vitest unit tests in `useAuditStore.test.ts` and `AuditTrail.test.ts`, plus 3 Pytest unit tests in `tests/unit/test_risk_routes.py`) with 100% pass rate, bringing total project test count to 935 passed tests (819 Python + 116 Frontend across 70 test suites).
     - **Phase 12 (React Frontend) is now 100% complete (6/6 tasks).**
 
+63. **Master Supplier Seed Data Infrastructure, Plant Allocation & Canonical NanoCore Reference Persistence (SEC-065, BR-RULE-001, CLAUDE.md Sec 14 & Sec 15)**:
+    - **Master Seed Orchestrator (`src/database/seed_dev.py`)**: Implemented idempotent development database seeder populating Aurora PostgreSQL with realistic, multi-tier automotive supply chain reference data.
+    - **53 Tier-1 Automotive Direct Suppliers Across 10 Countries**: Seeded major suppliers across Germany (Bosch, Continental, ZF, Schaeffler, Mahle, Hella), Japan (Denso, Aisin, Sumitomo, Yazaki, Hitachi, Stanley), USA (Magna, Lear, BorgWarner, Dana, Aptiv, Visteon), South Korea (Mobis, Mando, Hanon, SL, Transys), Taiwan (Foxconn, Delta, Pegatron, Quanta, Wistron), China (CATL, BYD, Weichai, Joyson, Fuyao, CALB), Mexico (Nemak, Rassini, Metalsa, Brose, Martinrea), India (Tata AutoComp, Bharat Forge, Motherson, Uno Minda, Sona Comstar, Sundram Fasteners), Vietnam (VinFast, FPT, THACO, Hanwha), and United Kingdom (GKN, TI Fluid, Senior, Ricardo).
+    - **20 Global Automotive Manufacturing Plants**: Seeded complete manufacturing footprint spanning Munich (`PLT-MUC-01`), Bengaluru (`PLT-BLR-02`), Pune (`PLT-PUN-03`), Stuttgart (`PLT-STU-01`), Leipzig (`PLT-LEI-01`), Graz (`PLT-GRA-01`), San Luis Potosi (`PLT-SLP-01`), Austin (`PLT-AUST-01`), Yokohama (`PLT-YOK-01`), Wolfsburg (`PLT-WOL-01`), Oxford (`PLT-OXF-01`), Chennai (`PLT-CHE-01`), Hyderabad (`PLT-HYD-01`), Bangkok (`PLT-BKK-01`), Haiphong (`PLT-HAI-01`), Shenzhen (`PLT-SZX-01`), Guanajuato (`PLT-GUA-01`), Valencia (`PLT-VAL-01`), Bratislava (`PLT-BRA-01`), and Detroit (`PLT-DET-01`).
+    - **200 Component SKUs Across 10 Engineering Domains**: Seeded 200 distinct component SKUs across Microcontrollers, PMICs, Battery Management Systems, ADAS/Radar/LiDAR, Chassis/Steering, High-Voltage Wiring, Thermal Management/HVAC, Cockpit/Displays, Structural Castings, and Fasteners/Seals, with inventory snapshots distributed across all 20 plants.
+    - **Canonical NanoCore Golden Scenario (CLAUDE.md Sec 14)**: Seeded NanoCore Semiconductor Ltd (`SUP-NC-001` / `SUP-NC-882`, TW, Tier-2, risk score `0.880`), golden component `SKU-MCU-4402` at Munich Assembly Hub (`PLT-MUC-01`) with exact certified parameters (stock: `142,000`, burn: `18,500/day`, unit cost: `$100.25`, ETA: `9.00 days`), canonical `CRITICAL` risk alert (`7.68` days of cover, `24,420` units shortage, `$2,448,105.00` financial exposure), and append-only audit trail record in `audit_logs`.
+    - **CLI Automation & Integrity Audit**: Provided `python -m src.database.seed_dev` CLI with `--clear`, `--dry-run`, and `--verify` flags, plus programmatic `seed_database()` and `verify_seed_integrity()` APIs.
+    - **Comprehensive Test Suite**: 11 unit tests in `tests/unit/test_seed_dev.py` achieving **99% statement coverage** on `src/database/seed_dev.py`, bringing total project test count to 946 passed tests (830 Python + 116 Frontend across 71 test suites).
+    - **Phase 13 (Supplier Seed Data & Golden Datasets) progress is now 1/4 (25.0%).**
+
 ---
 
 ## 5. Next Planned Tasks
 - **Phase 11 — FastAPI API Routes**: Completed ✅ (6/6 tasks done)
 - **Phase 12 — React Frontend**: Completed ✅ (6/6 tasks done)
-- **Phase 13 — Supplier Seed Data & Golden Datasets**: Next 🔄 (0/4 tasks done)
-  - **P13-1**: Supplier seed script (`src/database/seed_dev.py`) — 50 Tier-1 suppliers (10 countries), 200 components, 20 plants, NanoCore scenario loaded (`feature/seed-supplier-data`). Next 🔄
-  - **P13-2**: Neptune graph seed — supplier → component → plant edges, tier-chain links, 3 geopolitical risk nodes for NanoCore region (`feature/seed-graph-data`). Pending ❌
+- **Phase 13 — Supplier Seed Data & Golden Datasets**: In Progress 🔄 (1/4 tasks done)
+  - **P13-1**: Supplier seed script (`src/database/seed_dev.py`) — 50 Tier-1 suppliers (10 countries), 200 components, 20 plants, NanoCore scenario loaded (`feature/seed-supplier-data`). Completed ✅
+  - **P13-2**: Neptune graph seed — supplier → component → plant edges, tier-chain links, 3 geopolitical risk nodes for NanoCore region (`feature/seed-graph-data`). Next 🔄
   - **P13-3**: Golden dataset (`tests/golden/`) — `nanocore_scenario.json` with exact inputs/expected outputs; 5 edge-case JSON files (`feature/seed-golden-datasets`). Pending ❌
   - **P13-4**: OpenSearch vector seed — 500 synthetic contract clauses chunked and embedded into `contracts-v1` index (`feature/seed-opensearch-vectors`). Pending ❌
+
 
 
 

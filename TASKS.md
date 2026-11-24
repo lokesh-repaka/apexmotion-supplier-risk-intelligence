@@ -199,7 +199,7 @@ Sub-tasks in the same phase that do not share files can be open at the same time
 
 | Task | Branch | Status |
 |------|--------|--------|
-| P13-1 · Supplier seed script (`src/database/seed_dev.py`) — 50 Tier-1 suppliers (10 countries), 200 components, 20 plants, NanoCore scenario loaded | `feature/seed-supplier-data` | Pending ❌ |
+| P13-1 · Supplier seed script (`src/database/seed_dev.py`) — 50 Tier-1 suppliers (10 countries), 200 components, 20 plants, NanoCore scenario loaded | `feature/seed-supplier-data` | Completed ✅ |
 | P13-2 · Neptune graph seed — supplier → component → plant edges, tier-chain links, 3 geopolitical risk nodes for NanoCore region | `feature/seed-graph-data` | Pending ❌ |
 | P13-3 · Golden dataset (`tests/golden/`) — `nanocore_scenario.json` with exact inputs/expected outputs; 5 edge-case JSON files (zero stock, zero gap, negative gap, dual-approval threshold, single-source dependency) | `feature/seed-golden-datasets` | Pending ❌ |
 | P13-4 · OpenSearch vector seed — 500 synthetic contract clauses chunked and embedded into `contracts-v1` index | `feature/seed-opensearch-vectors` | Pending ❌ |
@@ -312,8 +312,8 @@ Phases 4, 5, 6, 7, and 8 all depend on Phase 3 and can be developed in parallel.
 | 10 | HITL Approval System | 4 | 4 (100%) ✅ |
 | 11 | FastAPI API Routes | 6 | 6 (100%) ✅ |
 | 12 | React Frontend | 6 | 6 (100%) ✅ |
-| 13 | Supplier Seed Data & Golden Datasets | 4 | 0 (0%) ❌ |
+| 13 | Supplier Seed Data & Golden Datasets | 4 | 1 (25.0%) 🔄 |
 | 14 | Unit & Integration Tests | 6 | 0 (0%) ❌ |
 | 15 | Observability | 5 | 0 (0%) ❌ |
 | 16 | Infrastructure & Delivery | 6 | 0 (0%) ❌ |
-| **Total** | | **83** | **62 (74.7%)** |
+| **Total** | | **83** | **63 (75.9%)** |

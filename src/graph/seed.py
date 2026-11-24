@@ -76,6 +76,24 @@ GOLDEN_SUPPLIERS: list[dict[str, Any]] = [
         "aml_status": "CLEAR",
         "last_updated": "2026-11-20T10:00:00Z",
     },
+    {
+        "id": "SUP-MC-002",
+        "name": "MicroChip Global Semiconductors",
+        "tier": 2,
+        "country": "US",
+        "risk_score": 0.25,
+        "aml_status": "CLEAR",
+        "last_updated": "2026-11-20T10:00:00Z",
+    },
+    {
+        "id": "SUP-SIL-901",
+        "name": "Siltronic Silicon Wafers AG",
+        "tier": 3,
+        "country": "DE",
+        "risk_score": 0.15,
+        "aml_status": "CLEAR",
+        "last_updated": "2026-11-20T10:00:00Z",
+    },
 ]
 
 GOLDEN_COMPONENTS: list[dict[str, Any]] = [
@@ -153,9 +171,26 @@ GOLDEN_EXTERNAL_SIGNALS: list[dict[str, Any]] = [
     {
         "label": "GeopoliticalRisk",
         "id": "RISK-GEO-TW-01",
-        "region": "East Asia",
+        "region": "East Asia / Taiwan Strait",
         "risk_type": "EXPORT_RESTRICTION_LOGISTICS",
         "severity": "HIGH",
+        "description": "Bilateral export controls and maritime shipping lane congestion in the Taiwan Strait corridor.",
+    },
+    {
+        "label": "GeopoliticalRisk",
+        "id": "RISK-GEO-TW-02",
+        "region": "Northern Taiwan / Hsinchu",
+        "risk_type": "SEISMIC_AND_POWER_VULNERABILITY",
+        "severity": "HIGH",
+        "description": "Subduction fault seismic activity and cleanroom power grid concentration across Hsinchu Science Park.",
+    },
+    {
+        "label": "GeopoliticalRisk",
+        "id": "RISK-GEO-TW-03",
+        "region": "Taiwan Strait / South China Sea",
+        "risk_type": "MARITIME_CHOKEPOINT_BLOCKADE",
+        "severity": "CRITICAL",
+        "description": "Airspace restrictions and naval blockade exercises threatening primary container shipping routes.",
     },
 ]
 
@@ -205,6 +240,14 @@ GOLDEN_RELATIONSHIPS: list[dict[str, Any]] = [
         "to_id": "CMP-PMIC-440",
         "props": {"lead_time_days": 60, "is_single_source": False},
     },
+    {
+        "from_label": "Supplier",
+        "from_id": "SUP-MC-002",
+        "type": "SUPPLIES_PART",
+        "to_label": "Component",
+        "to_id": "CMP-MCU-X91",
+        "props": {"lead_time_days": 28, "is_single_source": False},
+    },
     # Component to Plant
     {
         "from_label": "Component",
@@ -212,6 +255,14 @@ GOLDEN_RELATIONSHIPS: list[dict[str, Any]] = [
         "type": "USED_BY",
         "to_label": "Plant",
         "to_id": "PLT-MUC-01",
+        "props": {},
+    },
+    {
+        "from_label": "Component",
+        "from_id": "CMP-MCU-X91",
+        "type": "USED_BY",
+        "to_label": "Plant",
+        "to_id": "PLT-BLR-02",
         "props": {},
     },
     {
@@ -226,6 +277,24 @@ GOLDEN_RELATIONSHIPS: list[dict[str, Any]] = [
     {
         "from_label": "Supplier",
         "from_id": "SUP-NC-882",
+        "type": "TIER_1_OF",
+        "to_label": "Supplier",
+        "to_id": "SUP-BE-101",
+        "props": {},
+    },
+    # Multi-Tier Chain: Siltronic Wafers (Tier 3) -> NanoCore (Tier 2)
+    {
+        "from_label": "Supplier",
+        "from_id": "SUP-SIL-901",
+        "type": "TIER_1_OF",
+        "to_label": "Supplier",
+        "to_id": "SUP-NC-882",
+        "props": {},
+    },
+    # Multi-Tier Chain: MicroChip (Tier 2) -> BetaElectro (Tier 1)
+    {
+        "from_label": "Supplier",
+        "from_id": "SUP-MC-002",
         "type": "TIER_1_OF",
         "to_label": "Supplier",
         "to_id": "SUP-BE-101",
@@ -287,6 +356,22 @@ GOLDEN_RELATIONSHIPS: list[dict[str, Any]] = [
     {
         "from_label": "GeopoliticalRisk",
         "from_id": "RISK-GEO-TW-01",
+        "type": "THREATENS",
+        "to_label": "Supplier",
+        "to_id": "SUP-NC-882",
+        "props": {},
+    },
+    {
+        "from_label": "GeopoliticalRisk",
+        "from_id": "RISK-GEO-TW-02",
+        "type": "THREATENS",
+        "to_label": "Supplier",
+        "to_id": "SUP-NC-882",
+        "props": {},
+    },
+    {
+        "from_label": "GeopoliticalRisk",
+        "from_id": "RISK-GEO-TW-03",
         "type": "THREATENS",
         "to_label": "Supplier",
         "to_id": "SUP-NC-882",
@@ -516,9 +601,28 @@ async def verify_seed_integrity(client: NeptuneClient) -> dict[str, Any]:
         is_valid = False
         discrepancies.append(f"Query failed for golden supplier: {exc}")
 
+    # Check 3 geopolitical risk nodes threatening NanoCore
+    geo_threats_present = False
+    try:
+        res = await client.execute_query(
+            "MATCH (g:GeopoliticalRisk)-[:THREATENS]->(s:Supplier {id: 'SUP-NC-882'}) RETURN g.id AS id"
+        )
+        geo_ids = {r.get("id") for r in res}
+        expected_threats = {"RISK-GEO-TW-01", "RISK-GEO-TW-02", "RISK-GEO-TW-03"}
+        geo_threats_present = expected_threats.issubset(geo_ids)
+        if not geo_threats_present:
+            is_valid = False
+            discrepancies.append(
+                f"Missing geopolitical threats for NanoCore: {expected_threats - geo_ids}"
+            )
+    except Exception as exc:
+        is_valid = False
+        discrepancies.append(f"Query failed for geopolitical risk threats: {exc}")
+
     return {
         "is_valid": is_valid,
         "golden_entity_present": golden_present,
+        "geopolitical_threats_present": geo_threats_present,
         "counts": counts,
         "discrepancies": discrepancies,
     }

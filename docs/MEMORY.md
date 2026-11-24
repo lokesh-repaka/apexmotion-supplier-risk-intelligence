@@ -28,11 +28,11 @@
 | **Phase 10 Progress** | 4 / 4 Tasks Completed (100%) | Completed ✅ |
 | **Phase 11 Progress** | 6 / 6 Tasks Completed (100%) | Completed ✅ |
 | **Phase 12 Progress** | 6 / 6 Tasks Completed (100%) | Completed ✅ |
-| **Phase 13 Progress** | 1 / 4 Tasks Completed (25.0%) | In Progress 🔄 |
+| **Phase 13 Progress** | 2 / 4 Tasks Completed (50.0%) | In Progress 🔄 |
 | **Total Test Suites** | 71 (57 Python suites + 14 Frontend suites) | PASSED ✅ |
-| **Total Test Cases** | 946 tests (830 Python [808 unit + 11 integration + 8 golden + 3 API] + 116 Frontend unit) | 100% Passing (0 failures) |
+| **Total Test Cases** | 951 tests (835 Python [813 unit + 11 integration + 8 golden + 3 API] + 116 Frontend unit) | 100% Passing (0 failures) |
 | **Code Coverage (`src/`)** | **95.00%** statement coverage (7,187 statements, 359 missed; exceeds 80% DoD gate) | Exceeds 80% DoD gate |
-| **Active Branch** | `development` | Clean |
+| **Active Branch** | `feature/seed-graph-data` | In Progress 🔄 |
 
 ---
 
@@ -846,15 +846,36 @@
     - **Comprehensive Test Suite**: 11 unit tests in `tests/unit/test_seed_dev.py` achieving **99% statement coverage** on `src/database/seed_dev.py`, bringing total project test count to 946 passed tests (830 Python + 116 Frontend across 71 test suites).
     - **Phase 13 (Supplier Seed Data & Golden Datasets) progress is now 1/4 (25.0%).**
 
+64. **Multi-Tier Knowledge Graph Seed, Sourcing Edges, and Geopolitical Threat Corridors (SEC-066, BR-RULE-001, CLAUDE.md Sec 8.2 & Sec 14)**:
+    - **Triad of Geopolitical Risk Corridors (`src/graph/seed.py`, `scripts/neptune_seed.cypher`)**: Seeded 3 distinct regional geopolitical and seismic risk nodes threatening NanoCore Semiconductor (`SUP-NC-882`, Hsinchu Science Park, Taiwan):
+      - `RISK-GEO-TW-01` (`HIGH`): Bilateral export controls and maritime shipping lane congestion in the Taiwan Strait corridor (`EXPORT_RESTRICTION_LOGISTICS`).
+      - `RISK-GEO-TW-02` (`HIGH`): Subduction fault seismic activity and cleanroom power grid concentration across Hsinchu Science Park (`SEISMIC_AND_POWER_VULNERABILITY`).
+      - `RISK-GEO-TW-03` (`CRITICAL`): Airspace restrictions and naval blockade exercises threatening primary container shipping routes (`MARITIME_CHOKEPOINT_BLOCKADE`).
+      - All 3 risk nodes connect via directed `[:THREATENS]` edges to `SUP-NC-882`, powering multi-hop graph disruption blast radius queries.
+    - **Multi-Tier Sourcing & AML Alternate Bypass**:
+      - **Tier 3 Wafer Raw Materials**: Seeded Siltronic Silicon Wafers AG (`SUP-SIL-901`, DE, Tier 3) -[:`TIER_1_OF`]-> NanoCore Semiconductor (`SUP-NC-882`, TW, Tier 2).
+      - **Tier 2 Semiconductor Fab to Tier 1 System Integrator**: NanoCore (`SUP-NC-882`, TW, Tier 2) -[:`TIER_1_OF`]-> BetaElectro AG (`SUP-BE-101`, DE, Tier 1).
+      - **AML Pre-Qualified Secondary Alternate Route**: Seeded MicroChip Global (`SUP-MC-002`, US, Tier 2) supplying `CMP-MCU-X91` (`is_single_source=false`, lead time 28 days) and linked via -[:`TIER_1_OF`]-> BetaElectro AG (`SUP-BE-101`), enabling multi-hop alternate route routing when the primary fab is disrupted.
+    - **Supplier → Component → Plant Edges & BOM Linkages**:
+      - `SUP-NC-882` -[:`SUPPLIES_PART` {`lead_time_days`: 45, `is_single_source`: true}]-> `CMP-MCU-X91`.
+      - Direct plant consumption: `CMP-MCU-X91` -[:`USED_BY`]-> `PLT-MUC-01` (Munich) and `PLT-BLR-02` (Bengaluru).
+      - Assembly BOM linkage: `CMP-MCU-X91` -[:`PART_OF_BOM` {`quantity`: 1}]-> `ASM-BECU-04` (Body Electronic Control Unit) -[:`ASSEMBLED_AT`]-> `PLT-MUC-01`.
+    - **Cypher Injection Defense & Idempotency (SEC-024, SEC-025)**:
+      - Enforced string sanitization with single quote escaping in `_format_cypher_value()`.
+      - Every OpenCypher statement uses `MERGE ... SET` syntax to guarantee zero node duplication across runs.
+      - Programmatic verification in `verify_seed_integrity(client)` auditing all 3 geopolitical threats to NanoCore.
+    - **Comprehensive Test Suite**: 5 new unit tests in `tests/unit/test_graph_seed.py` (17 tests total in suite), 100% pass rate, **97% statement coverage** on `src/graph/seed.py`, bringing total project test count to 951 passed tests (835 Python + 116 Frontend across 71 test suites).
+    - **Phase 13 (Supplier Seed Data & Golden Datasets) progress is now 2/4 (50.0%).**
+
 ---
 
 ## 5. Next Planned Tasks
 - **Phase 11 — FastAPI API Routes**: Completed ✅ (6/6 tasks done)
 - **Phase 12 — React Frontend**: Completed ✅ (6/6 tasks done)
-- **Phase 13 — Supplier Seed Data & Golden Datasets**: In Progress 🔄 (1/4 tasks done)
+- **Phase 13 — Supplier Seed Data & Golden Datasets**: In Progress 🔄 (2/4 tasks done)
   - **P13-1**: Supplier seed script (`src/database/seed_dev.py`) — 50 Tier-1 suppliers (10 countries), 200 components, 20 plants, NanoCore scenario loaded (`feature/seed-supplier-data`). Completed ✅
-  - **P13-2**: Neptune graph seed — supplier → component → plant edges, tier-chain links, 3 geopolitical risk nodes for NanoCore region (`feature/seed-graph-data`). Next 🔄
-  - **P13-3**: Golden dataset (`tests/golden/`) — `nanocore_scenario.json` with exact inputs/expected outputs; 5 edge-case JSON files (`feature/seed-golden-datasets`). Pending ❌
+  - **P13-2**: Neptune graph seed — supplier → component → plant edges, tier-chain links, 3 geopolitical risk nodes for NanoCore region (`feature/seed-graph-data`). Completed ✅
+  - **P13-3**: Golden dataset (`tests/golden/`) — `nanocore_scenario.json` with exact inputs/expected outputs; 5 edge-case JSON files (`feature/seed-golden-datasets`). Next 🔄
   - **P13-4**: OpenSearch vector seed — 500 synthetic contract clauses chunked and embedded into `contracts-v1` index (`feature/seed-opensearch-vectors`). Pending ❌
 
 

@@ -32,6 +32,22 @@ SET vl.name = 'Volta Lithium Resources',
     vl.aml_status = 'CLEAR',
     vl.last_updated = '2026-11-20T10:00:00Z';
 
+MERGE (mc:Supplier {id: 'SUP-MC-002'})
+SET mc.name = 'MicroChip Global Semiconductors',
+    mc.tier = 2,
+    mc.country = 'US',
+    mc.risk_score = 0.25,
+    mc.aml_status = 'CLEAR',
+    mc.last_updated = '2026-11-20T10:00:00Z';
+
+MERGE (sil:Supplier {id: 'SUP-SIL-901'})
+SET sil.name = 'Siltronic Silicon Wafers AG',
+    sil.tier = 3,
+    sil.country = 'DE',
+    sil.risk_score = 0.15,
+    sil.aml_status = 'CLEAR',
+    sil.last_updated = '2026-11-20T10:00:00Z';
+
 // ------------------------------------------------------------------------------
 // 2. Component Nodes (Bill of Materials Items)
 // ------------------------------------------------------------------------------
@@ -117,9 +133,22 @@ SET news.headline = 'Cleanroom facility fire reported at Hsinchu Science Park, w
     news.published_at = '2026-11-20T08:15:00Z';
 
 MERGE (geo:GeopoliticalRisk {id: 'RISK-GEO-TW-01'})
-SET geo.region = 'East Asia',
+SET geo.region = 'East Asia / Taiwan Strait',
     geo.risk_type = 'EXPORT_RESTRICTION_LOGISTICS',
-    geo.severity = 'HIGH';
+    geo.severity = 'HIGH',
+    geo.description = 'Bilateral export controls and maritime shipping lane congestion in the Taiwan Strait corridor.';
+
+MERGE (geo2:GeopoliticalRisk {id: 'RISK-GEO-TW-02'})
+SET geo2.region = 'Northern Taiwan / Hsinchu',
+    geo2.risk_type = 'SEISMIC_AND_POWER_VULNERABILITY',
+    geo2.severity = 'HIGH',
+    geo2.description = 'Subduction fault seismic activity and cleanroom power grid concentration across Hsinchu Science Park.';
+
+MERGE (geo3:GeopoliticalRisk {id: 'RISK-GEO-TW-03'})
+SET geo3.region = 'Taiwan Strait / South China Sea',
+    geo3.risk_type = 'MARITIME_CHOKEPOINT_BLOCKADE',
+    geo3.severity = 'CRITICAL',
+    geo3.description = 'Airspace restrictions and naval blockade exercises threatening primary container shipping routes.';
 
 // ------------------------------------------------------------------------------
 // 8. Graph Edges & Supply Chain Relationships
@@ -138,9 +167,16 @@ MATCH (vl:Supplier {id: 'SUP-VL-501'}), (pmic:Component {id: 'CMP-PMIC-440'})
 MERGE (vl)-[r:SUPPLIES_PART]->(pmic)
 SET r.lead_time_days = 60, r.is_single_source = false;
 
+MATCH (mc:Supplier {id: 'SUP-MC-002'}), (mcu:Component {id: 'CMP-MCU-X91'})
+MERGE (mc)-[r:SUPPLIES_PART]->(mcu)
+SET r.lead_time_days = 28, r.is_single_source = false;
+
 // Component to Plant Direct Consumption
 MATCH (mcu:Component {id: 'CMP-MCU-X91'}), (muc:Plant {id: 'PLT-MUC-01'})
 MERGE (mcu)-[:USED_BY]->(muc);
+
+MATCH (mcu:Component {id: 'CMP-MCU-X91'}), (blr:Plant {id: 'PLT-BLR-02'})
+MERGE (mcu)-[:USED_BY]->(blr);
 
 MATCH (pmic:Component {id: 'CMP-PMIC-440'}), (blr:Plant {id: 'PLT-BLR-02'})
 MERGE (pmic)-[:USED_BY]->(blr);
@@ -148,6 +184,14 @@ MERGE (pmic)-[:USED_BY]->(blr);
 // Tier Chain: NanoCore (Tier 2) is sub-tier supplier to BetaElectro (Tier 1)
 MATCH (nc:Supplier {id: 'SUP-NC-882'}), (be:Supplier {id: 'SUP-BE-101'})
 MERGE (nc)-[:TIER_1_OF]->(be);
+
+// Tier Chain: Siltronic Wafers (Tier 3) supplies NanoCore (Tier 2)
+MATCH (sil:Supplier {id: 'SUP-SIL-901'}), (nc:Supplier {id: 'SUP-NC-882'})
+MERGE (sil)-[:TIER_1_OF]->(nc);
+
+// Tier Chain: MicroChip (Tier 2) supplies BetaElectro (Tier 1)
+MATCH (mc:Supplier {id: 'SUP-MC-002'}), (be:Supplier {id: 'SUP-BE-101'})
+MERGE (mc)-[:TIER_1_OF]->(be);
 
 // Component to Assembly BOM Structure
 MATCH (mcu:Component {id: 'CMP-MCU-X91'}), (ecu:Assembly {id: 'ASM-BECU-04'})
@@ -177,3 +221,9 @@ MERGE (news)-[:AFFECTS]->(nc);
 
 MATCH (geo:GeopoliticalRisk {id: 'RISK-GEO-TW-01'}), (nc:Supplier {id: 'SUP-NC-882'})
 MERGE (geo)-[:THREATENS]->(nc);
+
+MATCH (geo2:GeopoliticalRisk {id: 'RISK-GEO-TW-02'}), (nc:Supplier {id: 'SUP-NC-882'})
+MERGE (geo2)-[:THREATENS]->(nc);
+
+MATCH (geo3:GeopoliticalRisk {id: 'RISK-GEO-TW-03'}), (nc:Supplier {id: 'SUP-NC-882'})
+MERGE (geo3)-[:THREATENS]->(nc);

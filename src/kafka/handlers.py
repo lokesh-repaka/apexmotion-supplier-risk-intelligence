@@ -133,6 +133,13 @@ async def persist_risk_alert(
             else str(schema_instance.risk_level)
         )
         await session.commit()
+        # Broadcast real-time alert via WebSocket (P11-5)
+        try:
+            from src.api.routes.websocket_routes import broadcast_risk_alert
+
+            await broadcast_risk_alert(schema_instance)
+        except Exception as ws_err:
+            logger.warning("Failed to broadcast alert via WebSocket: %s", ws_err)
         return existing_alert
 
     # 3. Create new database model
@@ -172,6 +179,13 @@ async def persist_risk_alert(
             effective_trace,
             extra={"trace_id": effective_trace},
         )
+        # Broadcast real-time alert via WebSocket (P11-5)
+        try:
+            from src.api.routes.websocket_routes import broadcast_risk_alert
+
+            await broadcast_risk_alert(schema_instance)
+        except Exception as ws_err:
+            logger.warning("Failed to broadcast alert via WebSocket: %s", ws_err)
         return persisted
     except Exception as exc:
         await session.rollback()

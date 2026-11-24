@@ -1,6 +1,6 @@
 You have access to the project's authoritative documentation: `TASKS.md`, `CLAUDE.md`, `GEMINI.md`, `.agents/rules/`, and architecture specifications in `docs/` (`HLD_*.md`, `LLD_*.md`, `PRD_*.md`, `BRD_*.md`, `FRD_*.md`).
 
-Go ahead and complete **P11-5 · WebSocket handler (`src/api/routes/websocket_routes.py`) — real-time alert push to frontend on new `risk-alerts` Kafka message**, as defined in `TASKS.md`.
+Go ahead and complete **P11-6 · No-op guard and error standardisation (`src/api/routes/error_handlers.py`, `src/api/main.py`) — reject approvals where token already used; all errors return `{error: {code, message, trace_id}}`**, as defined in `TASKS.md`.
 
 ---
 

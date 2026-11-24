@@ -5,3 +5,4 @@
 export * from './useRiskStore';
 export * from './useInvestigationStore';
 export * from './useApprovalStore';
+export * from './useGraphStore';

@@ -1,6 +1,6 @@
 You have access to the project's authoritative documentation: `TASKS.md`, `CLAUDE.md`, `GEMINI.md`, `.agents/rules/`, and architecture specifications in `docs/` (`HLD_*.md`, `LLD_*.md`, `PRD_*.md`, `BRD_*.md`, `FRD_*.md`).
 
-Go ahead and complete **P12-5 · Supplier Graph Visualiser — Neptune subgraph rendered as interactive force-directed graph (D3 or React Flow)**, as defined in `TASKS.md`.
+Go ahead and complete **P12-6 · Audit Trail Viewer (`frontend/src/components/AuditTrail/`, `frontend/src/pages/AuditTrailPage.tsx`) — chronological immutable timeline per alert; role-aware UI (hide approve button for `analyst`)**, as defined in `TASKS.md`.
 
 ---
 

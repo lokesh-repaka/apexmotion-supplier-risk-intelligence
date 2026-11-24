@@ -813,17 +813,29 @@
     - **Comprehensive Test Suite**: 16 new unit tests in Vitest across `useApprovalStore.test.ts` and `HITLApprovalModal.test.ts` with 100% pass rate, bringing total project test count to 902 passed tests (816 Python + 86 Frontend across 66 test suites).
     - **Phase 12 (React Frontend) progress is now 4/6 (66.7%).**
 
+61. **Multi-Tier Knowledge Graph Visualizer, Neptune 2-Hop Subgraph Topology, and Single-Source Choke Point Isolation (SEC-063, BR-RULE-001, FRD FR-UND-002, CLAUDE.md Sec 5.2 & Sec 14)**:
+    - **Zustand Graph State Management (`frontend/src/stores/useGraphStore.ts`)**: Implemented specialized graph store coordinating Neptune 2-hop topological ego-subgraph retrieval (`GET /api/v1/suppliers/{id}/graph`), node/edge normalization, zoom/pan transforms, and resilient fallback to canonical golden NanoCore reference scenario when backend traversal encounters network latency or offline status.
+    - **Interactive Canvas/SVG Graph Engine (`frontend/src/components/SupplierGraph/SupplierGraphVisualiser.tsx`)**: High-performance, zero-dependency interactive SVG renderer supporting mouse drag panning, wheel zooming, node dragging & repositioning, spring-embedder force simulation (Coulomb repulsion, Hooke spring attraction, damping 0.82), and concentric radial rings.
+    - **Canonical Critical Failure Path Tracing**: Highlights unbroken 5-hop directed failure path in glowing dashed rose line (`SUP-NC-001 [Tier-2 Fab] -> SKU-MCU-4402 [Auto MCU] -> SUP-BETA-001 [Tier-1 Integrator] -> ASM-BMS-E4 [Battery Unit] -> PLT-MUC-01 [Munich Gigafactory] -> PGM-APEX-SUV [Model-X Performance]`).
+    - **Qualified AML Alternate Route Bypass**: Renders validated alternate sourcing route in dashed emerald line (`SUP-MC-002 [MicroChip Global] -> SKU-MCU-4402`), demonstrating secondary qualification bypassing the disrupted fab without risk to production lines.
+    - **Deterministic Risk & BOM Inspector Drawer (`frontend/src/components/SupplierGraph/NodeDetailDrawer.tsx`)**: Displays comprehensive node telemetry including single-source choke point warnings (`SINGLE_SOURCE_RISK`), certified mathematical proofs (7.68d cover, 24,420 units shortage, $2,448,105 exposure, €85,000/hr line halt impact), and resolved upstream feeders / downstream consumers.
+    - **Interactive Controls & Legend (`frontend/src/components/SupplierGraph/GraphControls.tsx`, `GraphLegend.tsx`)**: Provides instant text search across node IDs, names, SKUs, and locations; multi-attribute filters (All Tiers, Tier 1/2/3, Node Types); layout switcher (Layered DAG, Force Physics, Radial); and visual category keys.
+    - **Top-Level Navigation & Page Integration (`frontend/src/pages/SupplierGraphPage.tsx`, `frontend/src/App.tsx`)**: Assembled full-page visualizer with preset supplier selector, telemetry badges, and 4th view tab "Multi-Tier Knowledge Graph" in the top navigation bar.
+    - **Comprehensive Test Suite**: 16 new unit tests in Vitest across `useGraphStore.test.ts` and `SupplierGraph.test.ts` with 100% pass rate, bringing total project test count to 918 passed tests (816 Python + 102 Frontend across 68 test suites).
+    - **Phase 12 (React Frontend) progress is now 5/6 (83.3%).**
+
 ---
 
 ## 5. Next Planned Tasks
 - **Phase 11 — FastAPI API Routes**: Completed ✅ (6/6 tasks done)
-- **Phase 12 — React Frontend**: In Progress 🔄 (4/6 tasks done)
+- **Phase 12 — React Frontend**: In Progress 🔄 (5/6 tasks done)
   - **P12-1**: Typed API client (`frontend/src/api/`) — axios + Zod schemas for all backend routes; WebSocket hook for live alerts (`feature/frontend-api-client`). Completed ✅
   - **P12-2**: Risk Dashboard page — supplier risk table, severity heat-map, Kafka-driven live alert feed, Zustand store (`feature/frontend-risk-dashboard`). Completed ✅
   - **P12-3**: Investigation Panel — trigger investigation, poll status, display agent narrative + evidence cards (`feature/frontend-investigation-panel`). Completed ✅
   - **P12-4**: HITL Approval Modal — spend tier badge, ECDSA token submission form, dual-approval progress indicator (`feature/frontend-hitl-approval-modal`). Completed ✅
-  - **P12-5**: Supplier Graph Visualiser — Neptune subgraph rendered as interactive force-directed graph (D3 or React Flow) (`feature/frontend-supplier-graph-viz`). Next 🔄
-  - **P12-6**: Audit Trail Viewer — chronological immutable timeline per alert; role-aware UI (hide approve button for `analyst`) (`feature/frontend-audit-trail-viewer`). Pending ❌
+  - **P12-5**: Supplier Graph Visualiser — Neptune subgraph rendered as interactive force-directed graph (D3 or React Flow) (`feature/frontend-supplier-graph-viz`). Completed ✅
+  - **P12-6**: Audit Trail Viewer — chronological immutable timeline per alert; role-aware UI (hide approve button for `analyst`) (`feature/frontend-audit-trail-viewer`). Next 🔄
+
 
 
 

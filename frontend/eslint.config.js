@@ -29,6 +29,10 @@ export default [
         clearInterval: 'readonly',
         MessageEvent: 'readonly',
         CloseEvent: 'readonly',
+        SVGSVGElement: 'readonly',
+        HTMLElement: 'readonly',
+        requestAnimationFrame: 'readonly',
+        cancelAnimationFrame: 'readonly',
       },
     },
     plugins: {

@@ -3,8 +3,9 @@ import { HITLApprovalModal } from './components/HITLApprovalModal/HITLApprovalMo
 import { ApprovalQueueTable } from './components/HITLApprovalModal/ApprovalQueueTable';
 import { InvestigationPage } from './pages/InvestigationPage';
 import { RiskDashboardPage } from './pages/RiskDashboardPage';
+import { SupplierGraphPage } from './pages/SupplierGraphPage';
 
-export type AppView = 'dashboard' | 'investigation' | 'approvals';
+export type AppView = 'dashboard' | 'investigation' | 'graph' | 'approvals';
 
 export const App: React.FC = () => {
   const [activeView, setActiveView] = useState<AppView>('dashboard');
@@ -24,6 +25,17 @@ export const App: React.FC = () => {
             }`}
           >
             Operational Risk Dashboard
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveView('graph')}
+            className={`px-3 py-1.5 rounded-lg font-semibold transition-colors ${
+              activeView === 'graph'
+                ? 'bg-sky-600 text-white shadow-sm'
+                : 'text-slate-400 hover:text-white hover:bg-slate-800'
+            }`}
+          >
+            Multi-Tier Knowledge Graph
           </button>
           <button
             type="button"
@@ -61,6 +73,11 @@ export const App: React.FC = () => {
       <div className="flex-1">
         {activeView === 'dashboard' ? (
           <RiskDashboardPage onNavigateToInvestigation={() => setActiveView('investigation')} />
+        ) : activeView === 'graph' ? (
+          <SupplierGraphPage
+            onNavigateToInvestigation={() => setActiveView('investigation')}
+            onBackToDashboard={() => setActiveView('dashboard')}
+          />
         ) : activeView === 'investigation' ? (
           <InvestigationPage onBackToDashboard={() => setActiveView('dashboard')} />
         ) : (
@@ -77,3 +94,4 @@ export const App: React.FC = () => {
 };
 
 export default App;
+

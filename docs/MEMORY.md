@@ -25,10 +25,10 @@
 | **Phase 7 Progress** | 5 / 5 Tasks Completed | Completed ✅ |
 | **Phase 8 Progress** | 5 / 5 Tasks Completed (100%) | Completed ✅ |
 | **Phase 9 Progress** | 6 / 6 Tasks Completed (100%) | Completed ✅ |
-| **Phase 10 Progress** | 3 / 4 Tasks Completed (75%) | In Progress 🔄 |
-| **Total Test Suites** | 49 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`, `test_localstack_bootstrap.py`, `test_redpanda_topics.py`, `test_neptune_emulation.py`, `test_makefile.py`, `test_database_models.py`, `test_database_migrations.py`, `test_database_repositories.py`, `test_token_hash_index.py`, `test_opensearch_client.py`, `test_security_rbac.py`, `test_hitl_tokens.py`, `test_demo_tokens.py`, `test_spend_tier_router.py`, `test_audit_writer.py`, `test_neptune_client.py`, `test_graph_seed.py`, `test_cypher_queries.py`, `test_supplier_traversal.py`, `test_graph_traversal_paths.py`, `test_kafka_consumer.py`, `test_kafka_producer.py`, `test_kafka_schemas.py`, `test_kafka_consumer_integration.py`, `test_risk_calculator.py`, `test_risk_scorer.py`, `test_inventory_service.py`, `test_alert_service.py`, `test_nanocore_golden.py`, `test_litellm_gateway.py`, `test_quarantined_reader.py`, `test_llm_models.py`, `test_vllm_client.py`, `test_mock_llm_client.py`, `test_agent_graph_skeleton.py`, `test_triage_agent.py`, `test_research_agent.py`, `test_contract_agent.py`, `test_risk_agent.py`, `test_recommendation_agent.py`, `test_hitl_service.py`, `test_dual_approval_enforcer.py`, `test_token_replay_guard.py`) | PASSED ✅ |
-| **Total Test Cases** | 673 tests (654 unit + 11 integration + 8 golden) | 100% Passing (0 failures) |
-| **Code Coverage (`src/`)** | **97.28%** statement coverage (`src/services/token_replay_guard.py` at 95%, `src/services/dual_approval_enforcer.py` at 91%, `src/services/hitl_service.py` at 98%, `src/agents/nodes/recommendation_agent.py` at 100% stmts / 100% branch, `src/agents/nodes/risk_agent.py`, `src/agents/nodes/contract_agent.py`, `src/agents/nodes/research_agent.py`, `src/agents/tools/research_tools.py`, `src/agents/nodes/triage_agent.py`, `src/agents/state.py`, `src/agents/graph.py`, `src/llm/`, `src/services/alert_service.py`, `src/services/risk/calculator.py`, `src/services/risk/scorer.py`, `src/kafka/handlers.py`, and `src/kafka/schemas/` at 100%; `src/database/repositories/risk_alert_repository.py` at 96%; `src/services/risk/inventory_service.py` at 92%) | Exceeds 80% DoD gate |
+| **Phase 10 Progress** | 4 / 4 Tasks Completed (100%) | Completed ✅ |
+| **Total Test Suites** | 50 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`, `test_localstack_bootstrap.py`, `test_redpanda_topics.py`, `test_neptune_emulation.py`, `test_makefile.py`, `test_database_models.py`, `test_database_migrations.py`, `test_database_repositories.py`, `test_token_hash_index.py`, `test_opensearch_client.py`, `test_security_rbac.py`, `test_hitl_tokens.py`, `test_demo_tokens.py`, `test_spend_tier_router.py`, `test_audit_writer.py`, `test_neptune_client.py`, `test_graph_seed.py`, `test_cypher_queries.py`, `test_supplier_traversal.py`, `test_graph_traversal_paths.py`, `test_kafka_consumer.py`, `test_kafka_producer.py`, `test_kafka_schemas.py`, `test_kafka_consumer_integration.py`, `test_risk_calculator.py`, `test_risk_scorer.py`, `test_inventory_service.py`, `test_alert_service.py`, `test_nanocore_golden.py`, `test_litellm_gateway.py`, `test_quarantined_reader.py`, `test_llm_models.py`, `test_vllm_client.py`, `test_mock_llm_client.py`, `test_agent_graph_skeleton.py`, `test_triage_agent.py`, `test_research_agent.py`, `test_contract_agent.py`, `test_risk_agent.py`, `test_recommendation_agent.py`, `test_hitl_service.py`, `test_dual_approval_enforcer.py`, `test_token_replay_guard.py`, `test_hitl_unit_tests.py`) | PASSED ✅ |
+| **Total Test Cases** | 692 tests (673 unit + 11 integration + 8 golden) | 100% Passing (0 failures) |
+| **Code Coverage (`src/`)** | **97.33%** statement coverage (`src/core/hitl_tokens.py` at 100%, `src/services/token_replay_guard.py` at 98%, `src/services/hitl_service.py` at 97%, `src/services/dual_approval_enforcer.py` at 93%, `src/agents/nodes/recommendation_agent.py` at 100% stmts / 100% branch, `src/agents/nodes/risk_agent.py`, `src/agents/nodes/contract_agent.py`, `src/agents/nodes/research_agent.py`, `src/agents/tools/research_tools.py`, `src/agents/nodes/triage_agent.py`, `src/agents/state.py`, `src/agents/graph.py`, `src/llm/`, `src/services/alert_service.py`, `src/services/risk/calculator.py`, `src/services/risk/scorer.py`, `src/kafka/handlers.py`, and `src/kafka/schemas/` at 100%; `src/database/repositories/risk_alert_repository.py` at 96%; `src/services/risk/inventory_service.py` at 92%) | Exceeds 80% DoD gate |
 | **Active Branch** | `development` | Clean |
 
 ---
@@ -707,6 +707,15 @@
     - Forensic audit durability (BR-RULE-007): Dispatches isolated `write_audit_log` with `action="SECURITY_TOKEN_REPLAY_ATTEMPT"`, ensuring forensic evidence is committed to Aurora PostgreSQL / SQLite even if outer workflow transactions roll back.
     - 14 automated unit tests in `tests/unit/test_token_replay_guard.py` achieving 95% statement coverage under strict offline isolation.
 
+50. **Comprehensive End-to-End HITL Security Verification & Anti-Bypass Gates (SEC-052, BR-RULE-001, CLAUDE.md Sec 14 & 20.1)**:
+    - Complete matrix test suite in `tests/unit/test_hitl_unit_tests.py` (19 unit tests, 100% pass) rigorously proving the 5 mandatory acceptance criteria across all system boundaries:
+      * **Valid Token Lifecycle**: Tier 1 (Category Manager $\le \$25,000$, 1-hr TTL), Tier 2 (Procurement Director $\$25,001 - \$100,000$, 1-hr TTL), and Tier 3 (Dual VP $> \$100,000$, 30-min TTL) cryptographically sign and transition approval status to `APPROVED`.
+      * **Temporal Expiration**: Immediate rejection across `HITLTokenService` (`TokenExpiredError`), `HITLService` (`TokenExpiredServiceError`), and `DualApprovalEnforcer` (`DualApprovalExpiredError`).
+      * **Token Replay Prevention**: Unique constraint lookup and intra-batch anti-self-replay detection raise `TokenReplaySecurityAlert` and record forensic security audit logs.
+      * **Strict Parameter Binding**: Cryptographic tokens bound to action ID, risk alert ID, or amount USD cannot be repurposed; mismatched parameters trigger `TokenBindingMismatchError` and `DualApprovalActionMismatchError`.
+      * **Dual-Approval Enforcer Hard Execution Gate**: Actions committing $> \$100,000$ with single signature transition to `PARTIALLY_APPROVED`, conditional edge `route_after_hitl_gate` routes to `await_approval` (`END`), and direct execution in `action_node` strictly raises `InsufficientSignaturesError`. Enforces invariant: *"A DUAL_VP action proceeding with only one approval signature must NEVER happen."*
+      * **Precision & RBAC**: Rejects native floats with `TypeError` per BR-RULE-001, rejects unauthorized roles (`analyst`) with `UnauthorizedSignerError`, and rejects tampered signatures with `TokenSignatureInvalidError`.
+
 ---
 
 ## 5. Next Planned Tasks
@@ -718,11 +727,13 @@
   - **P9-4**: Contract agent node (`src/agents/nodes/contract_agent.py`) (`feature/agents-contract-node`). Completed ✅
   - **P9-5**: Risk agent node (`src/agents/nodes/risk_agent.py`) (`feature/agents-risk-node`). Completed ✅
   - **P9-6**: Recommendation agent node (`src/agents/nodes/recommendation_agent.py`) (`feature/agents-recommendation-node`). Completed ✅
-- **Phase 10 — HITL Approval System**:
+- **Phase 10 — HITL Approval System**: Completed ✅ (4/4 tasks done)
   - **P10-1**: HITL service (`src/services/hitl_service.py`) — issues KMS ECDSA tokens, routes to correct spend tier, enforces 1-hour / 30-minute TTL (`feature/hitl-approval-service`). Completed ✅
   - **P10-2**: Dual-approval enforcer (`feature/hitl-dual-approval-enforcer`). Completed ✅
   - **P10-3**: Token replay guard (`feature/hitl-token-replay-guard`). Completed ✅
-  - **P10-4**: HITL unit tests (`feature/hitl-unit-tests`). Next 🔄
+  - **P10-4**: HITL unit tests (`feature/hitl-unit-tests`). Completed ✅
+- **Phase 11 — FastAPI API Routes**:
+  - **P11-1**: Fast-track / Full-track pipeline routes (`src/api/routes/risk_routes.py`) (`feature/api-risk-pipeline-routes`). Next 🔄
 
 
 

@@ -21,6 +21,12 @@ from src.api.schemas.risk import (
     RiskEvaluationRequest,
     RiskEvaluationResponse,
 )
+from src.api.schemas.supplier import (
+    SupplierGraphResponse,
+    SupplierListResponse,
+    SupplierResponse,
+    SupplierRiskResponse,
+)
 
 __all__ = [
     "AlertAcknowledgeRequest",
@@ -38,4 +44,8 @@ __all__ = [
     "RiskAlertResponse",
     "RiskEvaluationRequest",
     "RiskEvaluationResponse",
+    "SupplierGraphResponse",
+    "SupplierListResponse",
+    "SupplierResponse",
+    "SupplierRiskResponse",
 ]

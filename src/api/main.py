@@ -20,6 +20,7 @@ from src.api.routes.approval_routes import router as approval_router
 from src.api.routes.health import router as health_router
 from src.api.routes.investigation_routes import router as investigation_router
 from src.api.routes.risk_routes import router as risk_router
+from src.api.routes.supplier_routes import router as supplier_router
 from src.core.logging import bind_trace_id, get_logger, get_trace_id, setup_logging
 
 logger = get_logger("apexmotion.api")
@@ -174,3 +175,4 @@ app.include_router(health_router)
 app.include_router(risk_router)
 app.include_router(investigation_router)
 app.include_router(approval_router)
+app.include_router(supplier_router)

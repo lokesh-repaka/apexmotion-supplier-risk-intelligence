@@ -726,6 +726,14 @@
     - **Validation & Error Standards**: Pydantic v2 schemas with `extra="forbid"`, UUID format validation (`400 VALIDATION_ERROR`), and standardized RFC 7807 error envelopes masking internal traces.
     - **Comprehensive Test Suite**: 23 unit tests in `tests/unit/test_risk_routes.py` achieving 89% route statement coverage and 100% pass rate under strict offline isolation.
 
+52. **Asynchronous Investigation Orchestration & Telemetry Lifecycle (SEC-054, BR-RULE-001, CLAUDE.md Sec 5.2 & Sec 11)**:
+    - **Multi-Agent State Machine Dispatch**: `POST /api/v1/investigations/start` launches asynchronous incident investigations adhering to the sub-90s SLO target (p95 <= 90s). Automatically orchestrates `triage`, `research`, `contract`, deterministic `risk`, and `recommendation` nodes in LangGraph.
+    - **Asynchronous Polling & Dossier Retrieval**: `GET /api/v1/investigations/{id}` and `GET /api/v1/cases/{case_id}` provide polling access to live execution state, active node, traversal path, deterministic risk metrics, narrative, ranked mitigations, and HITL requirements.
+    - **Decoupled Database Sessions & Thread Safety**: Background workers use isolated database sessions from `get_async_session_factory()` to update `AgentRun` records upon completion or failure, avoiding session sharing across async request contexts.
+    - **Multi-Level State Resilience**: Three-tier lookup architecture resolves investigations via: (1) active in-memory record cache; (2) LangGraph `MemorySaver` checkpointer state tuples; (3) Aurora PostgreSQL `AgentRun` database records.
+    - **Forensic Audit & Error Containment**: All lifecycle events (`INVESTIGATION_STARTED`, `INVESTIGATION_COMPLETED`, `INVESTIGATION_FAILED`) emit append-only audit logs via `write_audit_log()`. Graph execution exceptions transition status to `FAILED` without leaking internal tracebacks.
+    - **Comprehensive Test Suite**: 11 unit tests in `tests/unit/test_investigation_routes.py` (96% route coverage, 87% service coverage, 100% pass), bringing full platform test suite to 737 tests passing (96.88% total coverage).
+
 ---
 
 ## 5. Next Planned Tasks
@@ -744,7 +752,8 @@
   - **P10-4**: HITL unit tests (`feature/hitl-unit-tests`). Completed ✅
 - **Phase 11 — FastAPI API Routes**:
   - **P11-1**: Fast-track / Full-track pipeline routes (`src/api/routes/risk_routes.py`) (`feature/api-alert-routes`). Completed ✅
-  - **P11-2**: Investigation routes — `POST /api/v1/investigations/start`, `GET /api/v1/investigations/{id}` (`feature/api-investigation-routes`). Next 🔄
+  - **P11-2**: Investigation routes — `POST /api/v1/investigations/start`, `GET /api/v1/investigations/{id}` (`feature/api-investigation-routes`). Completed ✅
+  - **P11-3**: Approval routes — `GET /api/v1/approvals` (HITL queue), `POST /api/v1/approvals/{id}/sign` (ECDSA token submission) (`feature/api-approval-routes`). Next 🔄
 
 
 

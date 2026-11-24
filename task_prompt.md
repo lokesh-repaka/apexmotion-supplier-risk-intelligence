@@ -1,6 +1,6 @@
 You have access to the project's authoritative documentation: `TASKS.md`, `CLAUDE.md`, `GEMINI.md`, `.agents/rules/`, and architecture specifications in `docs/` (`HLD_*.md`, `LLD_*.md`, `PRD_*.md`, `BRD_*.md`, `FRD_*.md`).
 
-Go ahead and complete **P11-2 · Investigation routes (`src/api/routes/investigation_routes.py`) — `POST /api/v1/investigations/start`, `GET /api/v1/investigations/{id}` (async polling)**, as defined in `TASKS.md`.
+Go ahead and complete **P11-3 · Approval routes (`src/api/routes/approval_routes.py`) — `GET /api/v1/approvals` (HITL queue), `POST /api/v1/approvals/{id}/sign` (ECDSA token submission)**, as defined in `TASKS.md`.
 
 ---
 

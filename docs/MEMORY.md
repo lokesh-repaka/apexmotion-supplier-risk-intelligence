@@ -26,10 +26,10 @@
 | **Phase 8 Progress** | 5 / 5 Tasks Completed (100%) | Completed ✅ |
 | **Phase 9 Progress** | 6 / 6 Tasks Completed (100%) | Completed ✅ |
 | **Phase 10 Progress** | 4 / 4 Tasks Completed (100%) | Completed ✅ |
-| **Phase 11 Progress** | 4 / 6 Tasks Completed (66.7%) | In Progress 🔄 |
-| **Total Test Suites** | 54 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`, `test_localstack_bootstrap.py`, `test_redpanda_topics.py`, `test_neptune_emulation.py`, `test_makefile.py`, `test_database_models.py`, `test_database_migrations.py`, `test_database_repositories.py`, `test_token_hash_index.py`, `test_opensearch_client.py`, `test_security_rbac.py`, `test_hitl_tokens.py`, `test_demo_tokens.py`, `test_spend_tier_router.py`, `test_audit_writer.py`, `test_neptune_client.py`, `test_graph_seed.py`, `test_cypher_queries.py`, `test_supplier_traversal.py`, `test_graph_traversal_paths.py`, `test_kafka_consumer.py`, `test_kafka_producer.py`, `test_kafka_schemas.py`, `test_kafka_consumer_integration.py`, `test_risk_calculator.py`, `test_risk_scorer.py`, `test_inventory_service.py`, `test_alert_service.py`, `test_nanocore_golden.py`, `test_litellm_gateway.py`, `test_quarantined_reader.py`, `test_llm_models.py`, `test_vllm_client.py`, `test_mock_llm_client.py`, `test_agent_graph_skeleton.py`, `test_triage_agent.py`, `test_research_agent.py`, `test_contract_agent.py`, `test_risk_agent.py`, `test_recommendation_agent.py`, `test_hitl_service.py`, `test_dual_approval_enforcer.py`, `test_token_replay_guard.py`, `test_hitl_unit_tests.py`, `test_risk_routes.py`, `test_investigation_routes.py`, `test_approval_routes.py`, `test_supplier_routes.py`) | PASSED ✅ |
-| **Total Test Cases** | 774 tests (755 unit + 11 integration + 8 golden) | 100% Passing (0 failures) |
-| **Code Coverage (`src/`)** | **96%** statement coverage (6,670 statements, 290 missed; exceeds 80% DoD gate) | Exceeds 80% DoD gate |
+| **Phase 11 Progress** | 5 / 6 Tasks Completed (83.3%) | In Progress 🔄 |
+| **Total Test Suites** | 55 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`, `test_localstack_bootstrap.py`, `test_redpanda_topics.py`, `test_neptune_emulation.py`, `test_makefile.py`, `test_database_models.py`, `test_database_migrations.py`, `test_database_repositories.py`, `test_token_hash_index.py`, `test_opensearch_client.py`, `test_security_rbac.py`, `test_hitl_tokens.py`, `test_demo_tokens.py`, `test_spend_tier_router.py`, `test_audit_writer.py`, `test_neptune_client.py`, `test_graph_seed.py`, `test_cypher_queries.py`, `test_supplier_traversal.py`, `test_graph_traversal_paths.py`, `test_kafka_consumer.py`, `test_kafka_producer.py`, `test_kafka_schemas.py`, `test_kafka_consumer_integration.py`, `test_risk_calculator.py`, `test_risk_scorer.py`, `test_inventory_service.py`, `test_alert_service.py`, `test_nanocore_golden.py`, `test_litellm_gateway.py`, `test_quarantined_reader.py`, `test_llm_models.py`, `test_vllm_client.py`, `test_mock_llm_client.py`, `test_agent_graph_skeleton.py`, `test_triage_agent.py`, `test_research_agent.py`, `test_contract_agent.py`, `test_risk_agent.py`, `test_recommendation_agent.py`, `test_hitl_service.py`, `test_dual_approval_enforcer.py`, `test_token_replay_guard.py`, `test_hitl_unit_tests.py`, `test_risk_routes.py`, `test_investigation_routes.py`, `test_approval_routes.py`, `test_supplier_routes.py`, `test_websocket_routes.py`) | PASSED ✅ |
+| **Total Test Cases** | 794 tests (775 unit + 11 integration + 8 golden) | 100% Passing (0 failures) |
+| **Code Coverage (`src/`)** | **95%** statement coverage (6,899 statements, 316 missed; exceeds 80% DoD gate) | Exceeds 80% DoD gate |
 | **Active Branch** | `development` | Clean |
 
 ---
@@ -754,6 +754,16 @@
     - **RBAC Governance**: All endpoints protected by `require_role(UserRole.ANALYST)` (`analyst+`), rejecting unauthenticated requests with 401 `AUTHENTICATION_REQUIRED`.
     - **Comprehensive Test Suite**: 19 unit tests in `tests/unit/test_supplier_routes.py` with 100% pass rate under zero external I/O, bringing total test suite to 774 passed tests (96% project-wide coverage).
 
+55. **WebSocket Alert Streaming, Dynamic Subscription Filtering, and Real-Time Kafka Push Architecture (SEC-057, BR-RULE-001, CLAUDE.md Sec 5.2 & Sec 7)**:
+    - **Dual-Endpoint WebSocket Feeds**: Mounted primary `/ws/alerts` and canonical alias `/api/v1/ws/alerts` endpoints in `src/api/routes/websocket_routes.py`.
+    - **Handshake Authentication & Policy Violation Gating**: Optional JWT access token support via query parameter (`?token=...`). Validates cryptographic signatures via `validate_jwt_token()`. Invalid, expired, or malformed tokens are rejected with WebSocket close code 1008 (`WS_1008_POLICY_VIOLATION`), preventing unauthorized socket creation.
+    - **Thread-Safe Connection Manager (`AlertConnectionManager`)**: Manages concurrent WebSocket connections with fine-grained subscription filtering (by `risk_level`, `supplier_id`, and `component_sku`). Supports dynamic in-session filter updates via `{"type": "subscribe", ...}` messages and handles bidirectional ping/pong heartbeats.
+    - **Fault-Tolerant Broadcast & Dead Socket Pruning**: Broadcast fanout sends alerts to all matching active connections. Client disconnects or socket write failures are caught gracefully and dead connections are automatically pruned from the registry without impacting other active subscribers.
+    - **Exact Decimal Preservation (BR-RULE-001)**: Monetary and inventory metrics (`financial_exposure`, `days_of_cover`, `gap_days`) are serialized as strict string-formatted Decimals in the JSON payload, strictly avoiding floating-point precision loss.
+    - **Real-Time Kafka Event Integration**: Integrated with `src/kafka/handlers.py` so that whenever `persist_risk_alert` saves or updates an alert from the `risk-alerts` MSK Kafka topic, it automatically dispatches a real-time push to all connected WebSockets.
+    - **REST Diagnostics & Management**: Gated by `require_role(UserRole.ANALYST)`: `GET /api/v1/ws/alerts/stats` returns connection counts and active filters; `POST /api/v1/ws/alerts/broadcast` allows manual broadcast triggers.
+    - **Comprehensive Test Suite**: 20 unit tests in `tests/unit/test_websocket_routes.py` with 100% pass rate under zero external I/O, bringing the total test suite to 794 passed tests (95% project-wide coverage).
+
 ---
 
 ## 5. Next Planned Tasks
@@ -775,7 +785,8 @@
   - **P11-2**: Investigation routes — `POST /api/v1/investigations/start`, `GET /api/v1/investigations/{id}` (`feature/api-investigation-routes`). Completed ✅
   - **P11-3**: Approval routes — `GET /api/v1/approvals` (HITL queue), `POST /api/v1/approvals/{id}/sign` (ECDSA token submission) (`feature/api-approval-routes`). Completed ✅
   - **P11-4**: Supplier routes — `GET /api/v1/suppliers/{id}/risk`, `GET /api/v1/suppliers/{id}/graph` (Neptune subgraph) (`feature/api-supplier-routes`). Completed ✅
-  - **P11-5**: WebSocket handler (`src/api/routes/websocket_routes.py`) — real-time alert push to frontend on new `risk-alerts` Kafka message (`feature/api-websocket-alert-push`). Next 🔄
+  - **P11-5**: WebSocket handler (`src/api/routes/websocket_routes.py`) — real-time alert push to frontend on new `risk-alerts` Kafka message (`feature/api-websocket-alert-push`). Completed ✅
+  - **P11-6**: No-op guard and error standardisation (`src/api/routes/error_handlers.py`, `src/api/main.py`) — reject approvals where token already used; all errors return `{error: {code, message, trace_id}}` (`feature/api-error-standardisation`). Next 🔄
 
 
 

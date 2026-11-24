@@ -23,6 +23,14 @@ from src.database.repositories import (
     SupplierRepository,
     TokenReplayError,
 )
+from src.database.seed_dev import (
+    PLANTS_CATALOG,
+    RAW_COMPONENTS_CATALOG,
+    RAW_SUPPLIERS_CATALOG,
+    SeedDevResult,
+    seed_database,
+    verify_seed_integrity,
+)
 from src.database.session import (
     get_async_engine,
     get_async_session_factory,
@@ -49,4 +57,10 @@ __all__ = [
     "AuditLogRepository",
     "AgentRunRepository",
     "InventoryRepository",
+    "seed_database",
+    "verify_seed_integrity",
+    "SeedDevResult",
+    "PLANTS_CATALOG",
+    "RAW_SUPPLIERS_CATALOG",
+    "RAW_COMPONENTS_CATALOG",
 ]

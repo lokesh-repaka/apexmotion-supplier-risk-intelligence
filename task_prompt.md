@@ -1,6 +1,6 @@
 You have access to the project's authoritative documentation: `TASKS.md`, `CLAUDE.md`, `GEMINI.md`, `.agents/rules/`, and architecture specifications in `docs/` (`HLD_*.md`, `LLD_*.md`, `PRD_*.md`, `BRD_*.md`, `FRD_*.md`).
 
-Go ahead and complete **P10-3 · Token replay guard — checks `hitl_approvals.token_hash` unique constraint, logs and alerts on replay attempt**, as defined in `TASKS.md`.
+Go ahead and complete **P10-4 · HITL unit tests — valid token, expired token, replayed token, wrong action ID, dual-approval with one missing signature**, as defined in `TASKS.md`.
 
 ---
 

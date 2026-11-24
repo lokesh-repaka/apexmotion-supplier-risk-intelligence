@@ -155,7 +155,7 @@ Sub-tasks in the same phase that do not share files can be open at the same time
 |------|--------|--------|
 | P10-1 · HITL service (`src/services/hitl_service.py`) — issues KMS ECDSA tokens, routes to correct spend tier, enforces 1-hour / 30-minute TTL | `feature/hitl-approval-service` | Completed ✅ |
 | P10-2 · Dual-approval enforcer — `DUAL_VP` actions require two independent token signatures before the action node executes | `feature/hitl-dual-approval-enforcer` | Completed ✅ |
-| P10-3 · Token replay guard — checks `hitl_approvals.token_hash` unique constraint, logs and alerts on replay attempt | `feature/hitl-token-replay-guard` | Pending ❌ |
+| P10-3 · Token replay guard — checks `hitl_approvals.token_hash` unique constraint, logs and alerts on replay attempt | `feature/hitl-token-replay-guard` | Completed ✅ |
 | P10-4 · HITL unit tests — valid token, expired token, replayed token, wrong action ID, dual-approval with one missing signature | `feature/hitl-unit-tests` | Pending ❌ |
 
 ---

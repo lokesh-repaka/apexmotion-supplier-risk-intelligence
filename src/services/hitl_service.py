@@ -259,13 +259,28 @@ class HITLService:
         raise_on_error: bool = False,
     ) -> bool:
         """Verify that the token hash has not already been used in previous actions."""
+        from src.services.token_replay_guard import get_token_replay_guard
+
+        guard = get_token_replay_guard()
         try:
-            return await self.token_service.verify_anti_replay(
+            is_valid = await self.token_service.verify_anti_replay(
                 token=token,
                 repository=repository,
                 raise_on_error=raise_on_error,
             )
+            if not is_valid:
+                token_hash = token.token_hash if isinstance(token, HITLToken) else str(token)
+                await guard.handle_replay_attempt(
+                    token_hash=token_hash,
+                    reason="Cryptographic token replay detected in hitl_approvals",
+                )
+            return is_valid
         except TokenReplayDetectedError as exc:
+            token_hash = token.token_hash if isinstance(token, HITLToken) else str(token)
+            await guard.handle_replay_attempt(
+                token_hash=token_hash,
+                reason=f"Cryptographic token replay detected: {exc}",
+            )
             if raise_on_error:
                 raise TokenReplayServiceError(str(exc)) from exc
             return False
@@ -425,6 +440,15 @@ class HITLService:
             await session.commit()
         except TokenReplayError as exc:
             await session.rollback()
+            from src.services.token_replay_guard import get_token_replay_guard
+
+            guard = get_token_replay_guard()
+            await guard.handle_replay_attempt(
+                token_hash=hitl_token.token_hash,
+                actor_id=signer_uuid,
+                alert_id=approval.alert_id,
+                reason=f"Database unique constraint violation on commit: {exc}",
+            )
             raise TokenReplayServiceError(str(exc)) from exc
 
         try:

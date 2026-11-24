@@ -172,7 +172,7 @@ Sub-tasks in the same phase that do not share files can be open at the same time
 | P11-3 · Approval routes — `GET /api/v1/approvals` (HITL queue), `POST /api/v1/approvals/{id}/sign` (ECDSA token submission) | `feature/api-approval-routes` | Completed ✅ |
 | P11-4 · Supplier routes — `GET /api/v1/suppliers/{id}/risk`, `GET /api/v1/suppliers/{id}/graph` (Neptune subgraph) | `feature/api-supplier-routes` | Completed ✅ |
 | P11-5 · WebSocket handler — real-time alert push to frontend on new `risk-alerts` Kafka message | `feature/api-websocket-alert-push` | Completed ✅ |
-| P11-6 · No-op guard and error standardisation — reject approvals where token already used; all errors return `{error: {code, message, trace_id}}` | `feature/api-error-standardisation` | Pending ❌ |
+| P11-6 · No-op guard and error standardisation — reject approvals where token already used; all errors return `{error: {code, message, trace_id}}` | `feature/api-error-standardisation` | Completed ✅ |
 
 ---
 
@@ -310,10 +310,10 @@ Phases 4, 5, 6, 7, and 8 all depend on Phase 3 and can be developed in parallel.
 | 8 | LLM Foundation | 5 | 5 (100%) ✅ |
 | 9 | LangGraph Agent Workflow | 6 | 6 (100%) ✅ |
 | 10 | HITL Approval System | 4 | 4 (100%) ✅ |
-| 11 | FastAPI API Routes | 6 | 5 (83.3%) 🔄 |
+| 11 | FastAPI API Routes | 6 | 6 (100%) ✅ |
 | 12 | React Frontend | 6 | 0 (0%) ❌ |
 | 13 | Supplier Seed Data & Golden Datasets | 4 | 0 (0%) ❌ |
 | 14 | Unit & Integration Tests | 6 | 0 (0%) ❌ |
 | 15 | Observability | 5 | 0 (0%) ❌ |
 | 16 | Infrastructure & Delivery | 6 | 0 (0%) ❌ |
-| **Total** | | **83** | **55 (66.3%)** |
+| **Total** | | **83** | **56 (67.5%)** |

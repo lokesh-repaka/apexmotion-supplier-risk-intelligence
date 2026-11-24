@@ -1,6 +1,6 @@
 You have access to the project's authoritative documentation: `TASKS.md`, `CLAUDE.md`, `GEMINI.md`, `.agents/rules/`, and architecture specifications in `docs/` (`HLD_*.md`, `LLD_*.md`, `PRD_*.md`, `BRD_*.md`, `FRD_*.md`).
 
-Go ahead and complete **P11-6 · No-op guard and error standardisation (`src/api/routes/error_handlers.py`, `src/api/main.py`) — reject approvals where token already used; all errors return `{error: {code, message, trace_id}}`**, as defined in `TASKS.md`.
+Go ahead and complete **P12-1 · Typed API client (`frontend/src/api/`) — axios + Zod schemas for all backend routes; WebSocket hook for live alerts**, as defined in `TASKS.md`.
 
 ---
 

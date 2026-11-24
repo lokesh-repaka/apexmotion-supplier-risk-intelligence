@@ -16,6 +16,7 @@ from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from src.api.exceptions import AppException, format_error_response
+from src.api.routes.approval_routes import router as approval_router
 from src.api.routes.health import router as health_router
 from src.api.routes.investigation_routes import router as investigation_router
 from src.api.routes.risk_routes import router as risk_router
@@ -172,3 +173,4 @@ async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONR
 app.include_router(health_router)
 app.include_router(risk_router)
 app.include_router(investigation_router)
+app.include_router(approval_router)

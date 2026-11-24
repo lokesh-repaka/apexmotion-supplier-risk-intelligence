@@ -26,10 +26,10 @@
 | **Phase 8 Progress** | 5 / 5 Tasks Completed (100%) | Completed ✅ |
 | **Phase 9 Progress** | 6 / 6 Tasks Completed (100%) | Completed ✅ |
 | **Phase 10 Progress** | 4 / 4 Tasks Completed (100%) | Completed ✅ |
-| **Phase 11 Progress** | 5 / 6 Tasks Completed (83.3%) | In Progress 🔄 |
-| **Total Test Suites** | 55 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`, `test_localstack_bootstrap.py`, `test_redpanda_topics.py`, `test_neptune_emulation.py`, `test_makefile.py`, `test_database_models.py`, `test_database_migrations.py`, `test_database_repositories.py`, `test_token_hash_index.py`, `test_opensearch_client.py`, `test_security_rbac.py`, `test_hitl_tokens.py`, `test_demo_tokens.py`, `test_spend_tier_router.py`, `test_audit_writer.py`, `test_neptune_client.py`, `test_graph_seed.py`, `test_cypher_queries.py`, `test_supplier_traversal.py`, `test_graph_traversal_paths.py`, `test_kafka_consumer.py`, `test_kafka_producer.py`, `test_kafka_schemas.py`, `test_kafka_consumer_integration.py`, `test_risk_calculator.py`, `test_risk_scorer.py`, `test_inventory_service.py`, `test_alert_service.py`, `test_nanocore_golden.py`, `test_litellm_gateway.py`, `test_quarantined_reader.py`, `test_llm_models.py`, `test_vllm_client.py`, `test_mock_llm_client.py`, `test_agent_graph_skeleton.py`, `test_triage_agent.py`, `test_research_agent.py`, `test_contract_agent.py`, `test_risk_agent.py`, `test_recommendation_agent.py`, `test_hitl_service.py`, `test_dual_approval_enforcer.py`, `test_token_replay_guard.py`, `test_hitl_unit_tests.py`, `test_risk_routes.py`, `test_investigation_routes.py`, `test_approval_routes.py`, `test_supplier_routes.py`, `test_websocket_routes.py`) | PASSED ✅ |
-| **Total Test Cases** | 794 tests (775 unit + 11 integration + 8 golden) | 100% Passing (0 failures) |
-| **Code Coverage (`src/`)** | **95%** statement coverage (6,899 statements, 316 missed; exceeds 80% DoD gate) | Exceeds 80% DoD gate |
+| **Phase 11 Progress** | 6 / 6 Tasks Completed (100%) | Completed ✅ |
+| **Total Test Suites** | 56 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`, `test_localstack_bootstrap.py`, `test_redpanda_topics.py`, `test_neptune_emulation.py`, `test_makefile.py`, `test_database_models.py`, `test_database_migrations.py`, `test_database_repositories.py`, `test_token_hash_index.py`, `test_opensearch_client.py`, `test_security_rbac.py`, `test_hitl_tokens.py`, `test_demo_tokens.py`, `test_spend_tier_router.py`, `test_audit_writer.py`, `test_neptune_client.py`, `test_graph_seed.py`, `test_cypher_queries.py`, `test_supplier_traversal.py`, `test_graph_traversal_paths.py`, `test_kafka_consumer.py`, `test_kafka_producer.py`, `test_kafka_schemas.py`, `test_kafka_consumer_integration.py`, `test_risk_calculator.py`, `test_risk_scorer.py`, `test_inventory_service.py`, `test_alert_service.py`, `test_nanocore_golden.py`, `test_litellm_gateway.py`, `test_quarantined_reader.py`, `test_llm_models.py`, `test_vllm_client.py`, `test_mock_llm_client.py`, `test_agent_graph_skeleton.py`, `test_triage_agent.py`, `test_research_agent.py`, `test_contract_agent.py`, `test_risk_agent.py`, `test_recommendation_agent.py`, `test_hitl_service.py`, `test_dual_approval_enforcer.py`, `test_token_replay_guard.py`, `test_hitl_unit_tests.py`, `test_risk_routes.py`, `test_investigation_routes.py`, `test_approval_routes.py`, `test_supplier_routes.py`, `test_websocket_routes.py`, `test_error_handlers.py`) | PASSED ✅ |
+| **Total Test Cases** | 816 tests (797 unit + 11 integration + 8 golden) | 100% Passing (0 failures) |
+| **Code Coverage (`src/`)** | **95.48%** statement coverage (6,952 statements, 314 missed; exceeds 80% DoD gate) | Exceeds 80% DoD gate |
 | **Active Branch** | `development` | Clean |
 
 ---
@@ -764,29 +764,31 @@
     - **REST Diagnostics & Management**: Gated by `require_role(UserRole.ANALYST)`: `GET /api/v1/ws/alerts/stats` returns connection counts and active filters; `POST /api/v1/ws/alerts/broadcast` allows manual broadcast triggers.
     - **Comprehensive Test Suite**: 20 unit tests in `tests/unit/test_websocket_routes.py` with 100% pass rate under zero external I/O, bringing the total test suite to 794 passed tests (95% project-wide coverage).
 
+56. **Canonical Error Standardization, No-Op State Mutation Interception, and Information Disclosure Defense (SEC-058, BR-RULE-001, CLAUDE.md Sec 5.2, Sec 10 & Sec 20)**:
+    - **Canonical Error Envelope (CLAUDE.md Sec 10)**: Every API error response strictly conforms to `{ "error": { "code": str, "message": str, "trace_id": str } }`, with optional `details` metadata for validation or operational contexts. Eliminates unstructured error leaks and standardizes client-side error handling across all frontend and microservice consumers.
+    - **No-Op Mutation Guard (CLAUDE.md Sec 20)**: Engineered `check_no_op_mutation(entity_id, current_state, target_state)` and `NoOpMutationException` (HTTP 409 `NO_OP_MUTATION_REJECTED`). Automatically intercepts and denies idempotent state transitions where `before_state == after_state`, preventing redundant database mutations, spamming downstream Kafka topics, and polluting append-only `audit_logs` tables. Wired into `acknowledge_risk_alert` and approval signing.
+    - **Cryptographic Anti-Replay Error Mapping**: Intercepts `TokenReplayError`, `TokenReplayDetectedError`, and `TokenReplayServiceError`, cleanly mapping them to HTTP 409 `TOKEN_REPLAY` with forensic logging. Intercepts `TokenExpiredError` as HTTP 401 `TOKEN_EXPIRED` and `TokenSignatureInvalidError` as HTTP 401 `TOKEN_SIGNATURE_INVALID`.
+    - **Database Integrity & Constraint Violation Defense**: Catches SQLAlchemy `IntegrityError` and regex-inspects for `token_hash` unique constraint violations (mapping to HTTP 409 `TOKEN_REPLAY`) or foreign key / unique collisions (mapping to HTTP 409 `CONFLICT`). Strictly sanitizes and masks raw SQL statements, table structures, and database column names from error envelopes, preventing SQL injection reconnaissance.
+    - **Information Disclosure Defense (HTTP 500)**: Unhandled server exceptions are trapped by `unhandled_exception_handler`, logging full traceback and context `trace_id` internally while returning a scrubbed, opaque generic error message ("An unexpected internal server error occurred. Please contact support.") with HTTP 500 `INTERNAL_ERROR`.
+    - **Distributed Traceability**: Seamlessly extracts and binds `trace_id` across request headers (`X-Trace-ID`, `X-Request-ID`), contextvars (`get_trace_id()`), and `request.state`, ensuring 100% trace correlation in all error envelopes.
+    - **Comprehensive Test Suite**: 22 unit tests in `tests/unit/test_error_handlers.py` with 100% pass rate under zero external I/O, bringing the total project test suite to 816 passed tests (95.48% statement coverage).
+    - **Phase 11 (FastAPI API Routes) is now 100% complete (6/6 tasks).**
+
 ---
 
 ## 5. Next Planned Tasks
 - **Phase 8 — LLM Foundation (LiteLLM Gateway & Guardrails)**: Completed ✅ (5/5 tasks done)
 - **Phase 9 — Multi-Agent System (LangGraph Orchestration)**: Completed ✅ (6/6 tasks done)
-  - **P9-1**: LangGraph `AgentState` and `StateGraph` skeleton (`src/agents/state.py`, `src/agents/graph.py`) (`feature/agents-langgraph-skeleton`). Completed ✅
-  - **P9-2**: Triage agent node (`src/agents/nodes/triage_agent.py`) (`feature/agents-triage-node`). Completed ✅
-  - **P9-3**: Research agent node (`src/agents/nodes/research_agent.py`) (`feature/agents-research-node`). Completed ✅
-  - **P9-4**: Contract agent node (`src/agents/nodes/contract_agent.py`) (`feature/agents-contract-node`). Completed ✅
-  - **P9-5**: Risk agent node (`src/agents/nodes/risk_agent.py`) (`feature/agents-risk-node`). Completed ✅
-  - **P9-6**: Recommendation agent node (`src/agents/nodes/recommendation_agent.py`) (`feature/agents-recommendation-node`). Completed ✅
 - **Phase 10 — HITL Approval System**: Completed ✅ (4/4 tasks done)
-  - **P10-1**: HITL service (`src/services/hitl_service.py`) — issues KMS ECDSA tokens, routes to correct spend tier, enforces 1-hour / 30-minute TTL (`feature/hitl-approval-service`). Completed ✅
-  - **P10-2**: Dual-approval enforcer (`feature/hitl-dual-approval-enforcer`). Completed ✅
-  - **P10-3**: Token replay guard (`feature/hitl-token-replay-guard`). Completed ✅
-  - **P10-4**: HITL unit tests (`feature/hitl-unit-tests`). Completed ✅
-- **Phase 11 — FastAPI API Routes**:
+- **Phase 11 — FastAPI API Routes**: Completed ✅ (6/6 tasks done)
   - **P11-1**: Fast-track / Full-track pipeline routes (`src/api/routes/risk_routes.py`) (`feature/api-alert-routes`). Completed ✅
   - **P11-2**: Investigation routes — `POST /api/v1/investigations/start`, `GET /api/v1/investigations/{id}` (`feature/api-investigation-routes`). Completed ✅
   - **P11-3**: Approval routes — `GET /api/v1/approvals` (HITL queue), `POST /api/v1/approvals/{id}/sign` (ECDSA token submission) (`feature/api-approval-routes`). Completed ✅
   - **P11-4**: Supplier routes — `GET /api/v1/suppliers/{id}/risk`, `GET /api/v1/suppliers/{id}/graph` (Neptune subgraph) (`feature/api-supplier-routes`). Completed ✅
   - **P11-5**: WebSocket handler (`src/api/routes/websocket_routes.py`) — real-time alert push to frontend on new `risk-alerts` Kafka message (`feature/api-websocket-alert-push`). Completed ✅
-  - **P11-6**: No-op guard and error standardisation (`src/api/routes/error_handlers.py`, `src/api/main.py`) — reject approvals where token already used; all errors return `{error: {code, message, trace_id}}` (`feature/api-error-standardisation`). Next 🔄
+  - **P11-6**: No-op guard and error standardisation (`src/api/routes/error_handlers.py`, `src/api/main.py`) — reject approvals where token already used; all errors return `{error: {code, message, trace_id}}` (`feature/api-error-standardisation`). Completed ✅
+- **Phase 12 — React Frontend**: Next 🔄
+  - **P12-1**: Typed API client (`frontend/src/api/`) — axios + Zod schemas for all backend routes; WebSocket hook for live alerts (`feature/frontend-api-client`). Next 🔄
 
 
 

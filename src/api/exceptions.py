@@ -86,6 +86,34 @@ class ConflictException(AppException):
         )
 
 
+class NoOpMutationException(ConflictException):
+    """Raised when an operation would produce no state transition (before_state == after_state).
+
+    Enforces CLAUDE.md Section 20 invariant: No-op edits must be rejected at the API layer.
+    """
+
+    def __init__(
+        self,
+        message: str = "Operation rejected: state mutation is a no-op (before_state == after_state).",
+        details: Any = None,
+    ):
+        super().__init__(message=message)
+        self.code = "NO_OP_MUTATION_REJECTED"
+        self.status_code = 409
+        self.details = details
+
+
+class DependencyUnavailableException(AppException):
+    """Raised when an external backing service (Neptune, Aurora, Kafka, Redis) is unreachable."""
+
+    def __init__(self, message: str = "Backing dependency service is unavailable."):
+        super().__init__(
+            code="DEPENDENCY_UNAVAILABLE",
+            message=message,
+            status_code=503,
+        )
+
+
 def format_error_response(
     code: str,
     message: str,

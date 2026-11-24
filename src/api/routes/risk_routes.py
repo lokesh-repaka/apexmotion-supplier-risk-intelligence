@@ -18,7 +18,12 @@ from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.api.exceptions import ConflictException, NotFoundException, ValidationException
+from src.api.exceptions import (
+    ConflictException,
+    NoOpMutationException,
+    NotFoundException,
+    ValidationException,
+)
 from src.api.schemas.risk import (
     AlertAcknowledgeRequest,
     AlertAcknowledgeResponse,
@@ -432,6 +437,11 @@ async def acknowledge_risk_alert(
 
     if alert is None:
         raise NotFoundException(f"Risk alert '{alert_id}' not found.")
+
+    if alert.status == "ACKNOWLEDGED":
+        raise NoOpMutationException(
+            f"Alert '{alert_id}' is already in ACKNOWLEDGED status. No-op mutation rejected."
+        )
 
     if alert.status in ("RESOLVED", "CLOSED", "DISMISSED"):
         raise ConflictException(

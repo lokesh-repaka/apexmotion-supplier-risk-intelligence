@@ -1,6 +1,6 @@
 You have access to the project's authoritative documentation: `TASKS.md`, `CLAUDE.md`, `GEMINI.md`, `.agents/rules/`, and architecture specifications in `docs/` (`HLD_*.md`, `LLD_*.md`, `PRD_*.md`, `BRD_*.md`, `FRD_*.md`).
 
-Go ahead and complete **P10-2 · Dual-approval enforcer — `DUAL_VP` actions require two independent token signatures before the action node executes**, as defined in `TASKS.md`.
+Go ahead and complete **P10-3 · Token replay guard — checks `hitl_approvals.token_hash` unique constraint, logs and alerts on replay attempt**, as defined in `TASKS.md`.
 
 ---
 

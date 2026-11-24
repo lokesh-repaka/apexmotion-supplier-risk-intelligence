@@ -17,6 +17,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from src.api.exceptions import AppException, format_error_response
 from src.api.routes.health import router as health_router
+from src.api.routes.risk_routes import router as risk_router
 from src.core.logging import bind_trace_id, get_logger, get_trace_id, setup_logging
 
 logger = get_logger("apexmotion.api")
@@ -168,3 +169,4 @@ async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONR
 # ------------------------------------------------------------------------------
 
 app.include_router(health_router)
+app.include_router(risk_router)

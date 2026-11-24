@@ -716,6 +716,16 @@
       * **Dual-Approval Enforcer Hard Execution Gate**: Actions committing $> \$100,000$ with single signature transition to `PARTIALLY_APPROVED`, conditional edge `route_after_hitl_gate` routes to `await_approval` (`END`), and direct execution in `action_node` strictly raises `InsufficientSignaturesError`. Enforces invariant: *"A DUAL_VP action proceeding with only one approval signature must NEVER happen."*
       * **Precision & RBAC**: Rejects native floats with `TypeError` per BR-RULE-001, rejects unauthorized roles (`analyst`) with `UnauthorizedSignerError`, and rejects tampered signatures with `TokenSignatureInvalidError`.
 
+51. **Deterministic API Route Layering & Alert Governance (SEC-053, BR-RULE-001, CLAUDE.md Sec 5.2 & Sec 10)**:
+    - **The Triad of Separation Invariant (BR-RULE-001)**: `POST /api/v1/risk/evaluate` strictly delegates 100% of arithmetic operations to deterministic Python services (`RiskCalculator.calculate_from_params()` and `compute_risk_level()`). Route handlers never perform business arithmetic directly.
+    - **Fast-Track vs Full-Track Pipeline Routing**: Disruption evaluations with zero shortage gap (`gap_days <= 0.00`) and low severity deterministically classify as `FAST_TRACK`, returning immediate calculation responses with zero agent latency. Disruptions with positive shortage gaps and exposure auto-route to `FULL_TRACK`. Explicit `pipeline_mode` overrides are honored.
+    - **RBAC Authority Boundaries**: Evaluation and feed querying (`POST /api/v1/risk/evaluate`, `GET /api/v1/alerts`, `GET /api/v1/alerts/{id}`) mandate `require_role(UserRole.ANALYST)` or higher. Consequential alert status transitions (`POST /api/v1/alerts/{id}/acknowledge`) mandate `require_role(UserRole.CATEGORY_MANAGER)`, strictly rejecting `analyst` with HTTP 403 `INSUFFICIENT_ROLE`.
+    - **Rolling Window Deduplication & Anti-Flooding**: Integrates `RiskAlertRepository.find_recent_active_alert()` to collapse repeated evaluations for the same SKU and supplier within a 1-hour window, updating existing exposure metrics and returning `status="COLLAPSED"` to prevent alert table bloat.
+    - **Terminal Status Protection**: Alerts in terminal statuses (`RESOLVED`, `CLOSED`, `DISMISSED`) reject acknowledgement attempts with HTTP 409 `CONFLICT`.
+    - **Append-Only Forensic Audit Trail (BR-RULE-007)**: Dispatches immutable audit records via `write_audit_log()` on evaluation (`RISK_EVALUATION_EXECUTED`) and acknowledgement (`ALERT_ACKNOWLEDGED`) with graceful error containment.
+    - **Validation & Error Standards**: Pydantic v2 schemas with `extra="forbid"`, UUID format validation (`400 VALIDATION_ERROR`), and standardized RFC 7807 error envelopes masking internal traces.
+    - **Comprehensive Test Suite**: 23 unit tests in `tests/unit/test_risk_routes.py` achieving 89% route statement coverage and 100% pass rate under strict offline isolation.
+
 ---
 
 ## 5. Next Planned Tasks
@@ -733,7 +743,8 @@
   - **P10-3**: Token replay guard (`feature/hitl-token-replay-guard`). Completed ✅
   - **P10-4**: HITL unit tests (`feature/hitl-unit-tests`). Completed ✅
 - **Phase 11 — FastAPI API Routes**:
-  - **P11-1**: Fast-track / Full-track pipeline routes (`src/api/routes/risk_routes.py`) (`feature/api-risk-pipeline-routes`). Next 🔄
+  - **P11-1**: Fast-track / Full-track pipeline routes (`src/api/routes/risk_routes.py`) (`feature/api-alert-routes`). Completed ✅
+  - **P11-2**: Investigation routes — `POST /api/v1/investigations/start`, `GET /api/v1/investigations/{id}` (`feature/api-investigation-routes`). Next 🔄
 
 
 

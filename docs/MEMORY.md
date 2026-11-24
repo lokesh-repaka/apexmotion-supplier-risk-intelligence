@@ -25,10 +25,10 @@
 | **Phase 7 Progress** | 5 / 5 Tasks Completed | Completed ✅ |
 | **Phase 8 Progress** | 5 / 5 Tasks Completed (100%) | Completed ✅ |
 | **Phase 9 Progress** | 6 / 6 Tasks Completed (100%) | Completed ✅ |
-| **Phase 10 Progress** | 1 / 4 Tasks Completed (25%) | In Progress 🔄 |
-| **Total Test Suites** | 47 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`, `test_localstack_bootstrap.py`, `test_redpanda_topics.py`, `test_neptune_emulation.py`, `test_makefile.py`, `test_database_models.py`, `test_database_migrations.py`, `test_database_repositories.py`, `test_token_hash_index.py`, `test_opensearch_client.py`, `test_security_rbac.py`, `test_hitl_tokens.py`, `test_demo_tokens.py`, `test_spend_tier_router.py`, `test_audit_writer.py`, `test_neptune_client.py`, `test_graph_seed.py`, `test_cypher_queries.py`, `test_supplier_traversal.py`, `test_graph_traversal_paths.py`, `test_kafka_consumer.py`, `test_kafka_producer.py`, `test_kafka_schemas.py`, `test_kafka_consumer_integration.py`, `test_risk_calculator.py`, `test_risk_scorer.py`, `test_inventory_service.py`, `test_alert_service.py`, `test_nanocore_golden.py`, `test_litellm_gateway.py`, `test_quarantined_reader.py`, `test_llm_models.py`, `test_vllm_client.py`, `test_mock_llm_client.py`, `test_agent_graph_skeleton.py`, `test_triage_agent.py`, `test_research_agent.py`, `test_contract_agent.py`, `test_risk_agent.py`, `test_recommendation_agent.py`, `test_hitl_service.py`) | PASSED ✅ |
-| **Total Test Cases** | 652 tests (633 unit + 11 integration + 8 golden) | 100% Passing (0 failures) |
-| **Code Coverage (`src/`)** | **97.65%** statement coverage (`src/services/hitl_service.py` at 98%, `src/agents/nodes/recommendation_agent.py` at 100% stmts / 100% branch, `src/agents/nodes/risk_agent.py`, `src/agents/nodes/contract_agent.py`, `src/agents/nodes/research_agent.py`, `src/agents/tools/research_tools.py`, `src/agents/nodes/triage_agent.py`, `src/agents/state.py`, `src/agents/graph.py`, `src/llm/`, `src/services/alert_service.py`, `src/services/risk/calculator.py`, `src/services/risk/scorer.py`, `src/kafka/handlers.py`, and `src/kafka/schemas/` at 100%; `src/database/repositories/risk_alert_repository.py` at 96%; `src/services/risk/inventory_service.py` at 92%) | Exceeds 80% DoD gate |
+| **Phase 10 Progress** | 2 / 4 Tasks Completed (50%) | In Progress 🔄 |
+| **Total Test Suites** | 48 (`test_project_structure.py`, `test_config.py`, `test_logging.py`, `test_api_skeleton.py`, `test_health_routes.py`, `test_ci_pipeline.py`, `test_docker_compose.py`, `test_localstack_bootstrap.py`, `test_redpanda_topics.py`, `test_neptune_emulation.py`, `test_makefile.py`, `test_database_models.py`, `test_database_migrations.py`, `test_database_repositories.py`, `test_token_hash_index.py`, `test_opensearch_client.py`, `test_security_rbac.py`, `test_hitl_tokens.py`, `test_demo_tokens.py`, `test_spend_tier_router.py`, `test_audit_writer.py`, `test_neptune_client.py`, `test_graph_seed.py`, `test_cypher_queries.py`, `test_supplier_traversal.py`, `test_graph_traversal_paths.py`, `test_kafka_consumer.py`, `test_kafka_producer.py`, `test_kafka_schemas.py`, `test_kafka_consumer_integration.py`, `test_risk_calculator.py`, `test_risk_scorer.py`, `test_inventory_service.py`, `test_alert_service.py`, `test_nanocore_golden.py`, `test_litellm_gateway.py`, `test_quarantined_reader.py`, `test_llm_models.py`, `test_vllm_client.py`, `test_mock_llm_client.py`, `test_agent_graph_skeleton.py`, `test_triage_agent.py`, `test_research_agent.py`, `test_contract_agent.py`, `test_risk_agent.py`, `test_recommendation_agent.py`, `test_hitl_service.py`, `test_dual_approval_enforcer.py`) | PASSED ✅ |
+| **Total Test Cases** | 670 tests (651 unit + 11 integration + 8 golden) | 100% Passing (0 failures) |
+| **Code Coverage (`src/`)** | **96.24%** statement coverage (`src/services/dual_approval_enforcer.py` at 91%, `src/services/hitl_service.py` at 98%, `src/agents/nodes/recommendation_agent.py` at 100% stmts / 100% branch, `src/agents/nodes/risk_agent.py`, `src/agents/nodes/contract_agent.py`, `src/agents/nodes/research_agent.py`, `src/agents/tools/research_tools.py`, `src/agents/nodes/triage_agent.py`, `src/agents/state.py`, `src/agents/graph.py`, `src/llm/`, `src/services/alert_service.py`, `src/services/risk/calculator.py`, `src/services/risk/scorer.py`, `src/kafka/handlers.py`, and `src/kafka/schemas/` at 100%; `src/database/repositories/risk_alert_repository.py` at 96%; `src/services/risk/inventory_service.py` at 92%) | Exceeds 80% DoD gate |
 | **Active Branch** | `development` | Clean |
 
 ---
@@ -690,6 +690,14 @@
     - Replay attacks are prohibited through SHA-256 unique `token_hash` indexing and verification against Aurora PostgreSQL/SQLite repositories before state transitions are committed.
     - Dual sign-off enforces distinct executive identities (`UnauthorizedSignerError` on duplicate signers), ensuring no single actor can unilaterally dispatch Tier 3 capital commitments (> $100,000).
 
+48. **Dual Executive Sign-Off Enforcement on High-Value Disruption Mitigations (SEC-050, BR-RULE-001)**:
+    - Actions committing capital > $100,000 (Tier 3 / `DUAL_VP`) require two independent, valid cryptographic KMS ECDSA P-256 tokens from distinct executive signers (Procurement Director + VP Supply Chain) with 30-minute TTLs.
+    - Strict enforcement of CLAUDE.md Sec 20.1 invariant: *"A DUAL_VP action proceeding with only one approval signature must NEVER happen."*
+    - Single signature on a `DUAL_VP` action transitions workflow status to `PARTIALLY_APPROVED` and keeps the StateGraph paused at `await_approval` (routing to `END`).
+    - `action_node` enforces a hard pre-execution gate via `enforce_action_execution()`, raising `InsufficientSignaturesError` if fewer than two valid signatures are present, guaranteeing zero automated or single-signature execution bypass.
+    - Pure deterministic Python arithmetic with `Decimal`, strictly rejecting native floats with `TypeError`.
+    - 18 comprehensive unit tests in `tests/unit/test_dual_approval_enforcer.py` achieving 91% coverage under strict offline isolation (zero live AWS or network calls).
+
 ---
 
 ## 5. Next Planned Tasks
@@ -703,8 +711,8 @@
   - **P9-6**: Recommendation agent node (`src/agents/nodes/recommendation_agent.py`) (`feature/agents-recommendation-node`). Completed ✅
 - **Phase 10 — HITL Approval System**:
   - **P10-1**: HITL service (`src/services/hitl_service.py`) — issues KMS ECDSA tokens, routes to correct spend tier, enforces 1-hour / 30-minute TTL (`feature/hitl-approval-service`). Completed ✅
-  - **P10-2**: Dual-approval enforcer (`feature/hitl-dual-approval-enforcer`). Pending ❌
-  - **P10-3**: Token replay guard (`feature/hitl-token-replay-guard`). Pending ❌
+  - **P10-2**: Dual-approval enforcer (`feature/hitl-dual-approval-enforcer`). Completed ✅
+  - **P10-3**: Token replay guard (`feature/hitl-token-replay-guard`). Next 🔄
   - **P10-4**: HITL unit tests (`feature/hitl-unit-tests`). Pending ❌
 
 

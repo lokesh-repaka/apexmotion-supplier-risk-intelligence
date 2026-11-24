@@ -347,7 +347,7 @@ async def test_investigation_orchestrator_resume_with_approval() -> None:
         current_stock=142000,
         daily_consumption_rate=Decimal("18500"),
         eta_days=Decimal("9.0"),
-        unit_cost_usd=Decimal("100.25"),
+        unit_cost_usd=Decimal("2.00"),
     )
 
     thread_config = {"configurable": {"thread_id": "thread-investigation-001"}}
@@ -360,13 +360,19 @@ async def test_investigation_orchestrator_resume_with_approval() -> None:
     assert paused_state["workflow_status"] == WorkflowStatus.AWAITING_APPROVAL
     assert paused_state["requires_hitl"] is True
 
-    # 2. Resumed run: provide valid approval decision
+    # 2. Resumed run: provide valid approval decision (Tier 2 PROC_DIRECTOR <= $100k allows single signature)
     approval_decision = {
         "approved": True,
         "token_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "signer_id": "usr-vp-supplychain-01",
-        "spend_tier": SpendTier.DUAL_VP,
+        "spend_tier": SpendTier.PROC_DIRECTOR,
     }
+
+    # Update governing spend tier to match decision tier for single-signer resumption
+    await orchestrator.graph.aupdate_state(
+        thread_config,
+        {"governing_spend_tier": SpendTier.PROC_DIRECTOR},
+    )
 
     resumed_state = await orchestrator.resume_investigation(
         thread_id="thread-investigation-001",

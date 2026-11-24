@@ -29,6 +29,7 @@ from src.agents.state import (
     WorkflowStatus,
 )
 from src.core.logging import get_logger
+from src.services.dual_approval_enforcer import get_dual_approval_enforcer
 
 logger = get_logger("apexmotion.agents.graph")
 
@@ -112,13 +113,28 @@ def route_after_hitl_gate(state: SupplierRiskState) -> str:
     """Evaluate whether workflow requires human sign-off before executing mitigation actions.
 
     - Requires HITL and no decision present -> suspend / await approval (routes to END).
-    - Requires HITL and approved -> proceed to action node.
+    - Requires HITL and approved (including both signatures for DUAL_VP) -> proceed to action node.
     - Requires HITL and rejected -> terminate (routes to END).
     - Zero spend ($0) does not require HITL -> proceed to action node.
     """
     if state.get("requires_hitl"):
         decision = state.get("hitl_decision")
         if decision is not None:
+            enforcer = get_dual_approval_enforcer()
+            is_dual = enforcer.is_dual_approval_required(
+                spend_tier=state.get("governing_spend_tier")
+            )
+            if is_dual:
+                tokens = decision.get("tokens") or []
+                if len(tokens) < 2 and not decision.get("is_dual_approved"):
+                    return "await_approval"
+                ver_res = enforcer.enforce_state_approval(state)
+                if ver_res.is_approved:
+                    return NODE_ACTION
+                if decision.get("approved") is False:
+                    return "rejected"
+                return "await_approval"
+
             if decision.get("approved") is True:
                 return NODE_ACTION
             return "rejected"
@@ -137,12 +153,33 @@ def hitl_gate_node(state: SupplierRiskState) -> dict[str, Any]:
     logger.info("HITL gate node checking authorization status for alert: %s", state.get("alert_id"))
 
     if state.get("requires_hitl"):
+        enforcer = get_dual_approval_enforcer()
+        is_dual = enforcer.is_dual_approval_required(spend_tier=state.get("governing_spend_tier"))
+
         decision = state.get("hitl_decision")
         if decision is not None:
-            if decision.get("approved") is True:
-                status = WorkflowStatus.APPROVED
+            if is_dual:
+                tokens = decision.get("tokens") or []
+                if not tokens and decision.get("token_hash"):
+                    tokens = [decision["token_hash"]]
+
+                if len(tokens) == 1 and not decision.get("approved"):
+                    status = "PARTIALLY_APPROVED"
+                else:
+                    ver_res = enforcer.enforce_state_approval(state)
+                    if ver_res.is_approved:
+                        status = WorkflowStatus.APPROVED
+                    elif decision.get("approved") is False:
+                        status = WorkflowStatus.REJECTED
+                    elif len(tokens) == 1:
+                        status = "PARTIALLY_APPROVED"
+                    else:
+                        status = WorkflowStatus.AWAITING_APPROVAL
             else:
-                status = WorkflowStatus.REJECTED
+                if decision.get("approved") is True:
+                    status = WorkflowStatus.APPROVED
+                else:
+                    status = WorkflowStatus.REJECTED
         else:
             status = WorkflowStatus.AWAITING_APPROVAL
     else:
@@ -159,14 +196,27 @@ def action_node(state: SupplierRiskState) -> dict[str, Any]:
     """Node 7: Execute approved procurement action and append cryptographic audit record."""
     logger.info("Action node executing approved mitigation for alert: %s", state.get("alert_id"))
 
+    # Hard security gate: Enforce dual executive signatures for DUAL_VP actions
+    enforcer = get_dual_approval_enforcer()
+    enforcer.enforce_action_execution(state)
+
     decision = state.get("hitl_decision") or {}
-    audit_record = {
+    tokens = decision.get("tokens") or []
+    signers = decision.get("signers") or (
+        [decision.get("signer_id")] if decision.get("signer_id") else ["SYSTEM"]
+    )
+
+    audit_record: dict[str, Any] = {
         "action": "EXECUTE_PROCUREMENT_MITIGATION",
         "action_id": state.get("recommended_action_id"),
         "token_hash": decision.get("token_hash", "SYSTEM_PRE_AUTHORIZED"),
         "signer_id": decision.get("signer_id", "SYSTEM"),
         "status": "EXECUTED",
     }
+    if len(tokens) >= 2 or decision.get("is_dual_approved"):
+        audit_record["is_dual_approved"] = True
+        audit_record["signers"] = signers
+        audit_record["token_hashes"] = tokens
 
     return {
         "current_node": NODE_ACTION,

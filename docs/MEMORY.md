@@ -27,9 +27,9 @@
 | **Phase 9 Progress** | 6 / 6 Tasks Completed (100%) | Completed ✅ |
 | **Phase 10 Progress** | 4 / 4 Tasks Completed (100%) | Completed ✅ |
 | **Phase 11 Progress** | 6 / 6 Tasks Completed (100%) | Completed ✅ |
-| **Phase 12 Progress** | 2 / 6 Tasks Completed (33.3%) | In Progress 🔄 |
-| **Total Test Suites** | 62 (56 Python suites + 6 Frontend suites: `types.test.ts`, `client.test.ts`, `routes.test.ts`, `useAlertWebSocket.test.ts`, `useRiskStore.test.ts`, `RiskDashboard.test.ts`) | PASSED ✅ |
-| **Total Test Cases** | 874 tests (816 Python [797 unit + 11 integration + 8 golden] + 58 Frontend unit) | 100% Passing (0 failures) |
+| **Phase 12 Progress** | 3 / 6 Tasks Completed (50.0%) | In Progress 🔄 |
+| **Total Test Suites** | 64 (56 Python suites + 8 Frontend suites: `types.test.ts`, `client.test.ts`, `routes.test.ts`, `useAlertWebSocket.test.ts`, `useRiskStore.test.ts`, `RiskDashboard.test.ts`, `useInvestigationStore.test.ts`, `InvestigationPanel.test.ts`) | PASSED ✅ |
+| **Total Test Cases** | 886 tests (816 Python [797 unit + 11 integration + 8 golden] + 70 Frontend unit) | 100% Passing (0 failures) |
 | **Code Coverage (`src/`)** | **95.48%** statement coverage (6,952 statements, 314 missed; exceeds 80% DoD gate) | Exceeds 80% DoD gate |
 | **Active Branch** | `development` | Clean |
 
@@ -793,15 +793,26 @@
     - **Comprehensive Test Suite**: 14 new unit tests in Vitest across `useRiskStore.test.ts` and `RiskDashboard.test.ts` with 100% pass rate, bringing total project test count to 874 passed tests (816 Python + 58 Frontend).
     - **Phase 12 (React Frontend) progress is now 2/6 (33.3%).**
 
+59. **Multi-Agent Case Dossier Workbench, Evidence Grounding, and Sub-90s Investigation Pipeline UI (SEC-061, BR-RULE-001, FRD FR-DEC-001, CLAUDE.md Sec 5.2 & Sec 11)**:
+    - **Multi-Agent Investigation State Management (`frontend/src/stores/useInvestigationStore.ts`)**: Engineered dedicated Zustand store coordinating sub-90s incident investigations (`POST /api/v1/investigations/start`) and autonomous status polling (`GET /api/v1/investigations/{id}`). Automatically terminates polling when reaching terminal or interactive statuses (`COMPLETED`, `AWAITING_APPROVAL`, `DISMISSED`, `FAILED`).
+    - **6-Stage LangGraph Pipeline Stepper (`frontend/src/components/InvestigationPanel/InvestigationStepper.tsx`)**: Visualizes real-time workflow traversal across LangGraph nodes (`triage`, `research`, `erp`, `risk`, `contract`, `recommendation`), tracking latency against the sub-90s SLO SLA (p95 <= 90s).
+    - **Grounded Narrative & Interactive Evidence Citations (`frontend/src/components/InvestigationPanel/AgentNarrative.tsx`, `CitationModal.tsx`)**: Replaces bracketed citation keys in synthesized narratives (e.g. `[REUTERS-TW-9921]`, `[NEPTUNE-GRAPH]`, `[SAP-INV-001]`, `[MSA-2024-BE §14.2]`) with interactive citation buttons opening primary source telemetry with triple-corroboration verification.
+    - **Deterministic Math Proof Engine (`frontend/src/components/InvestigationPanel/DeterministicProofCard.tsx`)**: Strictly upholds the Triad of Responsibility (BR-RULE-001), reproducing exact certified arithmetic (NanoCore: 142k/18.5k = 7.68d cover, 1.32d gap, 24,420 units shortage, $2,448,105.00 exposure). Zero LLM math.
+    - **Multi-Modal Evidence Cards (`frontend/src/components/InvestigationPanel/EvidenceCards.tsx`)**: Displays external satellite/AIS feeds, Neptune 3-tier dependency blast radius, and Master Supply Agreement §14.2 contract clauses (Force Majeure denied, 50/50 freight cost-sharing).
+    - **Ranked Mitigation Scenarios & HITL Spend Tiers (`frontend/src/components/InvestigationPanel/MitigationScenariosList.tsx`)**: Evaluates 3 pre-compiled decision scenarios with cost, lead time, net savings, and required cryptographic spend authority tiers (Category Manager, Procurement Director, Dual Sign-off).
+    - **Circuit Breaker Fallback (FRD FR-DEC-001 Alt Flow)**: Simulates graceful degradation when LLM narrative synthesis exceeds 20s, falling back to deterministic template mode while preserving 100% of numerical calculations.
+    - **Comprehensive Test Suite**: 12 new unit tests in Vitest across `useInvestigationStore.test.ts` and `InvestigationPanel.test.ts` with 100% pass rate, bringing total project test count to 886 passed tests (816 Python + 70 Frontend across 64 test suites).
+    - **Phase 12 (React Frontend) progress is now 3/6 (50.0%).**
+
 ---
 
 ## 5. Next Planned Tasks
 - **Phase 11 — FastAPI API Routes**: Completed ✅ (6/6 tasks done)
-- **Phase 12 — React Frontend**: In Progress 🔄 (2/6 tasks done)
+- **Phase 12 — React Frontend**: In Progress 🔄 (3/6 tasks done)
   - **P12-1**: Typed API client (`frontend/src/api/`) — axios + Zod schemas for all backend routes; WebSocket hook for live alerts (`feature/frontend-api-client`). Completed ✅
   - **P12-2**: Risk Dashboard page — supplier risk table, severity heat-map, Kafka-driven live alert feed, Zustand store (`feature/frontend-risk-dashboard`). Completed ✅
-  - **P12-3**: Investigation Panel — trigger investigation, poll status, display agent narrative + evidence cards (`feature/frontend-investigation-panel`). Next 🔄
-  - **P12-4**: HITL Approval Modal — spend tier badge, ECDSA token submission form, dual-approval progress indicator (`feature/frontend-hitl-approval-modal`). Pending ❌
+  - **P12-3**: Investigation Panel — trigger investigation, poll status, display agent narrative + evidence cards (`feature/frontend-investigation-panel`). Completed ✅
+  - **P12-4**: HITL Approval Modal — spend tier badge, ECDSA token submission form, dual-approval progress indicator (`feature/frontend-hitl-approval-modal`). Next 🔄
   - **P12-5**: Supplier Graph Visualiser — Neptune subgraph rendered as interactive force-directed graph (D3 or React Flow) (`feature/frontend-supplier-graph-viz`). Pending ❌
   - **P12-6**: Audit Trail Viewer — chronological immutable timeline per alert; role-aware UI (hide approve button for `analyst`) (`feature/frontend-audit-trail-viewer`). Pending ❌
 

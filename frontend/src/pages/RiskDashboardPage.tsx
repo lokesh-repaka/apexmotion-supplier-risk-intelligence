@@ -22,7 +22,13 @@ import { KPICards } from '../components/RiskDashboard/KPICards';
 import { SeverityHeatMap } from '../components/RiskDashboard/SeverityHeatMap';
 import { SupplierRiskTable } from '../components/RiskDashboard/SupplierRiskTable';
 
-export const RiskDashboardPage: React.FC = () => {
+export interface RiskDashboardPageProps {
+  onNavigateToInvestigation?: () => void;
+}
+
+export const RiskDashboardPage: React.FC<RiskDashboardPageProps> = ({
+  onNavigateToInvestigation,
+}) => {
   const {
     suppliers,
     alerts,
@@ -103,6 +109,17 @@ export const RiskDashboardPage: React.FC = () => {
             <RefreshCw className={`h-3.5 w-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
             <span>Refresh</span>
           </button>
+
+          {/* Investigation Dossier Navigation Action */}
+          {onNavigateToInvestigation && (
+            <button
+              type="button"
+              onClick={onNavigateToInvestigation}
+              className="inline-flex items-center gap-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 px-3 py-1.5 text-xs font-bold text-white transition-colors shadow-sm"
+            >
+              <span>Investigation Dossier &rarr;</span>
+            </button>
+          )}
         </div>
       </header>
 

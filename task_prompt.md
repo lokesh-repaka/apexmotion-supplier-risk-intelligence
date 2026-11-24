@@ -1,6 +1,6 @@
 You have access to the project's authoritative documentation: `TASKS.md`, `CLAUDE.md`, `GEMINI.md`, `.agents/rules/`, and architecture specifications in `docs/` (`HLD_*.md`, `LLD_*.md`, `PRD_*.md`, `BRD_*.md`, `FRD_*.md`).
 
-Go ahead and complete **P12-3 · Investigation Panel — trigger investigation, poll status, display agent narrative + evidence cards**, as defined in `TASKS.md`.
+Go ahead and complete **P12-4 · HITL Approval Modal — spend tier badge, ECDSA token submission form, dual-approval progress indicator**, as defined in `TASKS.md`.
 
 ---
 

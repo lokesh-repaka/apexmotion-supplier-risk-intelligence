@@ -31,11 +31,11 @@
 | **Phase 13 Progress** | 4 / 4 Tasks Completed (100%) | Completed ✅ |
 | **Phase 14 Progress** | 6 / 6 Tasks Completed (100%) | Completed ✅ |
 | **Phase 15 Progress** | 5 / 5 Tasks Completed (100%) | Completed ✅ |
-| **Phase 16 Progress** | 1 / 6 Tasks Completed (17%) | In Progress 🔄 |
-| **Total Test Suites** | 82 (68 Python suites + 14 Frontend suites) | PASSED ✅ |
-| **Total Test Cases** | 1,149 tests (1,033 Python [976 unit + 26 integration + 31 golden] + 116 Frontend unit) | 100% Passing (0 failures) |
+| **Phase 16 Progress** | 2 / 6 Tasks Completed (33%) | In Progress 🔄 |
+| **Total Test Suites** | 83 (69 Python suites + 14 Frontend suites) | PASSED ✅ |
+| **Total Test Cases** | 1,158 tests (1,042 Python [985 unit + 26 integration + 31 golden] + 116 Frontend unit) | 100% Passing (0 failures) |
 | **Code Coverage (`src/`)** | **95.22%** statement coverage | Exceeds 80% DoD gate |
-| **Active Branch** | `feature/docker-api-image` | In Progress 🔄 |
+| **Active Branch** | `feature/docker-worker-image` | In Progress 🔄 |
 
 ---
 
@@ -1106,6 +1106,19 @@
 
 ---
 
+### Invariant 79: Background Worker Container Hardening & Daemon Isolation (P16-2)
+- **Standard**: Production container image specification in `Dockerfile.worker` adhering to CIS Docker Benchmark v1.6 and NIST SP 800-190 container security guidelines for asynchronous event-driven worker clusters. Enforces:
+  1. **Multi-Stage Base Image**: `python:3.12-slim` for both `builder` and `runner` stages, eliminating compiler toolchains (`build-essential`, `gcc`) and package caches from final runtime layers.
+  2. **Unprivileged Non-Root Execution**: Creates dedicated system group `appgroup` (GID 10001) and system user `appuser` (UID 10001) with `/sbin/nologin` shell, ensuring zero root execution in Kafka consumer or Celery background workers.
+  3. **Zero-Binary Container Liveness Health Check**: Container `HEALTHCHECK` directive probing module and runtime integrity (`--interval=30s --timeout=5s --start-period=10s --retries=3`), eliminating external networking binaries.
+  4. **Production Worker Entrypoint**: Binds default execution to `CMD ["python3", "-m", "src.kafka.consumer"]`, with runtime override flexibility for Celery background enrichment pods.
+  5. **Clean Environment & Path Hygiene**: Standard `PYTHONUNBUFFERED=1`, `PYTHONDONTWRITEBYTECODE=1`, `PYTHONPATH="/app"`.
+  6. **Layer & Migration Completeness**: Bundles `alembic.ini` and `pyproject.toml` into `/app` alongside `src/` to support schema awareness and package introspection.
+  7. **Dockerignore Defense-in-Depth**: Verified `.dockerignore` exclusions for secrets (`.env*`, `*.pem`, `*.key`, `*credentials*.json`), `.git`, `.venv`, and cache directories.
+- **Verification**: `tests/unit/test_dockerfile_worker.py` (9 unit tests, 100% pass rate).
+
+---
+
 ## 5. Next Planned Tasks
 - **Phase 11 — FastAPI API Routes**: Completed ✅ (6/6 tasks done)
 - **Phase 12 — React Frontend**: Completed ✅ (6/6 tasks done)
@@ -1117,10 +1130,10 @@
   - **P15-3**: Prometheus metrics export — counter, gauge, and histogram metrics (`feature/observability-prometheus-metrics`). Completed ✅
   - **P15-4**: Grafana dashboard JSON (`feature/observability-grafana-dashboard`). Completed ✅
   - **P15-5**: CloudWatch alarms (`feature/observability-cloudwatch-alarms`). Completed ✅
-- **Phase 16 — Infrastructure & Delivery**: In Progress 🔄 (1/6 tasks done, 17%)
+- **Phase 16 — Infrastructure & Delivery**: In Progress 🔄 (2/6 tasks done, 33%)
   - **P16-1**: `Dockerfile.api` — FastAPI + Uvicorn image (Python 3.12-slim, non-root user, health check) (`feature/docker-api-image`). Completed ✅
-  - **P16-2**: `Dockerfile.worker` — Celery worker image for background enrichment and Kafka consumer (`feature/docker-worker-image`). Next 🔄
-  - **P16-3**: Terraform modules (`infrastructure/terraform/`) — EKS 1.30, Neptune, Aurora PG 16 Serverless v2, MSK 3-broker, OpenSearch, ElastiCache Redis, S3 Object Lock, KMS (`feature/terraform-aws-infrastructure`). Pending ❌
+  - **P16-2**: `Dockerfile.worker` — Celery worker image for background enrichment and Kafka consumer (`feature/docker-worker-image`). Completed ✅
+  - **P16-3**: Terraform modules (`infrastructure/terraform/`) — EKS 1.30, Neptune, Aurora PG 16 Serverless v2, MSK 3-broker, OpenSearch, ElastiCache Redis, S3 Object Lock, KMS (`feature/terraform-aws-infrastructure`). Next 🔄
   - **P16-4**: Kubernetes manifests (`infrastructure/kubernetes/`) — Deployments, Services, KEDA `ScaledObject` for Kafka consumer, HPA for API pods (`feature/kubernetes-manifests-keda`). Pending ❌
   - **P16-5**: KEDA autoscaling configuration for Kafka consumers (`feature/keda-autoscaling-kafka`). Pending ❌
   - **P16-6**: GitHub Actions CI/CD pipeline (`feature/ci-cd-github-actions`). Pending ❌

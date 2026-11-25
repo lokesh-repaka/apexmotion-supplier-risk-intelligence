@@ -30,6 +30,7 @@ from src.agents.state import (
     create_initial_state,
 )
 from src.core.logging import get_logger
+from src.core.telemetry import trace_span
 
 logger = get_logger("apexmotion.agents.orchestrator")
 
@@ -47,9 +48,18 @@ class InvestigationOrchestrator:
         config: RunnableConfig | None = None,
     ) -> SupplierRiskState:
         """Execute the investigation graph until completion or suspension at HITL gate."""
-        logger.info("Executing investigation workflow for alert: %s", state.get("alert_id"))
-        result = await self.graph.ainvoke(state, config=config)
-        return cast(SupplierRiskState, result)
+        init_attrs = {
+            "alert_id": str(state.get("alert_id", "")),
+            "supplier_id": str(state.get("supplier_id", "")),
+            "signal_type": str(state.get("signal_type", "")),
+        }
+        with trace_span("investigation_workflow_execute", attributes=init_attrs) as span:
+            logger.info("Executing investigation workflow for alert: %s", state.get("alert_id"))
+            result = await self.graph.ainvoke(state, config=config)
+            res_dict = cast(SupplierRiskState, result)
+            if res_dict.get("workflow_status"):
+                span.set_attribute("workflow_status", str(res_dict["workflow_status"]))
+            return res_dict
 
     async def resume_investigation(
         self,
@@ -58,21 +68,31 @@ class InvestigationOrchestrator:
         config: RunnableConfig | None = None,
     ) -> SupplierRiskState:
         """Resume a suspended investigation following human-in-the-loop sign-off."""
-        logger.info("Resuming investigation thread %s with HITL approval decision", thread_id)
-        active_config = config or cast(RunnableConfig, {"configurable": {"thread_id": thread_id}})
+        init_attrs = {
+            "thread_id": thread_id,
+            "is_approved": str(hitl_decision.get("approved")),
+        }
+        with trace_span("investigation_workflow_resume", attributes=init_attrs) as span:
+            logger.info("Resuming investigation thread %s with HITL approval decision", thread_id)
+            active_config = config or cast(
+                RunnableConfig, {"configurable": {"thread_id": thread_id}}
+            )
 
-        # Update checkpointed state with approved HITL decision
-        await self.graph.aupdate_state(
-            active_config,
-            {"hitl_decision": hitl_decision},
-        )
+            # Update checkpointed state with approved HITL decision
+            await self.graph.aupdate_state(
+                active_config,
+                {"hitl_decision": hitl_decision},
+            )
 
-        # Re-invoke to process approval through hitl_gate and action nodes
-        result = await self.graph.ainvoke(
-            {"hitl_decision": hitl_decision},
-            config=active_config,
-        )
-        return cast(SupplierRiskState, result)
+            # Re-invoke to process approval through hitl_gate and action nodes
+            result = await self.graph.ainvoke(
+                {"hitl_decision": hitl_decision},
+                config=active_config,
+            )
+            res_dict = cast(SupplierRiskState, result)
+            if res_dict.get("workflow_status"):
+                span.set_attribute("workflow_status", str(res_dict["workflow_status"]))
+            return res_dict
 
 
 # ------------------------------------------------------------------------------

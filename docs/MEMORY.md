@@ -30,10 +30,11 @@
 | **Phase 12 Progress** | 6 / 6 Tasks Completed (100%) | Completed ✅ |
 | **Phase 13 Progress** | 4 / 4 Tasks Completed (100%) | Completed ✅ |
 | **Phase 14 Progress** | 6 / 6 Tasks Completed (100%) | Completed ✅ |
-| **Total Test Suites** | 75 (61 Python suites + 14 Frontend suites) | PASSED ✅ |
-| **Total Test Cases** | 1,085 tests (969 Python [916 unit + 20 integration + 31 golden + 2 API] + 116 Frontend unit) | 100% Passing (0 failures) |
-| **Code Coverage (`src/`)** | **95.74%** statement coverage (100% on input_sanitizer.py, hitl_tokens.py, spend_tier_router.py & calculator.py) | Exceeds 80% DoD gate |
-| **Active Branch** | `feature/tests-golden-dataset-suite` | In Progress 🔄 |
+| **Phase 15 Progress** | 1 / 5 Tasks Completed (20%) | In Progress 🔄 |
+| **Total Test Suites** | 76 (62 Python suites + 14 Frontend suites) | PASSED ✅ |
+| **Total Test Cases** | 1,099 tests (983 Python [926 unit + 26 integration + 31 golden] + 116 Frontend unit) | 100% Passing (0 failures) |
+| **Code Coverage (`src/`)** | **95.76%** statement coverage (100% on input_sanitizer.py, hitl_tokens.py, spend_tier_router.py & calculator.py) | Exceeds 80% DoD gate |
+| **Active Branch** | `feature/observability-otel-setup` | In Progress 🔄 |
 
 ---
 
@@ -1013,19 +1014,30 @@
 
 ---
 
+### Invariant 73: OpenTelemetry Distributed Tracing & Span Instrumentation (P15-1)
+- **Standard**: `@vercel/otel`-style span instrumentation on all FastAPI routes, LangGraph agent nodes, and core calculation / security pillars (`quarantined_reader.sanitize`, `math_engine.calculate_coverage`), with W3C `traceparent` context propagation and automatic `trace_id` injection into 100% of structured JSON log lines.
+- **Verification**: `tests/unit/test_telemetry.py` (14 unit tests, 97% telemetry coverage, 95.76% project-wide coverage).
+- **Enforcement Rules**:
+  1. **@vercel/otel Ergonomics**: `setup_telemetry`, `get_tracer`, `@trace_span`, and `with trace_span(...)` manage span lifecycle, attributes, status codes, and exception recording.
+  2. **FastAPI Route Instrumentation**: Middleware extracts incoming W3C `traceparent` (or `X-Trace-ID` / `X-Request-ID`), creates `HTTP {method} {target}` server spans with client IP, user agent, and status code, binds `trace_id` to contextvars, and injects `traceparent`, `X-Trace-ID`, and `X-Request-ID` into response headers.
+  3. **LangGraph Agent Node Tracing**: `@trace_agent_node` wraps each agent node (`triage`, `research`, `contract`, `risk`, `recommendation`, `hitl_gate`, `action`, `dismiss`), capturing domain attributes (`alert_id`, `supplier_id`, `signal_type`, `workflow_status`, `governing_spend_tier`, calculation metrics).
+  4. **Investigation Root Span**: Orchestrator wraps investigation lifecycle inside `investigation_workflow_execute` and `investigation_workflow_resume` root spans (LLD Sec 8.1).
+  5. **Log Trace Correlation**: ContextVar synchronization guarantees every structured JSON log line automatically includes the 32-hex `trace_id` from the active span.
+  6. **Zero External I/O**: `InMemorySpanExporter` ensures all tests execute strictly offline without external collector dependencies.
+
+---
+
 ## 5. Next Planned Tasks
 - **Phase 11 — FastAPI API Routes**: Completed ✅ (6/6 tasks done)
 - **Phase 12 — React Frontend**: Completed ✅ (6/6 tasks done)
 - **Phase 13 — Supplier Seed Data & Golden Datasets**: Completed ✅ (4/4 tasks done)
 - **Phase 14 — Unit & Golden Test Hardening**: Completed ✅ (6/6 tasks done)
-  - **P14-1**: Risk calculator unit tests — NanoCore golden numbers, zero-stock edge case, zero-consumption guard, negative gap → zero shortage (`feature/tests-unit-risk-calculator`). Completed ✅
-  - **P14-2**: HITL token unit tests — valid token, expired TTL, replay detection, wrong action binding, missing second signature (`feature/tests-unit-hitl-tokens`). Completed ✅
-  - **P14-3**: Quarantined Reader unit tests — XML injection, markdown injection, Unicode bypass, clean text passthrough (`feature/tests-unit-quarantined-reader`). Completed ✅
-  - **P14-4**: Integration test — full investigation flow: Kafka event → triage → risk calculator → HITL gate → approval → audit log (`feature/tests-integration-investigation-flow`). Completed ✅
-  - **P14-5**: Integration test — RBAC 403 scenarios: analyst calling approve route, category_manager signing >$100k action (`feature/tests-integration-rbac`). Completed ✅
-  - **P14-6**: Golden dataset pytest suite (`tests/golden/test_golden_scenarios.py`) — automated verification against nanocore_scenario.json + 5 edge cases (`feature/tests-golden-dataset-suite`). Completed ✅
-- **Phase 15 — Observability**: In Progress 🔄 (0/5 tasks done)
-  - **P15-1**: Structured log aggregation via OpenTelemetry / CloudWatch EMF (`feature/obs-log-aggregation`). Next 🔄
+- **Phase 15 — Observability**: In Progress 🔄 (1/5 tasks done)
+  - **P15-1**: OpenTelemetry setup — @vercel/otel-style span instrumentation on all FastAPI routes and agent nodes; trace_id propagated to every log line (`feature/observability-otel-setup`). Completed ✅
+  - **P15-2**: Langfuse callback integration — CallbackHandler on every LangGraph agent run; records tokens used, latency, and cost per investigation (`feature/observability-langfuse-tracing`). Next 🔄
+  - **P15-3**: Prometheus metrics export (`feature/observability-prometheus-metrics`). Pending ❌
+  - **P15-4**: Grafana dashboard JSON (`feature/observability-grafana-dashboard`). Pending ❌
+  - **P15-5**: CloudWatch alarms (`feature/observability-cloudwatch-alarms`). Pending ❌
 
 
 

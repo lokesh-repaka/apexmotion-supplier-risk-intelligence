@@ -202,6 +202,22 @@ class Settings(BaseSettings):
     )
 
     # --------------------------------------------------------------------------
+    # OpenTelemetry Tracing (P15-1)
+    # --------------------------------------------------------------------------
+    OTEL_SERVICE_NAME: str = Field(
+        default="apexmotion-supplier-risk",
+        description="OpenTelemetry service name attribute",
+    )
+    OTEL_EXPORTER_OTLP_ENDPOINT: str = Field(
+        default="http://localhost:4318",
+        description="OpenTelemetry OTLP exporter HTTP endpoint",
+    )
+    OTEL_ENABLED: bool = Field(
+        default=True,
+        description="Enable OpenTelemetry distributed tracing and span instrumentation",
+    )
+
+    # --------------------------------------------------------------------------
     # HITL Spend Authority Gates (BR-RULE-001 Monetary Precision)
     # --------------------------------------------------------------------------
     HITL_TIER_1_THRESHOLD_USD: Decimal = Field(

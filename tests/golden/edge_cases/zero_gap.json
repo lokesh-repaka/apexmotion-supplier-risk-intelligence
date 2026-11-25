@@ -1,0 +1,30 @@
+{
+  "scenario_id": "SCENARIO-EDGE-ZERO-GAP-001",
+  "name": "Zero Gap Just-In-Time Delivery Edge Case",
+  "description": "Boundary condition where replenishment shipment arrives at the exact moment on-hand inventory is exhausted (ETA == Days of Cover). Gap is exactly 0.00 days, resulting in zero shortage volume and zero financial exposure.",
+  "inputs": {
+    "supplier_id": "SUP-ZG-002",
+    "supplier_name": "Continental Precision Sensoric AG",
+    "component_sku": "SKU-SNS-2002",
+    "current_stock": 100000,
+    "daily_consumption_rate": 10000,
+    "eta_days": 10.0,
+    "unit_cost_usd": 15.00,
+    "factory_halt_cost_per_hour_eur": 0.00,
+    "supplier_risk_score": 0.30,
+    "is_single_source": false
+  },
+  "expected": {
+    "days_of_cover": 10.00,
+    "gap_days": 0.00,
+    "shortage_volume": 0,
+    "financial_exposure_usd": 0.00,
+    "downtime_hours": 0.00,
+    "factory_halt_exposure_eur": 0.00,
+    "total_financial_impact_usd": 0.00,
+    "risk_level": "LOW",
+    "hitl_tier": null,
+    "hitl_required": false,
+    "is_shortage": false
+  }
+}

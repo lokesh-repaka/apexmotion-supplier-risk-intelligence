@@ -1,0 +1,31 @@
+{
+  "scenario_id": "SCENARIO-EDGE-SINGLE-SOURCE-001",
+  "name": "Single-Source Bottleneck Dependency Edge Case",
+  "description": "Boundary condition where an impacted component has zero qualified secondary suppliers (is_single_source = true). Even with moderate financial exposure, the lack of AML alternate routing escalates vulnerability, triggering mandatory single-source risk warnings, elevated mitigation urgency, and cryptographic HITL governance.",
+  "inputs": {
+    "supplier_id": "SUP-SS-005",
+    "supplier_name": "Silicon Microstructures Inc",
+    "component_sku": "SKU-MEMS-5005",
+    "current_stock": 15000,
+    "daily_consumption_rate": 3000,
+    "eta_days": 7.0,
+    "unit_cost_usd": 45.00,
+    "factory_halt_cost_per_hour_eur": 50000.00,
+    "supplier_risk_score": 0.78,
+    "is_single_source": true
+  },
+  "expected": {
+    "days_of_cover": 5.00,
+    "gap_days": 2.00,
+    "shortage_volume": 6000,
+    "financial_exposure_usd": 270000.00,
+    "downtime_hours": 48.00,
+    "factory_halt_exposure_eur": 2400000.00,
+    "total_financial_impact_usd": 2670000.00,
+    "risk_level": "HIGH",
+    "hitl_tier": "DUAL_VP",
+    "hitl_required": true,
+    "is_single_source": true,
+    "is_shortage": true
+  }
+}

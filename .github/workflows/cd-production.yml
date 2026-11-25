@@ -1,0 +1,173 @@
+name: ApexMotion CD Pipeline - Production
+
+"on":
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      target_color:
+        description: "Target deployment color for blue-green cutover (blue or green)"
+        required: true
+        default: "green"
+        type: choice
+        options:
+          - green
+          - blue
+
+concurrency:
+  group: production-deployment
+  cancel-in-progress: false
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: eu-central-1
+  EKS_CLUSTER_NAME: apexmotion-eks-production
+  K8S_NAMESPACE: apexmotion
+  SERVICE_NAME: apexmotion-api
+
+jobs:
+  quality-gate:
+    name: Production Pre-Flight Quality Gate & Golden Evals
+    runs-on: ubuntu-latest
+    env:
+      PYTHON_VERSION: "3.12"
+      USE_LOCALSTACK: "true"
+      USE_MOCK_LLM: "true"
+      USE_LOCAL_KAFKA: "true"
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: "pip"
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Run Pytest Golden Suite & Code Coverage Gate (≥80%)
+        run: |
+          pytest -p no:logfire tests/golden/ tests/unit/ -v --cov=src --cov-fail-under=80
+
+  build-and-push-ecr:
+    name: Build & Push Images to ECR (Production)
+    needs: [quality-gate]
+    environment: production
+    runs-on: ubuntu-latest
+    outputs:
+      image_tag: prod-${{ github.sha }}
+      api_image: ${{ steps.login-ecr.outputs.registry }}/apexmotion-api:prod-${{ github.sha }}
+      worker_image: ${{ steps.login-ecr.outputs.registry }}/apexmotion-worker:prod-${{ github.sha }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN_PRODUCTION }}
+          aws-region: ${{ env.AWS_REGION }}
+          audience: sts.amazonaws.com
+
+      - name: Log in to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build & Push Production API Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile.api
+          push: true
+          tags: |
+            ${{ steps.login-ecr.outputs.registry }}/apexmotion-api:prod-${{ github.sha }}
+            ${{ steps.login-ecr.outputs.registry }}/apexmotion-api:prod-latest
+
+      - name: Build & Push Production Worker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile.worker
+          push: true
+          tags: |
+            ${{ steps.login-ecr.outputs.registry }}/apexmotion-worker:prod-${{ github.sha }}
+            ${{ steps.login-ecr.outputs.registry }}/apexmotion-worker:prod-latest
+
+  deploy-production-blue-green:
+    name: Production Blue-Green Cutover Deployment
+    needs: [build-and-push-ecr]
+    environment: production
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN_PRODUCTION }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Update Kubeconfig
+        run: |
+          aws eks update-kubeconfig --name ${{ env.EKS_CLUSTER_NAME }} --region ${{ env.AWS_REGION }}
+
+      - name: Determine Target & Active Deployment Colors
+        id: color-selector
+        run: |
+          ACTIVE=$(kubectl get service ${{ env.SERVICE_NAME }} -n ${{ env.K8S_NAMESPACE }} -o jsonpath='{.spec.selector.deployment_color}' 2>/dev/null || echo "blue")
+          if [ -n "${{ github.event.inputs.target_color }}" ]; then
+            TARGET="${{ github.event.inputs.target_color }}"
+          elif [ "$ACTIVE" = "blue" ]; then
+            TARGET="green"
+          else
+            TARGET="blue"
+          fi
+          echo "active_color=${ACTIVE}" >> "$GITHUB_OUTPUT"
+          echo "target_color=${TARGET}" >> "$GITHUB_OUTPUT"
+          echo "Active color: ${ACTIVE}, Target color: ${TARGET}"
+
+      - name: Deploy Target Color Revision & Update Workers
+        env:
+          TARGET_COLOR: ${{ steps.color-selector.outputs.target_color }}
+          API_IMAGE: ${{ needs.build-and-push-ecr.outputs.api_image }}
+          WORKER_IMAGE: ${{ needs.build-and-push-ecr.outputs.worker_image }}
+        run: |
+          echo "Deploying apexmotion-api-${TARGET_COLOR} with image ${API_IMAGE}..."
+          sed -e "s|apexmotion-api|apexmotion-api-${TARGET_COLOR}|g" \
+              -e "s|deployment_color:.*|deployment_color: ${TARGET_COLOR}|g" \
+              infrastructure/kubernetes/api-deployment.yaml | kubectl apply -n ${{ env.K8S_NAMESPACE }} -f -
+          kubectl set image deployment/apexmotion-api-${TARGET_COLOR} api=${API_IMAGE} -n ${{ env.K8S_NAMESPACE }}
+          
+          # Deploy Worker and apply KEDA ScaledObject
+          kubectl apply -f infrastructure/kubernetes/worker-deployment.yaml -n ${{ env.K8S_NAMESPACE }}
+          kubectl set image deployment/apexmotion-worker worker=${WORKER_IMAGE} -n ${{ env.K8S_NAMESPACE }}
+          kubectl apply -f infrastructure/kubernetes/worker-keda-scaledobject.yaml -n ${{ env.K8S_NAMESPACE }}
+
+      - name: Execute Blue-Green Cutover with Pre-Flight Health Check and Automated Rollback Trap
+        env:
+          TARGET_COLOR: ${{ steps.color-selector.outputs.target_color }}
+          ACTIVE_COLOR: ${{ steps.color-selector.outputs.active_color }}
+        run: |
+          chmod +x infrastructure/kubernetes/blue_green_cutover.sh
+          ./infrastructure/kubernetes/blue_green_cutover.sh
+
+      - name: Post-Cutover Stabilization & Scale Down Previous Blue
+        if: success()
+        env:
+          ACTIVE_COLOR: ${{ steps.color-selector.outputs.active_color }}
+        run: |
+          echo "Stabilization window: retaining previous ${ACTIVE_COLOR} revision at 1 replica for fast rollback..."
+          kubectl scale deployment/apexmotion-api-${ACTIVE_COLOR} --replicas=1 -n ${{ env.K8S_NAMESPACE }} || true
+          echo "Production blue-green release completed successfully."

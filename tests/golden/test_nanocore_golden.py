@@ -25,7 +25,7 @@ Canonical NanoCore Scenario Reference Metrics:
 import json
 from decimal import Decimal
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import pytest
 from src.core.hitl_tokens import SpendTier, get_spend_tier
@@ -44,7 +44,7 @@ def _load_golden_json() -> dict[str, Any]:
     """Helper to load and validate raw JSON structure from tests/golden/nanocore_scenario.json."""
     assert GOLDEN_SCENARIO_PATH.exists(), f"Golden file missing: {GOLDEN_SCENARIO_PATH}"
     with open(GOLDEN_SCENARIO_PATH, encoding="utf-8") as f:
-        return json.load(f)
+        return cast(dict[str, Any], json.load(f))
 
 
 # ------------------------------------------------------------------------------
@@ -236,6 +236,7 @@ def test_nanocore_golden_severity_and_hitl_classification() -> None:
     # Verify HITL governance
     assert score_result.requires_hitl is True
     assert score_result.recommended_hitl_tier == SpendTier.DUAL_VP
+    assert score_result.recommended_hitl_tier.value == expected["hitl_tier"]
     assert score_result.is_single_source is True
 
     # Verify explanatory reasons

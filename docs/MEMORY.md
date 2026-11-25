@@ -28,11 +28,11 @@
 | **Phase 10 Progress** | 4 / 4 Tasks Completed (100%) | Completed ✅ |
 | **Phase 11 Progress** | 6 / 6 Tasks Completed (100%) | Completed ✅ |
 | **Phase 12 Progress** | 6 / 6 Tasks Completed (100%) | Completed ✅ |
-| **Phase 13 Progress** | 2 / 4 Tasks Completed (50.0%) | In Progress 🔄 |
-| **Total Test Suites** | 71 (57 Python suites + 14 Frontend suites) | PASSED ✅ |
-| **Total Test Cases** | 951 tests (835 Python [813 unit + 11 integration + 8 golden + 3 API] + 116 Frontend unit) | 100% Passing (0 failures) |
+| **Phase 13 Progress** | 3 / 4 Tasks Completed (75.0%) | In Progress 🔄 |
+| **Total Test Suites** | 72 (58 Python suites + 14 Frontend suites) | PASSED ✅ |
+| **Total Test Cases** | 958 tests (842 Python [813 unit + 11 integration + 15 golden + 3 API] + 116 Frontend unit) | 100% Passing (0 failures) |
 | **Code Coverage (`src/`)** | **95.00%** statement coverage (7,187 statements, 359 missed; exceeds 80% DoD gate) | Exceeds 80% DoD gate |
-| **Active Branch** | `feature/seed-graph-data` | In Progress 🔄 |
+| **Active Branch** | `feature/seed-golden-datasets` | In Progress 🔄 |
 
 ---
 
@@ -867,16 +867,30 @@
     - **Comprehensive Test Suite**: 5 new unit tests in `tests/unit/test_graph_seed.py` (17 tests total in suite), 100% pass rate, **97% statement coverage** on `src/graph/seed.py`, bringing total project test count to 951 passed tests (835 Python + 116 Frontend across 71 test suites).
     - **Phase 13 (Supplier Seed Data & Golden Datasets) progress is now 2/4 (50.0%).**
 
+65. **Canonical Golden Scenarios, Boundary Condition Dataset Suite & Dual-Approval Spend Threshold Verification (SEC-067, BR-RULE-001, BR-RULE-004, CLAUDE.md Sec 14)**:
+    - **Enhanced Canonical NanoCore Reference Scenario (`tests/golden/nanocore_scenario.json`)**: Synchronized NanoCore benchmark dataset with certified platform invariants (stock: `142,000`, burn: `18,500/day`, eta: `9.00` days, unit cost: `$100.25`, halt rate: `€85,000/hr`). Verified exact metrics: `days_of_cover=7.68`, `gap_days=1.32`, `shortage_volume=24420`, `financial_exposure=$2,448,105.00`, `factory_halt_exposure=€2,692,800.00`, `total_financial_impact=$5,140,905.00`, `risk_level=CRITICAL`, and `hitl_tier=DUAL_VP` (> $100k exposure strictly mandates Dual VP sign-off).
+    - **5 Standardized Boundary Condition Edge-Case Golden Datasets (`tests/golden/edge_cases/`)**:
+      - `zero_stock.json`: Boundary condition where inventory is 0 units (`current_stock=0`). Coverage evaluates to `0.00` days, gap equals full ETA (`5.00` days), `shortage_volume=5000`, `financial_exposure=$50,000.00`, `risk_level=MEDIUM`, and routes to `PROC_DIRECTOR` ($25k - $100k tier).
+      - `zero_gap.json`: Just-In-Time delivery where replenishment arrives exactly when inventory depletes (`eta_days == days_of_cover == 10.00`). Gap evaluates to `0.00` days, `shortage_volume=0`, `financial_exposure=$0.00`, `risk_level=LOW`, and `hitl_required=False`.
+      - `negative_gap.json`: Healthy inventory buffer where shipment arrives before stockout (`eta_days=5.00 < days_of_cover=20.00`). Raw diff (`-15.00`) is strictly clamped to `0.00` days per Rule BR-RULE-001, preventing negative shortage or negative financial impact.
+      - `dual_approval_threshold.json`: Tests the exact boundary crossing for cryptographic Human-In-The-Loop spend governance (BR-RULE-004). Exposure at `$100,050.00` strictly crosses the `$100,000.00` threshold, mandating `DUAL_VP` sign-off (2 distinct KMS signatures, 30-min TTL), whereas `$100,000.00` requires a single `PROC_DIRECTOR` token (1-hr TTL).
+      - `single_source_dependency.json`: Component bottleneck with zero secondary qualified suppliers (`is_single_source=true`). Triggers mandatory single-source risk flag, factory halt downtime impact (`48.00` hours @ `€50,000/hr` = `€2,400,000.00`), `HIGH` risk severity, and `DUAL_VP` spend tier.
+    - **Schema Integrity & Cryptographic Anti-Tamper Verification (`tests/golden/test_edge_cases.py`)**:
+      - Enforced uniform schema structure (`scenario_id`, `name`, `description`, `inputs`, `expected`) across all 6 golden files.
+      - Verified deterministic SHA-256 calculation hashes across all datasets with 0 collisions.
+    - **Comprehensive Test Suite**: 7 new golden unit tests in `tests/golden/test_edge_cases.py` (15 total golden tests in `tests/golden/`), 100% pass rate, **100% statement coverage** on `src/services/risk/calculator.py` and `src/services/risk/scorer.py`, bringing total project test count to 958 passed tests (842 Python + 116 Frontend across 72 test suites).
+    - **Phase 13 (Supplier Seed Data & Golden Datasets) progress is now 3/4 (75.0%).**
+
 ---
 
 ## 5. Next Planned Tasks
 - **Phase 11 — FastAPI API Routes**: Completed ✅ (6/6 tasks done)
 - **Phase 12 — React Frontend**: Completed ✅ (6/6 tasks done)
-- **Phase 13 — Supplier Seed Data & Golden Datasets**: In Progress 🔄 (2/4 tasks done)
+- **Phase 13 — Supplier Seed Data & Golden Datasets**: In Progress 🔄 (3/4 tasks done)
   - **P13-1**: Supplier seed script (`src/database/seed_dev.py`) — 50 Tier-1 suppliers (10 countries), 200 components, 20 plants, NanoCore scenario loaded (`feature/seed-supplier-data`). Completed ✅
   - **P13-2**: Neptune graph seed — supplier → component → plant edges, tier-chain links, 3 geopolitical risk nodes for NanoCore region (`feature/seed-graph-data`). Completed ✅
-  - **P13-3**: Golden dataset (`tests/golden/`) — `nanocore_scenario.json` with exact inputs/expected outputs; 5 edge-case JSON files (`feature/seed-golden-datasets`). Next 🔄
-  - **P13-4**: OpenSearch vector seed — 500 synthetic contract clauses chunked and embedded into `contracts-v1` index (`feature/seed-opensearch-vectors`). Pending ❌
+  - **P13-3**: Golden dataset (`tests/golden/`) — `nanocore_scenario.json` with exact inputs/expected outputs; 5 edge-case JSON files (`feature/seed-golden-datasets`). Completed ✅
+  - **P13-4**: OpenSearch vector seed — 500 synthetic contract clauses chunked and embedded into `contracts-v1` index (`feature/seed-opensearch-vectors`). Next 🔄
 
 
 

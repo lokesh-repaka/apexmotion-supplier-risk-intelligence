@@ -1,0 +1,30 @@
+{
+  "scenario_id": "SCENARIO-EDGE-NEG-GAP-001",
+  "name": "Negative Gap Healthy Inventory Buffer Edge Case",
+  "description": "Boundary condition where shipment arrives well before inventory exhaustion (ETA < Days of Cover). Raw mathematical gap (eta - cover) is negative, but the deterministic engine strictly clamps gap to 0.00 per Rule BR-RULE-001, resulting in zero shortage volume and zero financial exposure.",
+  "inputs": {
+    "supplier_id": "SUP-NG-003",
+    "supplier_name": "Bosch Powertrain Systems GmbH",
+    "component_sku": "SKU-BOS-3003",
+    "current_stock": 200000,
+    "daily_consumption_rate": 10000,
+    "eta_days": 5.0,
+    "unit_cost_usd": 50.00,
+    "factory_halt_cost_per_hour_eur": 0.00,
+    "supplier_risk_score": 0.20,
+    "is_single_source": false
+  },
+  "expected": {
+    "days_of_cover": 20.00,
+    "gap_days": 0.00,
+    "shortage_volume": 0,
+    "financial_exposure_usd": 0.00,
+    "downtime_hours": 0.00,
+    "factory_halt_exposure_eur": 0.00,
+    "total_financial_impact_usd": 0.00,
+    "risk_level": "LOW",
+    "hitl_tier": null,
+    "hitl_required": false,
+    "is_shortage": false
+  }
+}

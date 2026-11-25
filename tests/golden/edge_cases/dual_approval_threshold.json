@@ -1,0 +1,32 @@
+{
+  "scenario_id": "SCENARIO-EDGE-DUAL-APPROVAL-001",
+  "name": "Dual-Approval Threshold Boundary Edge Case",
+  "description": "Boundary condition testing the exact threshold crossing for Human-In-The-Loop spend authority (Rule BR-RULE-001 & BR-RULE-004). Spend up to $100,000.00 requires only a single Procurement Director signature (1-hr TTL). When exposure crosses above $100,000.00 (e.g. $100,050.00), it strictly mandates Dual Executive Sign-off (Procurement Director + VP Supply Chain, 2x tokens, 30-min TTL).",
+  "inputs": {
+    "supplier_id": "SUP-DA-004",
+    "supplier_name": "ZF Friedrichshafen AG",
+    "component_sku": "SKU-TRN-4004",
+    "current_stock": 20000,
+    "daily_consumption_rate": 2000,
+    "eta_days": 11.0,
+    "unit_cost_usd": 50.025,
+    "factory_halt_cost_per_hour_eur": 0.00,
+    "supplier_risk_score": 0.65,
+    "is_single_source": false
+  },
+  "expected": {
+    "days_of_cover": 10.00,
+    "gap_days": 1.00,
+    "shortage_volume": 2000,
+    "financial_exposure_usd": 100050.00,
+    "downtime_hours": 0.00,
+    "factory_halt_exposure_eur": 0.00,
+    "total_financial_impact_usd": 100050.00,
+    "risk_level": "MEDIUM",
+    "hitl_tier": "DUAL_VP",
+    "hitl_required": true,
+    "required_signatures": 2,
+    "token_ttl_seconds": 1800,
+    "is_shortage": true
+  }
+}

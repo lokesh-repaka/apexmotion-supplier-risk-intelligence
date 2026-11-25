@@ -10,15 +10,21 @@
     "daily_consumption_rate": 18500,
     "eta_days": 9.0,
     "unit_cost_usd": 100.25,
-    "factory_halt_cost_per_hour_eur": 85000.00
+    "factory_halt_cost_per_hour_eur": 85000.00,
+    "supplier_risk_score": 0.885,
+    "is_single_source": true
   },
   "expected": {
     "days_of_cover": 7.68,
     "gap_days": 1.32,
     "shortage_volume": 24420,
     "financial_exposure_usd": 2448105.00,
+    "downtime_hours": 31.68,
+    "factory_halt_exposure_eur": 2692800.00,
+    "total_financial_impact_usd": 5140905.00,
     "risk_level": "CRITICAL",
-    "hitl_tier": "PROC_DIRECTOR",
-    "hitl_required": true
+    "hitl_tier": "DUAL_VP",
+    "hitl_required": true,
+    "is_shortage": true
   }
 }

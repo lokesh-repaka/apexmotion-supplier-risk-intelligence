@@ -1,0 +1,30 @@
+{
+  "scenario_id": "SCENARIO-EDGE-ZERO-STOCK-001",
+  "name": "Zero Stock On-Hand Depletion Edge Case",
+  "description": "Boundary condition where inventory stock is exactly 0 units. Stock is completely depleted upon disruption detection; coverage is 0.00 days and entire ETA period represents an active shortage gap.",
+  "inputs": {
+    "supplier_id": "SUP-ZS-001",
+    "supplier_name": "Apex Castings & Stamping GmbH",
+    "component_sku": "SKU-CST-1001",
+    "current_stock": 0,
+    "daily_consumption_rate": 1000,
+    "eta_days": 5.0,
+    "unit_cost_usd": 10.00,
+    "factory_halt_cost_per_hour_eur": 0.00,
+    "supplier_risk_score": 0.45,
+    "is_single_source": false
+  },
+  "expected": {
+    "days_of_cover": 0.00,
+    "gap_days": 5.00,
+    "shortage_volume": 5000,
+    "financial_exposure_usd": 50000.00,
+    "downtime_hours": 0.00,
+    "factory_halt_exposure_eur": 0.00,
+    "total_financial_impact_usd": 50000.00,
+    "risk_level": "MEDIUM",
+    "hitl_tier": "PROC_DIRECTOR",
+    "hitl_required": true,
+    "is_shortage": true
+  }
+}

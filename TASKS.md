@@ -247,7 +247,7 @@ Sub-tasks in the same phase that do not share files can be open at the same time
 | P16-1 · `Dockerfile.api` — FastAPI + Uvicorn image (Python 3.12-slim, non-root user, health check) | `feature/docker-api-image` | Completed ✅ |
 | P16-2 · `Dockerfile.worker` — Celery worker image for background enrichment and Kafka consumer | `feature/docker-worker-image` | Completed ✅ |
 | P16-3 · Terraform modules (`infrastructure/terraform/`) — EKS 1.30, Neptune, Aurora PG 16 Serverless v2, MSK 3-broker, OpenSearch, ElastiCache Redis, S3 Object Lock, KMS | `feature/terraform-aws-infrastructure` | Completed ✅ |
-| P16-4 · Kubernetes manifests (`infrastructure/kubernetes/`) — Deployments, Services, KEDA `ScaledObject` for Kafka consumer, HPA for API pods | `feature/kubernetes-manifests-keda` | Pending ❌ |
+| P16-4 · Kubernetes manifests (`infrastructure/kubernetes/`) — Deployments, Services, KEDA `ScaledObject` for Kafka consumer, HPA for API pods | `feature/kubernetes-manifests-keda` | Completed ✅ |
 | P16-5 · GitHub Actions CD pipeline — build → push ECR → `kubectl apply` → blue-green cutover; separate workflows for `staging` and `production` | `feature/cd-pipeline-eks-deploy` | Pending ❌ |
 | P16-6 · Deployment hygiene checks — no `.env` committed, no static AWS credentials, S3 Object Lock compliance mode verified, WORM 7-year hold confirmed | `feature/tests-deployment-hygiene` | Pending ❌ |
 

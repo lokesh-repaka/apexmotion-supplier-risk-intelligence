@@ -1,0 +1,27 @@
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: apexmotion-worker-keda
+  namespace: apexmotion
+  labels:
+    app: apexmotion-worker
+    app.kubernetes.io/name: apexmotion-worker
+    app.kubernetes.io/part-of: apexmotion-platform
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: apexmotion-worker
+  minReplicaCount: 4
+  maxReplicaCount: 32
+  pollingInterval: 15
+  cooldownPeriod: 300
+  triggers:
+    - type: kafka
+      metadata:
+        bootstrapServers: "b-1.msk-cluster.apexmotion.local:9094,b-2.msk-cluster.apexmotion.local:9094,b-3.msk-cluster.apexmotion.local:9094"
+        consumerGroup: "apexmotion-risk-engine"
+        topic: "supplier-events"
+        lagThreshold: "5000"
+        activationLagThreshold: "1000"
+        offsetResetPolicy: "latest"

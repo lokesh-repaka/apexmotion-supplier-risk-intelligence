@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: apexmotion-config
+  namespace: apexmotion
+  labels:
+    app.kubernetes.io/name: apexmotion
+    app.kubernetes.io/part-of: apexmotion-platform
+data:
+  ENVIRONMENT: "production"
+  AWS_REGION: "eu-central-1"
+  LOG_LEVEL: "INFO"
+  PROMETHEUS_METRICS_ENABLED: "true"
+  OTEL_ENABLED: "true"
+  OTEL_SERVICE_NAME: "apexmotion-supplier-risk"
+  KAFKA_BOOTSTRAP_SERVERS: "b-1.msk-cluster.apexmotion.local:9094,b-2.msk-cluster.apexmotion.local:9094,b-3.msk-cluster.apexmotion.local:9094"
+  KAFKA_CONSUMER_GROUP: "apexmotion-risk-engine"
+  KAFKA_TOPIC_SUPPLIER_EVENTS: "supplier-events"
+  KAFKA_TOPIC_RISK_ALERTS: "risk-alerts"
+  KAFKA_TOPIC_HITL_REQUIRED: "hitl-required"
+  KAFKA_TOPIC_AUDIT_EVENTS: "audit-events"
+  REDIS_HOST: "redis.cache.apexmotion.local"
+  REDIS_PORT: "6379"
+  OPENSEARCH_HOST: "https://search.apexmotion.local:443"
+  NEPTUNE_ENDPOINT: "neptune.apexmotion.local"
+  NEPTUNE_PORT: "8182"

@@ -56,13 +56,18 @@ def _to_decimal(val: Any, field_name: str) -> Decimal:
     if val is None:
         raise InvalidInventoryInputError(f"Field '{field_name}' cannot be None")
     if isinstance(val, Decimal):
-        return val
-    try:
-        return Decimal(str(val))
-    except (InvalidOperation, ValueError, TypeError) as exc:
-        raise InvalidInventoryInputError(
-            f"Failed to parse Decimal for field '{field_name}': {val}"
-        ) from exc
+        dec_val = val
+    else:
+        try:
+            dec_val = Decimal(str(val))
+        except (InvalidOperation, ValueError, TypeError) as exc:
+            raise InvalidInventoryInputError(
+                f"Failed to parse Decimal for field '{field_name}': {val}"
+            ) from exc
+
+    if dec_val.is_nan() or dec_val.is_infinite():
+        raise InvalidInventoryInputError(f"Field '{field_name}' cannot be NaN or Infinite: {val}")
+    return dec_val
 
 
 @dataclass(frozen=True)
@@ -249,6 +254,11 @@ class RiskCalculator:
         hours = _to_decimal(operating_hours_per_day, "operating_hours_per_day")
         rate = _to_decimal(hourly_rate, "hourly_rate")
 
+        if hours < Decimal("0.00"):
+            raise InvalidInventoryInputError(f"Operating hours per day cannot be negative: {hours}")
+        if rate < Decimal("0.00"):
+            raise InvalidInventoryInputError(f"Hourly halt rate cannot be negative: {rate}")
+
         if gap <= Decimal("0.00"):
             return Decimal("0.00")
 
@@ -265,6 +275,18 @@ class RiskCalculator:
         Returns:
             RiskAssessmentResult with all calculated metrics and verification hash.
         """
+        if input_data.operating_hours_per_day < Decimal("0.00"):
+            raise InvalidInventoryInputError(
+                f"Operating hours per day cannot be negative: {input_data.operating_hours_per_day}"
+            )
+        if (
+            input_data.factory_halt_cost_per_hour_eur is not None
+            and input_data.factory_halt_cost_per_hour_eur < Decimal("0.00")
+        ):
+            raise InvalidInventoryInputError(
+                f"Hourly halt rate cannot be negative: {input_data.factory_halt_cost_per_hour_eur}"
+            )
+
         # 1. Days of cover
         days_of_cover = self.calculate_days_of_cover(
             current_stock=input_data.current_stock,
@@ -336,8 +358,8 @@ class RiskCalculator:
 
     def calculate_from_params(
         self,
-        current_stock: int,
-        daily_consumption_rate: int | Decimal,
+        current_stock: int | Decimal | float | str,
+        daily_consumption_rate: int | Decimal | float | str,
         eta_days: Decimal | int | float | str,
         unit_cost_usd: Decimal | int | float | str,
         supplier_id: str | None = None,
@@ -346,13 +368,14 @@ class RiskCalculator:
         operating_hours_per_day: Decimal | int | float | str = DEFAULT_OPERATING_HOURS_PER_DAY,
     ) -> RiskAssessmentResult:
         """Convenience method accepting raw parameters with automatic type coercion."""
+        stock_dec = _to_decimal(current_stock, "current_stock")
         halt_cost_dec = (
             _to_decimal(factory_halt_cost_per_hour_eur, "factory_halt_cost_per_hour_eur")
             if factory_halt_cost_per_hour_eur is not None
             else None
         )
         input_data = RiskAssessmentInput(
-            current_stock=int(current_stock),
+            current_stock=int(stock_dec),
             daily_consumption_rate=_to_decimal(daily_consumption_rate, "daily_consumption_rate"),
             eta_days=_to_decimal(eta_days, "eta_days"),
             unit_cost_usd=_to_decimal(unit_cost_usd, "unit_cost_usd"),

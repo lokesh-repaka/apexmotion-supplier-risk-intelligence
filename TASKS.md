@@ -202,7 +202,7 @@ Sub-tasks in the same phase that do not share files can be open at the same time
 | P13-1 · Supplier seed script (`src/database/seed_dev.py`) — 50 Tier-1 suppliers (10 countries), 200 components, 20 plants, NanoCore scenario loaded | `feature/seed-supplier-data` | Completed ✅ |
 | P13-2 · Neptune graph seed — supplier → component → plant edges, tier-chain links, 3 geopolitical risk nodes for NanoCore region | `feature/seed-graph-data` | Completed ✅ |
 | P13-3 · Golden dataset (`tests/golden/`) — `nanocore_scenario.json` with exact inputs/expected outputs; 5 edge-case JSON files (zero stock, zero gap, negative gap, dual-approval threshold, single-source dependency) | `feature/seed-golden-datasets` | Completed ✅ |
-| P13-4 · OpenSearch vector seed — 500 synthetic contract clauses chunked and embedded into `contracts-v1` index | `feature/seed-opensearch-vectors` | Pending ❌ |
+| P13-4 · OpenSearch vector seed — 500 synthetic contract clauses chunked and embedded into `contracts-v1` index | `feature/seed-opensearch-vectors` | Completed ✅ |
 
 ---
 
@@ -289,8 +289,8 @@ Phases 4, 5, 6, 7, and 8 all depend on Phase 3 and can be developed in parallel.
 |-------------|-------------------|-------------|--------|
 | P1 + P2 + P3 + P4 (partial) | **POC Foundation** — skeleton, local stack, DB, auth wired | Week 3 | Completed ✅ |
 | P4 + P5 + P6 + P7 + P8 | **Risk Engine Ready** — Neptune, Kafka, deterministic calc, LLM gateway | Week 6 | Completed ✅ |
-| P9 + P10 + P11 + P13 | **Phase 1 POC** — NanoCore simulation live, HITL demo, all API routes | Week 10 | In Progress 🔄 |
-| P12 + P14 + P15 | **MVP Frontend & Test Coverage** — React UI, golden tests green, observability on | Week 16 | Pending ❌ |
+| P9 + P10 + P11 + P13 | **Phase 1 POC** — NanoCore simulation live, HITL demo, all API routes | Week 10 | Completed ✅ |
+| P12 + P14 + P15 | **MVP Frontend & Test Coverage** — React UI, golden tests green, observability on | Week 16 | In Progress 🔄 |
 | P11 (live Tier-1 connectors) + Production data | **Phase 2 MVP** — Bengaluru, Pune, Munich suppliers live | Week 22 | Pending ❌ |
 | P16 | **Phase 3 Production** — EKS full deploy, Mexico, Vietnam, US live | Week 30 | Pending ❌ |
 
@@ -312,8 +312,8 @@ Phases 4, 5, 6, 7, and 8 all depend on Phase 3 and can be developed in parallel.
 | 10 | HITL Approval System | 4 | 4 (100%) ✅ |
 | 11 | FastAPI API Routes | 6 | 6 (100%) ✅ |
 | 12 | React Frontend | 6 | 6 (100%) ✅ |
-| 13 | Supplier Seed Data & Golden Datasets | 4 | 3 (75.0%) 🔄 |
+| 13 | Supplier Seed Data & Golden Datasets | 4 | 4 (100%) ✅ |
 | 14 | Unit & Integration Tests | 6 | 0 (0%) ❌ |
 | 15 | Observability | 5 | 0 (0%) ❌ |
 | 16 | Infrastructure & Delivery | 6 | 0 (0%) ❌ |
-| **Total** | | **83** | **65 (78.3%)** |
+| **Total** | | **83** | **66 (79.5%)** |

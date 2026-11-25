@@ -217,7 +217,7 @@ Sub-tasks in the same phase that do not share files can be open at the same time
 | P14-2 · HITL token unit tests — valid token, expired TTL, replay detection, wrong action binding, missing second signature | `feature/tests-unit-hitl-tokens` | Completed ✅ |
 | P14-3 · Quarantined Reader unit tests — XML injection, markdown injection, Unicode bypass, clean text passthrough | `feature/tests-unit-quarantined-reader` | Completed ✅ |
 | P14-4 · Integration test — full investigation flow: Kafka event → triage → risk calculator → HITL gate → approval → audit log | `feature/tests-integration-investigation-flow` | Completed ✅ |
-| P14-5 · Integration test — RBAC 403 scenarios: `analyst` calling approve route, `category_manager` signing >$100k action | `feature/tests-integration-rbac` | Pending ❌ |
+| P14-5 · Integration test — RBAC 403 scenarios: `analyst` calling approve route, `category_manager` signing >$100k action | `feature/tests-integration-rbac` | Completed ✅ |
 | P14-6 · Golden dataset pytest suite — `tests/golden/` assertions that fail CI if `days_of_cover != 7.68` or `financial_exposure != 2448105.00` | `feature/tests-golden-dataset-suite` | Pending ❌ |
 
 ---
@@ -313,7 +313,7 @@ Phases 4, 5, 6, 7, and 8 all depend on Phase 3 and can be developed in parallel.
 | 11 | FastAPI API Routes | 6 | 6 (100%) ✅ |
 | 12 | React Frontend | 6 | 6 (100%) ✅ |
 | 13 | Supplier Seed Data & Golden Datasets | 4 | 4 (100%) ✅ |
-| 14 | Unit & Integration Tests | 6 | 4 (66.7%) 🔄 |
+| 14 | Unit & Integration Tests | 6 | 5 (83.3%) 🔄 |
 | 15 | Observability | 5 | 0 (0%) ❌ |
 | 16 | Infrastructure & Delivery | 6 | 0 (0%) ❌ |
-| **Total** | | **83** | **70 (84.3%)** |
+| **Total** | | **83** | **71 (85.5%)** |

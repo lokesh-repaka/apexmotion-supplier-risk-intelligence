@@ -29,11 +29,11 @@
 | **Phase 11 Progress** | 6 / 6 Tasks Completed (100%) | Completed ✅ |
 | **Phase 12 Progress** | 6 / 6 Tasks Completed (100%) | Completed ✅ |
 | **Phase 13 Progress** | 4 / 4 Tasks Completed (100%) | Completed ✅ |
-| **Phase 14 Progress** | 5 / 6 Tasks Completed (83.3%) | In Progress 🔄 |
+| **Phase 14 Progress** | 6 / 6 Tasks Completed (100%) | Completed ✅ |
 | **Total Test Suites** | 75 (61 Python suites + 14 Frontend suites) | PASSED ✅ |
-| **Total Test Cases** | 1,069 tests (953 Python [916 unit + 20 integration + 15 golden + 2 API] + 116 Frontend unit) | 100% Passing (0 failures) |
+| **Total Test Cases** | 1,085 tests (969 Python [916 unit + 20 integration + 31 golden + 2 API] + 116 Frontend unit) | 100% Passing (0 failures) |
 | **Code Coverage (`src/`)** | **95.74%** statement coverage (100% on input_sanitizer.py, hitl_tokens.py, spend_tier_router.py & calculator.py) | Exceeds 80% DoD gate |
-| **Active Branch** | `feature/tests-integration-rbac` | In Progress 🔄 |
+| **Active Branch** | `feature/tests-golden-dataset-suite` | In Progress 🔄 |
 
 ---
 
@@ -992,7 +992,24 @@
     - **Scenario 8 (Role Elevation & Spoofing Defense)**: Unrecognized arbitrary roles and scope injection attempts cannot bypass authorization checks, while valid case/whitespace variations normalize safely.
     - **Scenario 9 (Role Hierarchy Inheritance)**: Verified higher roles (`procurement_director`, `vp_supply_chain`, `system_admin`) inherit subordinate privileges, while lower roles remain restricted.
     - **Comprehensive Test Suite**: 9 integration tests in `tests/integration/test_rbac_scenarios.py` passing 100% offline, bringing total project test count across the suite to **1,069 passed tests** (953 Python + 116 Frontend across 75 test suites, 95.74% project-wide coverage).
-    - **Phase 14 (Unit & Integration Tests) progress is now 5/6 (83.3%).**
+    - **Phase 14 (Unit & Integration Tests) progress was 5/6 (83.3%).**
+
+72. **Golden Dataset Pytest Suite, CI Mathematical Gating, and Numerical Drift Prevention (SEC-074, BR-RULE-001, CLAUDE.md Sec 14 & Sec 20)**:
+    - **Hard CI Failure Gating (`tests/golden/test_golden_scenarios.py`)**: Implemented automated CI build gate that strictly asserts canonical NanoCore numbers (`days_of_cover == 7.68` and `financial_exposure == 2448105.00`). If either metric deviates, the build halts immediately with an explicit error message under CLAUDE.md Section 14 and Section 20.
+    - **Negative Constraint & CI Failure Hook Verification**: Executed perturbation simulations verifying that altering `days_of_cover` (to `7.67` or `7.69`), `financial_exposure` (to `2448104.99` or `2448105.01`), or `shortage_volume` (to `24419` or `24421`) strictly triggers `AssertionError` and blocks CI completion.
+    - **Parameterized Golden Benchmark Across All 6 Scenarios**:
+      * `nanocore_scenario.json`: 142k stock, 18.5k burn, 9.0d ETA -> 7.68d cover, 1.32d gap, 24,420 units shortage, $2,448,105 direct exposure, 31.68h downtime, €2,692,800 halt exposure, $5,140,905 total impact -> `CRITICAL` / `DUAL_VP`.
+      * `edge_cases/zero_stock.json`: 0 stock -> 0.00d cover, 5.00d gap, 5,000 units shortage, $50,000 exposure -> `MEDIUM` / `PROC_DIRECTOR`.
+      * `edge_cases/zero_gap.json`: JIT arrival -> 10.00d cover, 0.00d gap, 0 shortage, $0.00 exposure -> `LOW` / No HITL.
+      * `edge_cases/negative_gap.json`: Healthy buffer -> 20.00d cover, negative diff clamped to 0.00d gap, $0.00 exposure -> `LOW` / No HITL.
+      * `edge_cases/dual_approval_threshold.json`: $100,050 exposure -> triggers `DUAL_VP` spend tier (2 distinct signatures, 30m TTL).
+      * `edge_cases/single_source_dependency.json`: Single source with line halt (48.0h downtime, €2.4M halt exposure, $2.67M total impact) -> `HIGH` / `DUAL_VP`.
+    - **Zero Float Representation (BR-RULE-001)**: Verified 100% of numerical outputs across all golden datasets are exact `Decimal` instances with zero IEEE 754 floating-point representations.
+    - **Sensitivity & Perturbation Analysis**: Validated that single-unit deviations in stock, consumption, or unit price alter calculation outputs and calculation hashes.
+    - **Cryptographic Anti-Tamper SHA-256 Digest**: Verified bit-for-bit reproducibility and zero hash collisions across all 6 golden datasets.
+    - **API & Orchestrator Golden Invariants**: Verified that `POST /api/v1/risk/evaluate` and `create_initial_state` preserve identical golden metrics.
+    - **Comprehensive Test Suite**: 16 golden scenario tests passing in `tests/golden/test_golden_scenarios.py` (total 31 golden tests in `tests/golden/`), bringing total project test count across the suite to **1,085 passed tests** (969 Python + 116 Frontend across 75 test suites, 95.74% project-wide coverage).
+    - **Phase 14 (Unit & Integration Tests) is now 100% COMPLETE (6/6 tasks).**
 
 ---
 
@@ -1000,17 +1017,16 @@
 - **Phase 11 — FastAPI API Routes**: Completed ✅ (6/6 tasks done)
 - **Phase 12 — React Frontend**: Completed ✅ (6/6 tasks done)
 - **Phase 13 — Supplier Seed Data & Golden Datasets**: Completed ✅ (4/4 tasks done)
-  - **P13-1**: Supplier seed script (`src/database/seed_dev.py`) — 50 Tier-1 suppliers (10 countries), 200 components, 20 plants, NanoCore scenario loaded (`feature/seed-supplier-data`). Completed ✅
-  - **P13-2**: Neptune graph seed — supplier → component → plant edges, tier-chain links, 3 geopolitical risk nodes for NanoCore region (`feature/seed-graph-data`). Completed ✅
-  - **P13-3**: Golden dataset (`tests/golden/`) — `nanocore_scenario.json` with exact inputs/expected outputs; 5 edge-case JSON files (`feature/seed-golden-datasets`). Completed ✅
-  - **P13-4**: OpenSearch vector seed — 500 synthetic contract clauses chunked and embedded into `contracts-v1` index (`feature/seed-opensearch-vectors`). Completed ✅
-- **Phase 14 — Unit & Golden Test Hardening**: In Progress 🔄 (5/6 tasks done)
+- **Phase 14 — Unit & Golden Test Hardening**: Completed ✅ (6/6 tasks done)
   - **P14-1**: Risk calculator unit tests — NanoCore golden numbers, zero-stock edge case, zero-consumption guard, negative gap → zero shortage (`feature/tests-unit-risk-calculator`). Completed ✅
   - **P14-2**: HITL token unit tests — valid token, expired TTL, replay detection, wrong action binding, missing second signature (`feature/tests-unit-hitl-tokens`). Completed ✅
   - **P14-3**: Quarantined Reader unit tests — XML injection, markdown injection, Unicode bypass, clean text passthrough (`feature/tests-unit-quarantined-reader`). Completed ✅
   - **P14-4**: Integration test — full investigation flow: Kafka event → triage → risk calculator → HITL gate → approval → audit log (`feature/tests-integration-investigation-flow`). Completed ✅
   - **P14-5**: Integration test — RBAC 403 scenarios: analyst calling approve route, category_manager signing >$100k action (`feature/tests-integration-rbac`). Completed ✅
-  - **P14-6**: Golden dataset pytest suite (`tests/golden/test_golden_scenarios.py`) — automated verification against nanocore_scenario.json + 5 edge cases (`feature/tests-golden-scenarios`). Next 🔄
+  - **P14-6**: Golden dataset pytest suite (`tests/golden/test_golden_scenarios.py`) — automated verification against nanocore_scenario.json + 5 edge cases (`feature/tests-golden-dataset-suite`). Completed ✅
+- **Phase 15 — Observability**: In Progress 🔄 (0/5 tasks done)
+  - **P15-1**: Structured log aggregation via OpenTelemetry / CloudWatch EMF (`feature/obs-log-aggregation`). Next 🔄
+
 
 
 

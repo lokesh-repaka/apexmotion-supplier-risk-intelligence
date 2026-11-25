@@ -31,11 +31,11 @@
 | **Phase 13 Progress** | 4 / 4 Tasks Completed (100%) | Completed ✅ |
 | **Phase 14 Progress** | 6 / 6 Tasks Completed (100%) | Completed ✅ |
 | **Phase 15 Progress** | 5 / 5 Tasks Completed (100%) | Completed ✅ |
-| **Phase 16 Progress** | 5 / 6 Tasks Completed (83%) | In Progress 🔄 |
-| **Total Test Suites** | 86 (72 Python suites + 14 Frontend suites) | PASSED ✅ |
-| **Total Test Cases** | 1,191 tests (1,075 Python [1,018 unit + 26 integration + 31 golden] + 116 Frontend unit) | 100% Passing (0 failures) |
+| **Phase 16 Progress** | 6 / 6 Tasks Completed (100%) | Completed ✅ |
+| **Total Test Suites** | 87 (73 Python suites + 14 Frontend suites) | PASSED ✅ |
+| **Total Test Cases** | 1,202 tests (1,086 Python [1,029 unit + 26 integration + 31 golden] + 116 Frontend unit) | 100% Passing (0 failures) |
 | **Code Coverage (`src/`)** | **95.22%** statement coverage | Exceeds 80% DoD gate |
-| **Active Branch** | `feature/cd-pipeline-eks-deploy` | In Progress 🔄 |
+| **Active Branch** | `feature/tests-deployment-hygiene` | In Progress 🔄 |
 
 ---
 
@@ -1168,6 +1168,19 @@
 
 ---
 
+### Invariant 83: Automated Deployment Hygiene & WORM Compliance Gate (P16-6)
+- **Standard**: Automated pre-flight security, hygiene, and regulatory compliance verification enforced by `tests/unit/test_deployment_hygiene.py` and CLI utility `scripts/verify_deployment_hygiene.py`:
+  1. **Zero Committed Secret Dotenv Files**: Automated git tree inspection ensuring zero secret `.env` files are tracked (only `.env.example` and `.env.test.example` allowed).
+  2. **Defense-in-Depth Secret Exclusion Rules**: Enforces explicit exclusion rules for `.env*`, `*.pem`, `*.key`, `*credentials*.json`, and `secrets/` in `.gitignore` and `.dockerignore`.
+  3. **Zero Static AWS Credentials or Plaintext Private Keys**: Scans all tracked code files, manifests, and deployment configs for AWS Access Key IDs (`AKIA...`) and PEM private key headers, with zero tolerance.
+  4. **Statutory S3 WORM Compliance Mode**: Verifies `infrastructure/terraform/s3_worm.tf` mandates S3 Object Lock strictly in `COMPLIANCE` mode (precluding overwrite/deletion even by AWS account root).
+  5. **Mandatory 7-Year Statutory Hold**: Confirms default retention period defaults to 7 years (`years = var.audit_retention_years`, `default = 7`), with multi-AZ KMS encryption (`sse_algorithm = "aws:kms"`), bucket versioning, and public access blocks.
+  6. **Container & Kubernetes Non-Root Isolation**: Asserts API/Worker Dockerfiles and Kubernetes manifests enforce unprivileged non-root execution (`runAsUser: 10001`, `runAsGroup: 10001`), `allowPrivilegeEscalation: false`, and `capabilities.drop: ["ALL"]`.
+  7. **Continuous Delivery OIDC Credentialing**: Asserts all GitHub Actions CD workflows use short-lived AWS STS OIDC role assumption (`role-to-assume`) with zero static AWS credentials.
+- **Verification**: `tests/unit/test_deployment_hygiene.py` (11 unit tests, 100% pass rate) and `scripts/verify_deployment_hygiene.py` (exit code 0).
+
+---
+
 ## 5. Next Planned Tasks
 - **Phase 11 — FastAPI API Routes**: Completed ✅ (6/6 tasks done)
 - **Phase 12 — React Frontend**: Completed ✅ (6/6 tasks done)
@@ -1179,13 +1192,15 @@
   - **P15-3**: Prometheus metrics export — counter, gauge, and histogram metrics (`feature/observability-prometheus-metrics`). Completed ✅
   - **P15-4**: Grafana dashboard JSON (`feature/observability-grafana-dashboard`). Completed ✅
   - **P15-5**: CloudWatch alarms (`feature/observability-cloudwatch-alarms`). Completed ✅
-- **Phase 16 — Infrastructure & Delivery**: In Progress 🔄 (5/6 tasks done, 83%)
+- **Phase 16 — Infrastructure & Delivery**: Completed ✅ (6/6 tasks done, 100%)
   - **P16-1**: `Dockerfile.api` — FastAPI + Uvicorn image (Python 3.12-slim, non-root user, health check) (`feature/docker-api-image`). Completed ✅
   - **P16-2**: `Dockerfile.worker` — Celery worker image for background enrichment and Kafka consumer (`feature/docker-worker-image`). Completed ✅
   - **P16-3**: Terraform modules (`infrastructure/terraform/`) — EKS 1.30, Neptune, Aurora PG 16 Serverless v2, MSK 3-broker, OpenSearch, ElastiCache Redis, S3 Object Lock, KMS (`feature/terraform-aws-infrastructure`). Completed ✅
   - **P16-4**: Kubernetes manifests (`infrastructure/kubernetes/`) — Deployments, Services, KEDA `ScaledObject` for Kafka consumer, HPA for API pods (`feature/kubernetes-manifests-keda`). Completed ✅
   - **P16-5**: GitHub Actions CD pipeline — build → push ECR → `kubectl apply` → blue-green cutover; separate workflows for `staging` and `production` (`feature/cd-pipeline-eks-deploy`). Completed ✅
-  - **P16-6**: Deployment hygiene checks — no `.env` committed, no static AWS credentials, S3 Object Lock compliance mode verified, WORM 7-year hold confirmed (`feature/tests-deployment-hygiene`). Next 🔄
+  - **P16-6**: Deployment hygiene checks — no `.env` committed, no static AWS credentials, S3 Object Lock compliance mode verified, WORM 7-year hold confirmed (`feature/tests-deployment-hygiene`). Completed ✅
+
+> **Implementation Complete**: All 16 core architecture and infrastructure phases defined in `TASKS.md` (P1 through P16) are 100% complete, hardened, and verified with 1,202 automated tests passing at 95.22% code coverage.
 
 
 

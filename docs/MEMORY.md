@@ -29,11 +29,11 @@
 | **Phase 11 Progress** | 6 / 6 Tasks Completed (100%) | Completed ✅ |
 | **Phase 12 Progress** | 6 / 6 Tasks Completed (100%) | Completed ✅ |
 | **Phase 13 Progress** | 4 / 4 Tasks Completed (100%) | Completed ✅ |
-| **Phase 14 Progress** | 3 / 6 Tasks Completed (50.0%) | In Progress 🔄 |
-| **Total Test Suites** | 73 (59 Python suites + 14 Frontend suites) | PASSED ✅ |
-| **Total Test Cases** | 1,043 tests (927 Python [898 unit + 11 integration + 15 golden + 3 API] + 116 Frontend unit) | 100% Passing (0 failures) |
-| **Code Coverage (`src/`)** | **95.28%** statement coverage (100% on input_sanitizer.py, hitl_tokens.py & calculator.py) | Exceeds 80% DoD gate |
-| **Active Branch** | `feature/tests-unit-quarantined-reader` | In Progress 🔄 |
+| **Phase 14 Progress** | 5 / 6 Tasks Completed (83.3%) | In Progress 🔄 |
+| **Total Test Suites** | 75 (61 Python suites + 14 Frontend suites) | PASSED ✅ |
+| **Total Test Cases** | 1,069 tests (953 Python [916 unit + 20 integration + 15 golden + 2 API] + 116 Frontend unit) | 100% Passing (0 failures) |
+| **Code Coverage (`src/`)** | **95.74%** statement coverage (100% on input_sanitizer.py, hitl_tokens.py, spend_tier_router.py & calculator.py) | Exceeds 80% DoD gate |
+| **Active Branch** | `feature/tests-integration-rbac` | In Progress 🔄 |
 
 ---
 
@@ -976,6 +976,24 @@
     - **Comprehensive Test Suite**: 6 end-to-end integration tests in `tests/integration/test_investigation_flow.py` passing 100% offline, bringing total project test count across the suite to **1,060 passed tests** (944 Python + 116 Frontend across 74 test suites).
     - **Phase 14 (Unit & Integration Tests) progress is now 4/6 (66.7%).**
 
+71. **RBAC Authorization Boundaries & High-Consequence Spend Gate Enforcement (SEC-073, BR-RULE-001, BR-RULE-007, CLAUDE.md Sec 3, Sec 5.2, Sec 14)**:
+    - **Dedicated Integration Test Suite (`tests/integration/test_rbac_scenarios.py`)**: Engineered comprehensive integration test suite validating role-based access control, spend authority gates, and cryptographic signature boundaries with 100% offline isolation.
+    - **Scenario 1 (Analyst Gating on Approvals)**: Verified that read-only `analyst` attempting `GET /api/v1/approvals` (listing), `GET /api/v1/approvals/{id}` (detail lookup), `POST /api/v1/approvals/{id}/sign` (signature authorization), `POST /api/v1/cases/{id}/approve` (case approval alias), or `POST /api/v1/approvals/{id}/reject` (rejection) is strictly rejected with HTTP 403 Forbidden (`INSUFFICIENT_ROLE`). Verified zero state mutations in database records.
+    - **Scenario 2 (Category Manager Blocked from Tier 3 Spend)**: Verified that `category_manager` attempting to sign high-consequence actions exceeding $100,000 (including the canonical NanoCore Dresden fab disruption exposure of $2,448,105.00 and $150,000 commitments) via either `/sign` or `/approve` is rejected with HTTP 403 Forbidden (`INSUFFICIENT_ROLE`). Verified database status remains `PENDING`.
+    - **Scenario 3 (Category Manager Blocked from Tier 2 Spend)**: Verified that `category_manager` attempting to sign Tier 2 spend ($25,001 - $100,000, e.g. $50,000.00) is rejected with HTTP 403 Forbidden (`INSUFFICIENT_ROLE`), while `procurement_director` succeeds with HTTP 200 OK (`APPROVED`).
+    - **Scenario 4 (Exact Single-Cent Spend Boundary Thresholds)**:
+      * Exact $25,000.00 (Tier 1 ceiling): `category_manager` succeeds -> 200 OK (`APPROVED`).
+      * Exact $25,000.01 (Tier 2 floor): `category_manager` rejected with 403; `procurement_director` succeeds -> 200 OK (`APPROVED`).
+      * Exact $100,000.00 (Tier 2 ceiling): `category_manager` rejected with 403; `procurement_director` succeeds -> 200 OK (`APPROVED`).
+      * Exact $100,000.01 (Tier 3 floor): `category_manager` rejected with 403; `procurement_director` signature 1 moves status to `PARTIALLY_APPROVED`; `vp_supply_chain` signature 2 completes authorization to `APPROVED`.
+    - **Scenario 5 (Tier 3 Unilateral Approval Strictly Prohibited)**: Pure function `can_user_approve_spend` rejects unilateral single-signer approval for Tier 3 spend across all roles (Analyst, Category Manager, Procurement Director, VP Supply Chain, System Admin). Duplicate signer replay by the same executive is rejected with HTTP 409 `DUPLICATE_SIGNER`.
+    - **Scenario 6 (Analyst Blocked from Alert Acknowledgment)**: Verified `analyst` attempting `POST /api/v1/alerts/{id}/acknowledge` or `POST /api/v1/risk/alerts/{id}/acknowledge` is rejected with HTTP 403 Forbidden, while `category_manager` succeeds (200 OK -> `ACKNOWLEDGED`). Verified `analyst` is permitted read access to chronological forensic audit trails via `GET /api/v1/alerts/{id}/audit` (200 OK).
+    - **Scenario 7 (Unauthenticated & Tampered Requests)**: Missing Authorization headers, non-Bearer schemes, malformed tokens, expired JWTs, forged HMAC signatures, and missing `sub` claims return HTTP 401 Unauthorized (`AUTHENTICATION_REQUIRED`).
+    - **Scenario 8 (Role Elevation & Spoofing Defense)**: Unrecognized arbitrary roles and scope injection attempts cannot bypass authorization checks, while valid case/whitespace variations normalize safely.
+    - **Scenario 9 (Role Hierarchy Inheritance)**: Verified higher roles (`procurement_director`, `vp_supply_chain`, `system_admin`) inherit subordinate privileges, while lower roles remain restricted.
+    - **Comprehensive Test Suite**: 9 integration tests in `tests/integration/test_rbac_scenarios.py` passing 100% offline, bringing total project test count across the suite to **1,069 passed tests** (953 Python + 116 Frontend across 75 test suites, 95.74% project-wide coverage).
+    - **Phase 14 (Unit & Integration Tests) progress is now 5/6 (83.3%).**
+
 ---
 
 ## 5. Next Planned Tasks
@@ -986,12 +1004,14 @@
   - **P13-2**: Neptune graph seed — supplier → component → plant edges, tier-chain links, 3 geopolitical risk nodes for NanoCore region (`feature/seed-graph-data`). Completed ✅
   - **P13-3**: Golden dataset (`tests/golden/`) — `nanocore_scenario.json` with exact inputs/expected outputs; 5 edge-case JSON files (`feature/seed-golden-datasets`). Completed ✅
   - **P13-4**: OpenSearch vector seed — 500 synthetic contract clauses chunked and embedded into `contracts-v1` index (`feature/seed-opensearch-vectors`). Completed ✅
-- **Phase 14 — Unit & Golden Test Hardening**: In Progress 🔄 (4/6 tasks done)
+- **Phase 14 — Unit & Golden Test Hardening**: In Progress 🔄 (5/6 tasks done)
   - **P14-1**: Risk calculator unit tests — NanoCore golden numbers, zero-stock edge case, zero-consumption guard, negative gap → zero shortage (`feature/tests-unit-risk-calculator`). Completed ✅
   - **P14-2**: HITL token unit tests — valid token, expired TTL, replay detection, wrong action binding, missing second signature (`feature/tests-unit-hitl-tokens`). Completed ✅
   - **P14-3**: Quarantined Reader unit tests — XML injection, markdown injection, Unicode bypass, clean text passthrough (`feature/tests-unit-quarantined-reader`). Completed ✅
   - **P14-4**: Integration test — full investigation flow: Kafka event → triage → risk calculator → HITL gate → approval → audit log (`feature/tests-integration-investigation-flow`). Completed ✅
-  - **P14-5**: Integration test — RBAC 403 scenarios: analyst calling approve route, category_manager signing >$100k action (`feature/tests-integration-rbac-scenarios`). Next 🔄
+  - **P14-5**: Integration test — RBAC 403 scenarios: analyst calling approve route, category_manager signing >$100k action (`feature/tests-integration-rbac`). Completed ✅
+  - **P14-6**: Golden dataset pytest suite (`tests/golden/test_golden_scenarios.py`) — automated verification against nanocore_scenario.json + 5 edge cases (`feature/tests-golden-scenarios`). Next 🔄
+
 
 
 

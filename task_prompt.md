@@ -1,6 +1,6 @@
 You have access to the project's authoritative documentation: `TASKS.md`, `CLAUDE.md`, `GEMINI.md`, `.agents/rules/`, and architecture specifications in `docs/` (`HLD_*.md`, `LLD_*.md`, `PRD_*.md`, `BRD_*.md`, `FRD_*.md`).
 
-Go ahead and complete **P16-1 · `Dockerfile.api` — FastAPI + Uvicorn image (Python 3.12-slim, non-root user, health check)**, as defined in `TASKS.md`.
+Go ahead and complete **P16-2 · `Dockerfile.worker` — Celery worker image for background enrichment and Kafka consumer**, as defined in `TASKS.md`.
 
 ---
 

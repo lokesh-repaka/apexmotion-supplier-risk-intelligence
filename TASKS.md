@@ -244,7 +244,7 @@ Sub-tasks in the same phase that do not share files can be open at the same time
 
 | Task | Branch | Status |
 |------|--------|--------|
-| P16-1 · `Dockerfile.api` — FastAPI + Uvicorn image (Python 3.12-slim, non-root user, health check) | `feature/docker-api-image` | Pending ❌ |
+| P16-1 · `Dockerfile.api` — FastAPI + Uvicorn image (Python 3.12-slim, non-root user, health check) | `feature/docker-api-image` | Completed ✅ |
 | P16-2 · `Dockerfile.worker` — Celery worker image for background enrichment and Kafka consumer | `feature/docker-worker-image` | Pending ❌ |
 | P16-3 · Terraform modules (`infrastructure/terraform/`) — EKS 1.30, Neptune, Aurora PG 16 Serverless v2, MSK 3-broker, OpenSearch, ElastiCache Redis, S3 Object Lock, KMS | `feature/terraform-aws-infrastructure` | Pending ❌ |
 | P16-4 · Kubernetes manifests (`infrastructure/kubernetes/`) — Deployments, Services, KEDA `ScaledObject` for Kafka consumer, HPA for API pods | `feature/kubernetes-manifests-keda` | Pending ❌ |

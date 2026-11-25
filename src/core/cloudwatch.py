@@ -18,7 +18,7 @@ from pathlib import Path
 from typing import Any, cast
 
 import boto3
-from botocore.config import Config  # type: ignore[import-untyped]
+from botocore.config import Config
 
 from src.core.config import get_settings
 

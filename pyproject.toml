@@ -33,6 +33,9 @@ dependencies = [
     "python-jose[cryptography]>=3.3.0",
     "tenacity>=9.0.0",
     "prometheus-client>=0.20.0",
+    "opentelemetry-api>=1.20.0",
+    "opentelemetry-sdk>=1.20.0",
+    "langfuse>=2.0.0",
 ]
 
 [project.optional-dependencies]
@@ -97,6 +100,11 @@ show_error_codes = true
 [[tool.mypy.overrides]]
 module = [
     "boto3",
-    "botocore.exceptions",
+    "botocore",
+    "botocore.*",
+    "opentelemetry",
+    "opentelemetry.*",
+    "langfuse",
+    "langfuse.*",
 ]
 ignore_missing_imports = true

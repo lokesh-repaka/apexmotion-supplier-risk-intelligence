@@ -1,6 +1,6 @@
 You have access to the project's authoritative documentation: `TASKS.md`, `CLAUDE.md`, `GEMINI.md`, `.agents/rules/`, and architecture specifications in `docs/` (`HLD_*.md`, `LLD_*.md`, `PRD_*.md`, `BRD_*.md`, `FRD_*.md`).
 
-Go ahead and complete **P14-4 · Integration test — full investigation flow: Kafka event → triage → risk calculator → HITL gate → approval → audit log**, as defined in `TASKS.md`.
+Go ahead and complete **P14-5 · Integration test — RBAC 403 scenarios: `analyst` calling approve route, `category_manager` signing >$100k action**, as defined in `TASKS.md`.
 
 ---
 

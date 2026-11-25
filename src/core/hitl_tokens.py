@@ -13,6 +13,7 @@ import base64
 import hashlib
 import json
 import uuid
+from collections.abc import Sequence
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal
 from enum import StrEnum
@@ -435,7 +436,7 @@ class HITLTokenService:
 
     def verify_dual_approval(
         self,
-        tokens: list[str | HITLToken],
+        tokens: Sequence[str | HITLToken],
         expected_action_id: str | None = None,
         expected_alert_id: str | None = None,
         expected_amount_usd: Decimal | None = None,

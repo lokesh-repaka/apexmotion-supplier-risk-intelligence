@@ -29,11 +29,11 @@
 | **Phase 11 Progress** | 6 / 6 Tasks Completed (100%) | Completed ✅ |
 | **Phase 12 Progress** | 6 / 6 Tasks Completed (100%) | Completed ✅ |
 | **Phase 13 Progress** | 4 / 4 Tasks Completed (100%) | Completed ✅ |
-| **Phase 14 Progress** | 1 / 6 Tasks Completed (16.7%) | In Progress 🔄 |
+| **Phase 14 Progress** | 2 / 6 Tasks Completed (33.3%) | In Progress 🔄 |
 | **Total Test Suites** | 73 (59 Python suites + 14 Frontend suites) | PASSED ✅ |
-| **Total Test Cases** | 1,002 tests (886 Python [857 unit + 11 integration + 15 golden + 3 API] + 116 Frontend unit) | 100% Passing (0 failures) |
-| **Code Coverage (`src/`)** | **95.09%** statement coverage (7,391 statements, 363 missed; 100% on calculator.py) | Exceeds 80% DoD gate |
-| **Active Branch** | `feature/tests-unit-risk-calculator` | In Progress 🔄 |
+| **Total Test Cases** | 1,008 tests (892 Python [863 unit + 11 integration + 15 golden + 3 API] + 116 Frontend unit) | 100% Passing (0 failures) |
+| **Code Coverage (`src/`)** | **95.09%** statement coverage (7,391 statements, 363 missed; 100% on hitl_tokens.py & calculator.py) | Exceeds 80% DoD gate |
+| **Active Branch** | `feature/tests-unit-hitl-tokens` | In Progress 🔄 |
 
 ---
 
@@ -906,6 +906,27 @@
     - **Comprehensive Test Suite**: 42 unit tests in `tests/unit/test_risk_calculator.py` achieving **100.00% statement coverage** on `src/services/risk/calculator.py`, bringing total project test count across the 1,000 threshold to **1,002 passed tests** (886 Python + 116 Frontend across 73 test suites).
     - **Phase 14 (Unit & Integration Tests) progress is now 1/6 (16.7%).**
 
+68. **AWS KMS ECDSA P-256 Approval Token Security, Anti-Replay Guard, and Multi-Signer Spend Authority Gate Verification (SEC-070, BR-RULE-001, LLD Sec 7.2, CLAUDE.md Sec 14)**:
+    - **ECDSA P-256 Cryptographic Signing & Canonical Determinism**: Verified that `HITLTokenService` issues and cryptographically signs approval tokens using AWS KMS (`ECC_NIST_P256`, `ECDSA_SHA_256`) in `RAW` message mode over deterministically sorted JSON canonical bytes. Proved payload hash reproducibility and canonical serialization integrity.
+    - **Monetary Spend Tier & TTL Policy Enforcement**: Proved strict spend tier authority routing and TTL bounds:
+      - Tier 1 ($\le \$25,000$): Category Manager, 1-hour TTL, 1x ECDSA signature.
+      - Tier 2 ($\$25,001 - \$100,000$): Procurement Director, 1-hour TTL, 1x ECDSA signature.
+      - Tier 3 ($> \$100,000$, e.g. NanoCore $\$2,448,105.00$ expedite): Dual VP sign-off, 30-minute TTL, 2x independent ECDSA signatures.
+      - Exact threshold boundaries: verified boundary transition at $\$25,000.00$ vs $\$25,000.01$ and $\$100,000.00$ vs $\$100,000.01$.
+    - **Expired TTL & Boundary Invariants**: Proved that expired tokens are strictly rejected across both single approvals (1-hour boundary for Tier 1/2) and high-consequence dual approvals (30-minute boundary for Tier 3). Verified that dual approval fails immediately if either the first or second token has exceeded its TTL.
+    - **Database Anti-Replay & Cryptographic Nonce Uniqueness**: Verified that every issued token contains a unique UUIDv4 nonce, guaranteeing divergent SHA-256 token hashes across identical repeated actions. Verified repository lookup against the `hitl_approvals.token_hash` unique index, supporting both structured `HITLToken` entities and serialized base64 token strings.
+    - **Signature Malleability & Tamper Defense**: Verified that tampering with any payload attribute (`action_id`, `amount_usd`, `nonce`) alters the SHA-256 token hash but immediately triggers `TokenSignatureInvalidError` / `INVALID_SIGNATURE` during KMS ECDSA verification, preventing signature replay attacks.
+    - **Action, Alert & Amount Binding Mismatches**: Proved strict rejection when a token is presented against a mismatched `action_id`, mismatched `alert_id`, or mismatched `amount_usd`, preventing cross-action spend hijacking.
+    - **Multi-Signer / Dual-Approval Governance**: Proved that high-consequence spend ($> \$100,000$) strictly requires two valid, independently signed tokens. Enforced rejection when:
+      - Fewer than 2 tokens are supplied (`INSUFFICIENT_SIGNATURES`).
+      - Both tokens are signed by the same user ID (`IDENTICAL_SIGNERS`).
+      - Signer ID is missing (`IDENTICAL_SIGNERS`).
+      - Tokens are bound to different actions (`DUAL_ACTION_MISMATCH`).
+      - The second token has an invalid KMS signature (`INVALID_SIGNATURE`).
+      - Enhanced `verify_dual_approval` parameter typing to covariant `Sequence[str | HITLToken]` for seamless collection compatibility.
+    - **Comprehensive Test Suite**: 37 unit tests in `tests/unit/test_hitl_tokens.py` achieving **100.00% statement and branch coverage** on `src/core/hitl_tokens.py`, bringing total project test count to **1,008 passed tests** (892 Python + 116 Frontend across 73 test suites).
+    - **Phase 14 (Unit & Integration Tests) progress is now 2/6 (33.3%).**
+
 ---
 
 ## 5. Next Planned Tasks
@@ -916,9 +937,10 @@
   - **P13-2**: Neptune graph seed — supplier → component → plant edges, tier-chain links, 3 geopolitical risk nodes for NanoCore region (`feature/seed-graph-data`). Completed ✅
   - **P13-3**: Golden dataset (`tests/golden/`) — `nanocore_scenario.json` with exact inputs/expected outputs; 5 edge-case JSON files (`feature/seed-golden-datasets`). Completed ✅
   - **P13-4**: OpenSearch vector seed — 500 synthetic contract clauses chunked and embedded into `contracts-v1` index (`feature/seed-opensearch-vectors`). Completed ✅
-- **Phase 14 — Unit & Golden Test Hardening**: In Progress 🔄 (1/6 tasks done)
+- **Phase 14 — Unit & Golden Test Hardening**: In Progress 🔄 (2/6 tasks done)
   - **P14-1**: Risk calculator unit tests — NanoCore golden numbers, zero-stock edge case, zero-consumption guard, negative gap → zero shortage (`feature/tests-unit-risk-calculator`). Completed ✅
-  - **P14-2**: HITL token unit tests — valid token, expired TTL, replay detection, wrong action binding, missing second signature (`feature/tests-unit-hitl-tokens`). Next 🔄
+  - **P14-2**: HITL token unit tests — valid token, expired TTL, replay detection, wrong action binding, missing second signature (`feature/tests-unit-hitl-tokens`). Completed ✅
+  - **P14-3**: Quarantined Reader unit tests — XML injection, markdown injection, Unicode bypass, clean text passthrough (`feature/tests-unit-quarantined-reader`). Next 🔄
 
 
 

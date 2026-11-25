@@ -31,11 +31,11 @@
 | **Phase 13 Progress** | 4 / 4 Tasks Completed (100%) | Completed ✅ |
 | **Phase 14 Progress** | 6 / 6 Tasks Completed (100%) | Completed ✅ |
 | **Phase 15 Progress** | 5 / 5 Tasks Completed (100%) | Completed ✅ |
-| **Phase 16 Progress** | 2 / 6 Tasks Completed (33%) | In Progress 🔄 |
-| **Total Test Suites** | 83 (69 Python suites + 14 Frontend suites) | PASSED ✅ |
-| **Total Test Cases** | 1,158 tests (1,042 Python [985 unit + 26 integration + 31 golden] + 116 Frontend unit) | 100% Passing (0 failures) |
+| **Phase 16 Progress** | 3 / 6 Tasks Completed (50%) | In Progress 🔄 |
+| **Total Test Suites** | 84 (70 Python suites + 14 Frontend suites) | PASSED ✅ |
+| **Total Test Cases** | 1,169 tests (1,053 Python [996 unit + 26 integration + 31 golden] + 116 Frontend unit) | 100% Passing (0 failures) |
 | **Code Coverage (`src/`)** | **95.22%** statement coverage | Exceeds 80% DoD gate |
-| **Active Branch** | `feature/docker-worker-image` | In Progress 🔄 |
+| **Active Branch** | `feature/terraform-aws-infrastructure` | In Progress 🔄 |
 
 ---
 
@@ -1119,6 +1119,26 @@
 
 ---
 
+### Invariant 80: Production Terraform AWS Infrastructure & Network Isolation (P16-3)
+- **Standard**: Production Terraform AWS infrastructure configuration across `infrastructure/terraform/` defining multi-AZ, defense-in-depth, encrypted, and isolated enterprise cloud resources for ApexMotion:
+  1. **3-Tier VPC Architecture (`vpc.tf`)**: `10.100.0.0/16` across 3 AZs (`eu-central-1a`, `eu-central-1b`, `eu-central-1c`) with Public DMZ subnets (NAT Gateways, Internet Gateway), Private Application subnets for EKS worker nodes, and Private Data subnets with zero internet egress (`0.0.0.0/0` routes omitted) and S3 VPC Gateway endpoint.
+  2. **Dedicated Security Groups**: Strict port and protocol segregation (Aurora PostgreSQL 5432, Neptune Graph 8182, MSK Kafka 9092/9094/9098, OpenSearch 443, Redis 6379) restricted strictly to EKS application nodes.
+  3. **Dual KMS Cryptographic Keys (`kms.tf`)**:
+     - Asymmetric `ECC_NIST_P256` key with `SIGN_VERIFY` key usage dedicated to ECDSA P-256 HITL spend authorization tokens (BR-RULE-001).
+     - Symmetric `SYMMETRIC_DEFAULT` key with `ENCRYPT_DECRYPT` and automatic annual key rotation for datastore encryption at rest.
+  4. **S3 WORM Audit Vault (`s3_worm.tf`)**: S3 Object Lock bucket in strict `COMPLIANCE` mode with 7-year retention (`years = 7`), multi-AZ replication, bucket versioning, KMS encryption at rest, and all public access blocked.
+  5. **Amazon EKS 1.30 Cluster (`eks.tf`)**: Production Kubernetes control plane with IRSA OIDC provider, general compute node group (`m6i.xlarge`, min 3, max 10), and dedicated GPU node group (`g6e.12xlarge`) tainted (`dedicated=vllm:NoSchedule`) for private vLLM contract reasoning.
+  6. **Enterprise Datastores**:
+     - Aurora PostgreSQL 16 Serverless v2 (`aurora.tf`): ACU scaling 0.5 to 32.0, KMS storage encryption, automated backups.
+     - Amazon Neptune (`neptune.tf`): OpenCypher graph engine on port 8182 with IAM DB auth.
+     - Amazon MSK (`msk.tf`): 3-broker cluster across 3 AZs supporting 1,285 ev/s burst with TLS in-transit and KMS at-rest encryption.
+     - Amazon OpenSearch (`opensearch.tf`): OpenSearch 2.11 domain with 3-node zone awareness and k-NN vector search support.
+     - ElastiCache Redis 7.1 (`elasticache.tf`): Multi-AZ replication group (1 primary + 2 replicas) with in-transit TLS and KMS at-rest encryption.
+  7. **CloudWatch Alarms & Unified Variables**: Centralized `variables.tf` and `outputs.tf` unifying alarms and infrastructure modules with clean HCL syntax (`terraform fmt`).
+- **Verification**: `tests/unit/test_terraform_infrastructure.py` (11 unit tests, 100% pass rate) and `tests/unit/test_cloudwatch_alarms.py` (9 unit tests, 100% pass rate).
+
+---
+
 ## 5. Next Planned Tasks
 - **Phase 11 — FastAPI API Routes**: Completed ✅ (6/6 tasks done)
 - **Phase 12 — React Frontend**: Completed ✅ (6/6 tasks done)
@@ -1130,11 +1150,11 @@
   - **P15-3**: Prometheus metrics export — counter, gauge, and histogram metrics (`feature/observability-prometheus-metrics`). Completed ✅
   - **P15-4**: Grafana dashboard JSON (`feature/observability-grafana-dashboard`). Completed ✅
   - **P15-5**: CloudWatch alarms (`feature/observability-cloudwatch-alarms`). Completed ✅
-- **Phase 16 — Infrastructure & Delivery**: In Progress 🔄 (2/6 tasks done, 33%)
+- **Phase 16 — Infrastructure & Delivery**: In Progress 🔄 (3/6 tasks done, 50%)
   - **P16-1**: `Dockerfile.api` — FastAPI + Uvicorn image (Python 3.12-slim, non-root user, health check) (`feature/docker-api-image`). Completed ✅
   - **P16-2**: `Dockerfile.worker` — Celery worker image for background enrichment and Kafka consumer (`feature/docker-worker-image`). Completed ✅
-  - **P16-3**: Terraform modules (`infrastructure/terraform/`) — EKS 1.30, Neptune, Aurora PG 16 Serverless v2, MSK 3-broker, OpenSearch, ElastiCache Redis, S3 Object Lock, KMS (`feature/terraform-aws-infrastructure`). Next 🔄
-  - **P16-4**: Kubernetes manifests (`infrastructure/kubernetes/`) — Deployments, Services, KEDA `ScaledObject` for Kafka consumer, HPA for API pods (`feature/kubernetes-manifests-keda`). Pending ❌
+  - **P16-3**: Terraform modules (`infrastructure/terraform/`) — EKS 1.30, Neptune, Aurora PG 16 Serverless v2, MSK 3-broker, OpenSearch, ElastiCache Redis, S3 Object Lock, KMS (`feature/terraform-aws-infrastructure`). Completed ✅
+  - **P16-4**: Kubernetes manifests (`infrastructure/kubernetes/`) — Deployments, Services, KEDA `ScaledObject` for Kafka consumer, HPA for API pods (`feature/kubernetes-manifests-keda`). Next 🔄
   - **P16-5**: KEDA autoscaling configuration for Kafka consumers (`feature/keda-autoscaling-kafka`). Pending ❌
   - **P16-6**: GitHub Actions CI/CD pipeline (`feature/ci-cd-github-actions`). Pending ❌
 

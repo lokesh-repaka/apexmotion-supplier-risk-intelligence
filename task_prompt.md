@@ -1,6 +1,6 @@
 You have access to the project's authoritative documentation: `TASKS.md`, `CLAUDE.md`, `GEMINI.md`, `.agents/rules/`, and architecture specifications in `docs/` (`HLD_*.md`, `LLD_*.md`, `PRD_*.md`, `BRD_*.md`, `FRD_*.md`).
 
-Go ahead and complete **P16-3 · Terraform modules (`infrastructure/terraform/`) — EKS 1.30, Neptune, Aurora PG 16 Serverless v2, MSK 3-broker, OpenSearch, ElastiCache Redis, S3 Object Lock, KMS**, as defined in `TASKS.md`.
+Go ahead and complete **P16-4 · Kubernetes manifests (`infrastructure/kubernetes/`) — Deployments, Services, KEDA `ScaledObject` for Kafka consumer, HPA for API pods**, as defined in `TASKS.md`.
 
 ---
 

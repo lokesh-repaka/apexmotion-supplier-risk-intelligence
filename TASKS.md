@@ -233,7 +233,7 @@ Sub-tasks in the same phase that do not share files can be open at the same time
 | P15-2 · Langfuse callback integration — `CallbackHandler` on every LangGraph agent run; records tokens used, latency, and cost per investigation | `feature/observability-langfuse-tracing` | Completed ✅ |
 | P15-3 · Prometheus metrics export — `apexmotion_investigations_total`, `apexmotion_investigation_duration_seconds`, `apexmotion_llm_tokens_total`, `apexmotion_kafka_consumer_lag`, `apexmotion_hitl_pending_count` | `feature/observability-prometheus-metrics` | Completed ✅ |
 | P15-4 · Grafana dashboard JSON — SLO panels: p95 investigation latency ≤ 90s, Kafka lag, HITL queue depth, LLM cost/day | `feature/observability-grafana-dashboard` | Completed ✅ |
-| P15-5 · CloudWatch alarms — p95 latency breach, error rate > 1%, Kafka consumer lag > 30s, Neptune query > 2s | `feature/observability-cloudwatch-alarms` | Pending ❌ |
+| P15-5 · CloudWatch alarms — p95 latency breach, error rate > 1%, Kafka consumer lag > 30s, Neptune query > 2s | `feature/observability-cloudwatch-alarms` | Completed ✅ |
 
 ---
 
@@ -314,6 +314,6 @@ Phases 4, 5, 6, 7, and 8 all depend on Phase 3 and can be developed in parallel.
 | 12 | React Frontend | 6 | 6 (100%) ✅ |
 | 13 | Supplier Seed Data & Golden Datasets | 4 | 4 (100%) ✅ |
 | 14 | Unit & Integration Tests | 6 | 6 (100%) ✅ |
-| 15 | Observability | 5 | 4 (80%) 🔄 |
+| 15 | Observability | 5 | 5 (100%) ✅ |
 | 16 | Infrastructure & Delivery | 6 | 0 (0%) ❌ |
-| **Total** | | **83** | **76 (91.6%)** |
+| **Total** | | **83** | **77 (92.8%)** |

@@ -1,0 +1,121 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "version": "1.0",
+  "environment": "production",
+  "alarms": [
+    {
+      "AlarmName": "apexmotion-p95-investigation-latency",
+      "AlarmDescription": "Critical SLO Breach: Triggers PagerDuty when p95 investigation duration exceeds 90.0 seconds for 2 consecutive evaluation periods (PRD Sec 14, FRD FR-DEC-001).",
+      "Threshold": 90.0,
+      "ComparisonOperator": "GreaterThanThreshold",
+      "EvaluationPeriods": 2,
+      "Period": 60,
+      "TreatMissingData": "missing",
+      "MetricName": "InvestigationDurationSeconds",
+      "Namespace": "ApexMotion/Platform",
+      "ExtendedStatistic": "p95",
+      "Dimensions": [
+        {
+          "Name": "Service",
+          "Value": "investigation-orchestrator"
+        }
+      ],
+      "Unit": "Seconds"
+    },
+    {
+      "AlarmName": "apexmotion-api-error-rate",
+      "AlarmDescription": "High Severity: Triggers when inbound HTTP 5xx error rate exceeds 1.0% across 2 evaluation periods, indicating API gateway or backend degradation.",
+      "Threshold": 1.0,
+      "ComparisonOperator": "GreaterThanThreshold",
+      "EvaluationPeriods": 2,
+      "Period": 60,
+      "TreatMissingData": "missing",
+      "MetricName": "5xx_error_rate",
+      "Namespace": "ApexMotion/Platform",
+      "Statistic": "Average",
+      "Dimensions": [
+        {
+          "Name": "Service",
+          "Value": "fastapi-gateway"
+        }
+      ],
+      "Unit": "Percent"
+    },
+    {
+      "AlarmName": "apexmotion-kafka-consumer-lag",
+      "AlarmDescription": "High Severity: Triggers when Kafka consumer lag exceeds 30.0 seconds for 5 minutes, triggering KEDA autoscaling up to 24 worker pods (LLD Sec 8.3).",
+      "Threshold": 30.0,
+      "ComparisonOperator": "GreaterThanThreshold",
+      "EvaluationPeriods": 3,
+      "Period": 60,
+      "TreatMissingData": "missing",
+      "MetricName": "EstimatedMaxTimeLag",
+      "Namespace": "ApexMotion/Kafka",
+      "Statistic": "Maximum",
+      "Dimensions": [
+        {
+          "Name": "ConsumerGroup",
+          "Value": "apexmotion-disruption-consumers"
+        }
+      ],
+      "Unit": "Seconds"
+    },
+    {
+      "AlarmName": "apexmotion-neptune-query-latency",
+      "AlarmDescription": "High Severity: Triggers when Amazon Neptune OpenCypher query latency exceeds 2.0 seconds for 2 consecutive evaluation periods (LLD Sec 8.3).",
+      "Threshold": 2.0,
+      "ComparisonOperator": "GreaterThanThreshold",
+      "EvaluationPeriods": 2,
+      "Period": 60,
+      "TreatMissingData": "missing",
+      "MetricName": "OpenCypherRequestsLatency",
+      "Namespace": "ApexMotion/Neptune",
+      "Statistic": "Average",
+      "Dimensions": [
+        {
+          "Name": "Cluster",
+          "Value": "apexmotion-neptune-cluster"
+        }
+      ],
+      "Unit": "Seconds"
+    },
+    {
+      "AlarmName": "apexmotion-deterministic-math-mismatch",
+      "AlarmDescription": "P0 Critical Emergency Halt: Triggers immediate halt of action drafting pipeline if deterministic risk engine calculation hash deviates (LLD Sec 8.3).",
+      "Threshold": 0.0,
+      "ComparisonOperator": "GreaterThanThreshold",
+      "EvaluationPeriods": 1,
+      "Period": 60,
+      "TreatMissingData": "missing",
+      "MetricName": "CalculationHashVerificationFailure",
+      "Namespace": "ApexMotion/Platform",
+      "Statistic": "Sum",
+      "Dimensions": [
+        {
+          "Name": "Service",
+          "Value": "risk-calculator"
+        }
+      ],
+      "Unit": "Count"
+    },
+    {
+      "AlarmName": "apexmotion-dlq-accumulation",
+      "AlarmDescription": "Medium Severity: Triggers alert when Dead Letter Queue depth exceeds 50 rejected supplier disruption events (FRD FMEA-04).",
+      "Threshold": 50.0,
+      "ComparisonOperator": "GreaterThanThreshold",
+      "EvaluationPeriods": 2,
+      "Period": 60,
+      "TreatMissingData": "missing",
+      "MetricName": "DeadLetterQueueDepth",
+      "Namespace": "ApexMotion/Kafka",
+      "Statistic": "Maximum",
+      "Dimensions": [
+        {
+          "Name": "Topic",
+          "Value": "dlq.operational.events"
+        }
+      ],
+      "Unit": "Count"
+    }
+  ]
+}

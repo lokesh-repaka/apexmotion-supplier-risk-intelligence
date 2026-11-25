@@ -11,6 +11,18 @@ from src.core.audit import (
     sanitize_audit_payload,
     write_audit_log,
 )
+from src.core.cloudwatch import (
+    ALARM_API_ERROR_RATE,
+    ALARM_DETERMINISTIC_MATH_MISMATCH,
+    ALARM_DLQ_ACCUMULATION,
+    ALARM_INVESTIGATION_P95_LATENCY,
+    ALARM_KAFKA_CONSUMER_LAG,
+    ALARM_NEPTUNE_QUERY_LATENCY,
+    DEFAULT_ALARMS,
+    CloudWatchAlarmConfig,
+    CloudWatchAlarmManager,
+    get_cloudwatch_alarm_manager,
+)
 from src.core.config import Settings, get_settings
 from src.core.demo_auth import (
     DEMO_PERSONAS,
@@ -190,4 +202,14 @@ __all__ = [
     "record_approval_token_minted",
     "generate_latest_metrics",
     "reset_metrics",
+    "ALARM_INVESTIGATION_P95_LATENCY",
+    "ALARM_API_ERROR_RATE",
+    "ALARM_KAFKA_CONSUMER_LAG",
+    "ALARM_NEPTUNE_QUERY_LATENCY",
+    "ALARM_DETERMINISTIC_MATH_MISMATCH",
+    "ALARM_DLQ_ACCUMULATION",
+    "DEFAULT_ALARMS",
+    "CloudWatchAlarmConfig",
+    "CloudWatchAlarmManager",
+    "get_cloudwatch_alarm_manager",
 ]

@@ -951,6 +951,31 @@
     - **Comprehensive Test Suite**: 64 unit tests in `tests/unit/test_quarantined_reader.py` achieving **100.00% statement and branch coverage** on both `src/guardrails/input_sanitizer.py` (99 stmts) and `src/llm/quarantined_reader.py` (126 stmts), bringing total project test count to **1,043 passed tests** (927 Python + 116 Frontend across 73 test suites).
     - **Phase 14 (Unit & Integration Tests) progress is now 3/6 (50.0%).**
 
+70. **Investigation Flow Multi-Agent Integration, Consequential Spend Gate Enforcement, and Forensic Audit Immutability (SEC-072, BR-RULE-001, BR-RULE-007, CLAUDE.md Sec 5.2, Sec 11, Sec 14, Sec 20.1)**:
+    - **End-to-End Investigation Lifecycle Verification**: Proved complete asynchronous lifecycle from Kafka disruption ingestion through triage, deterministic risk computation, HITL gate pause, dual executive sign-off, action execution, and forensic audit logging.
+    - **Triad of Separation & Canonical NanoCore Numerical Integrity**: Validated 100% deterministic pure Python arithmetic replication for canonical NanoCore Dresden fab cleanroom fire (142,000 units stock, 18,500 daily consumption, 9.0d delay, $100.25 unit cost):
+      - Days of Cover: `7.68` days
+      - Coverage Gap: `1.32` days
+      - Shortage Volume: `24,420` units
+      - Direct Financial Exposure: `$2,448,105.00` USD (`NUMERIC(14,2)`)
+      - Factory Line Halt Downtime Exposure: `€2,692,800.00` EUR (at €85,000/hr)
+      - Severity Classification: `CRITICAL`
+      - Spend Tier Authority: `DUAL_VP` (> $100,000 threshold)
+      - Zero LLM arithmetic guaranteed across all steps.
+    - **StateGraph Checkpointing & Consequential Spend Gate Suspension**: Proved that LangGraph StateGraph (`build_investigation_graph` with `MemorySaver`) interrupts before `action_node`, setting `workflow_status = WorkflowStatus.AWAITING_APPROVAL` and emitting a `hitl-required` event to Kafka with `required_signers_count=2` and 30-minute expiration.
+    - **Dual Executive Sign-Off & Single-Signer Execution Prevention**:
+      - Proved that submitting a single signature (Procurement Director) transitions state to `PARTIALLY_APPROVED` while strictly remaining suspended before `NODE_ACTION`.
+      - Proved that attempting to bypass with `approved=True` on a single signature is strictly rejected by the enforcer and action node hard pre-execution gate (`CLAUDE.md Sec 20.1`).
+      - Validated that submitting two distinct executive signatures (Procurement Director + VP Supply Chain) validates dual sign-off via AWS KMS ECDSA P-256 tokens and resumes through `NODE_ACTION`, executing mitigation and reaching `WorkflowStatus.EXECUTED`.
+    - **Database Anti-Replay & Parameter Tampering Defenses**:
+      - Verified that replaying an existing token hash raises `TokenReplayError` at the `HITLApprovalRepository` database level.
+      - Verified that presenting tokens with a tampered or mismatched monetary amount ($175,000 instead of $150,000) is rejected with `AMOUNT_MISMATCH` by `DualApprovalEnforcer`.
+    - **Low-Value Commitment Tier 1 Flow**: Verified that minor shortage commitments ($\le \$25,000$) route to `SpendTier.CATEGORY_MGR`, require a single signature with 1-hour TTL, and execute cleanly.
+    - **Buffer Stock Zero-Shortage Dismissal**: Verified that when incoming replenishment arrives prior to inventory exhaustion (`eta_days < days_of_cover`), the workflow dismisses cleanly, routing directly to `NODE_DISMISS` without HITL gate or financial expenditure.
+    - **Immutable Forensic Audit Trail**: Verified that all critical transition checkpoints (`SUPPLIER_DISRUPTION_INGESTED`, `DETERMINISTIC_RISK_CALCULATED`, `HITL_DUAL_APPROVAL_REQUIRED`, `APPROVAL_PARTIALLY_SIGNED`, `MITIGATION_ACTION_DISPATCHED`) are persisted append-only in `audit_logs` sharing a common distributed `trace_id`.
+    - **Comprehensive Test Suite**: 6 end-to-end integration tests in `tests/integration/test_investigation_flow.py` passing 100% offline, bringing total project test count across the suite to **1,060 passed tests** (944 Python + 116 Frontend across 74 test suites).
+    - **Phase 14 (Unit & Integration Tests) progress is now 4/6 (66.7%).**
+
 ---
 
 ## 5. Next Planned Tasks
@@ -961,11 +986,13 @@
   - **P13-2**: Neptune graph seed — supplier → component → plant edges, tier-chain links, 3 geopolitical risk nodes for NanoCore region (`feature/seed-graph-data`). Completed ✅
   - **P13-3**: Golden dataset (`tests/golden/`) — `nanocore_scenario.json` with exact inputs/expected outputs; 5 edge-case JSON files (`feature/seed-golden-datasets`). Completed ✅
   - **P13-4**: OpenSearch vector seed — 500 synthetic contract clauses chunked and embedded into `contracts-v1` index (`feature/seed-opensearch-vectors`). Completed ✅
-- **Phase 14 — Unit & Golden Test Hardening**: In Progress 🔄 (3/6 tasks done)
+- **Phase 14 — Unit & Golden Test Hardening**: In Progress 🔄 (4/6 tasks done)
   - **P14-1**: Risk calculator unit tests — NanoCore golden numbers, zero-stock edge case, zero-consumption guard, negative gap → zero shortage (`feature/tests-unit-risk-calculator`). Completed ✅
   - **P14-2**: HITL token unit tests — valid token, expired TTL, replay detection, wrong action binding, missing second signature (`feature/tests-unit-hitl-tokens`). Completed ✅
   - **P14-3**: Quarantined Reader unit tests — XML injection, markdown injection, Unicode bypass, clean text passthrough (`feature/tests-unit-quarantined-reader`). Completed ✅
-  - **P14-4**: Integration test — full investigation flow: Kafka event → triage → risk calculator → HITL gate → approval → audit log (`feature/tests-integration-investigation-flow`). Next 🔄
+  - **P14-4**: Integration test — full investigation flow: Kafka event → triage → risk calculator → HITL gate → approval → audit log (`feature/tests-integration-investigation-flow`). Completed ✅
+  - **P14-5**: Integration test — RBAC 403 scenarios: analyst calling approve route, category_manager signing >$100k action (`feature/tests-integration-rbac-scenarios`). Next 🔄
+
 
 
 

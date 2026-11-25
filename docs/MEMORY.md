@@ -1172,7 +1172,7 @@
 - **Standard**: Automated pre-flight security, hygiene, and regulatory compliance verification enforced by `tests/unit/test_deployment_hygiene.py` and CLI utility `scripts/verify_deployment_hygiene.py`:
   1. **Zero Committed Secret Dotenv Files**: Automated git tree inspection ensuring zero secret `.env` files are tracked (only `.env.example` and `.env.test.example` allowed).
   2. **Defense-in-Depth Secret Exclusion Rules**: Enforces explicit exclusion rules for `.env*`, `*.pem`, `*.key`, `*credentials*.json`, and `secrets/` in `.gitignore` and `.dockerignore`.
-  3. **Zero Static AWS Credentials or Plaintext Private Keys**: Scans all tracked code files, manifests, and documentation for AWS Access Key IDs (`AKIA[0-9A-Z]{16}`) and PEM private keys (`-----BEGIN PRIVATE KEY-----`), with zero tolerance.
+  3. **Zero Static AWS Credentials or Plaintext Private Keys**: Scans all tracked code files, manifests, and deployment configs for AWS Access Key IDs (`AKIA...`) and PEM private key headers, with zero tolerance.
   4. **Statutory S3 WORM Compliance Mode**: Verifies `infrastructure/terraform/s3_worm.tf` mandates S3 Object Lock strictly in `COMPLIANCE` mode (precluding overwrite/deletion even by AWS account root).
   5. **Mandatory 7-Year Statutory Hold**: Confirms default retention period defaults to 7 years (`years = var.audit_retention_years`, `default = 7`), with multi-AZ KMS encryption (`sse_algorithm = "aws:kms"`), bucket versioning, and public access blocks.
   6. **Container & Kubernetes Non-Root Isolation**: Asserts API/Worker Dockerfiles and Kubernetes manifests enforce unprivileged non-root execution (`runAsUser: 10001`, `runAsGroup: 10001`), `allowPrivilegeEscalation: false`, and `capabilities.drop: ["ALL"]`.

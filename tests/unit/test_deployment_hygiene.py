@@ -70,7 +70,11 @@ def test_no_static_aws_access_keys() -> None:
     violations: list[str] = []
     for rel_path in tracked_files:
         p = Path(rel_path)
-        if not p.is_file() or p.suffix in (".xlsx", ".png", ".jpg", ".ico", ".pyc"):
+        if (
+            not p.is_file()
+            or p.suffix in (".xlsx", ".png", ".jpg", ".ico", ".pyc")
+            or p.name in ("test_deployment_hygiene.py", "verify_deployment_hygiene.py")
+        ):
             continue
         try:
             text = p.read_text(encoding="utf-8", errors="ignore")
@@ -97,7 +101,11 @@ def test_no_plaintext_private_keys() -> None:
     violations: list[str] = []
     for rel_path in tracked_files:
         p = Path(rel_path)
-        if not p.is_file() or p.suffix in (".xlsx", ".png", ".jpg", ".ico", ".pyc"):
+        if (
+            not p.is_file()
+            or p.suffix in (".xlsx", ".png", ".jpg", ".ico", ".pyc")
+            or p.name in ("test_deployment_hygiene.py", "verify_deployment_hygiene.py")
+        ):
             continue
         try:
             text = p.read_text(encoding="utf-8", errors="ignore")

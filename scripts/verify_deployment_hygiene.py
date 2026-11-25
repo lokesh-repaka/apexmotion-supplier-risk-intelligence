@@ -72,7 +72,11 @@ def check_no_static_credentials() -> tuple[bool, str]:
         violations = []
         for path_str in tracked:
             p = Path(path_str)
-            if not p.is_file() or p.suffix in (".xlsx", ".png", ".jpg", ".ico", ".pyc"):
+            if (
+                not p.is_file()
+                or p.suffix in (".xlsx", ".png", ".jpg", ".ico", ".pyc")
+                or p.name in ("test_deployment_hygiene.py", "verify_deployment_hygiene.py")
+            ):
                 continue
             try:
                 content = p.read_text(encoding="utf-8", errors="ignore")

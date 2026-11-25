@@ -27,6 +27,7 @@ from src.agents.state import (
 from src.api.schemas.investigation import InvestigationStartRequest
 from src.core.audit import write_audit_log
 from src.core.logging import get_logger, get_trace_id
+from src.core.metrics import record_investigation_completion
 from src.core.security import AuthenticatedUser
 from src.database.models import AgentRun
 from src.database.repositories.agent_run_repository import AgentRunRepository
@@ -306,6 +307,12 @@ class InvestigationService:
                 langfuse_trace_id=langfuse_trace_id,
             )
 
+            # Record Prometheus investigation metrics (P15-3)
+            record_investigation_completion(
+                status=status_str,
+                duration_seconds=duration_ms / 1000.0,
+            )
+
             # Forensic audit log
             try:
                 await write_audit_log(
@@ -342,6 +349,11 @@ class InvestigationService:
                 investigation_id=investigation_id,
                 status="FAILED",
                 duration_ms=duration_ms,
+            )
+
+            record_investigation_completion(
+                status="FAILED",
+                duration_seconds=duration_ms / 1000.0,
             )
 
             try:

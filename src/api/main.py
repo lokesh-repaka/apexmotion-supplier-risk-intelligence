@@ -4,6 +4,7 @@ Initializes FastAPI application instance, lifespan context manager, CORS middlew
 request ID / distributed tracing middleware, and global error handling envelopes.
 """
 
+import time
 import uuid
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
@@ -21,6 +22,11 @@ from src.api.routes.risk_routes import router as risk_router
 from src.api.routes.supplier_routes import router as supplier_router
 from src.api.routes.websocket_routes import router as websocket_router
 from src.core.logging import bind_trace_id, get_logger, setup_logging
+from src.core.metrics import (
+    PROMETHEUS_CONTENT_TYPE,
+    generate_latest_metrics,
+    record_http_request,
+)
 from src.core.telemetry import (
     extract_trace_context,
     get_current_trace_id,
@@ -81,8 +87,16 @@ async def trace_and_request_id_middleware(request: Request, call_next: Any) -> R
         trace_id = incoming_id or otel_trace_id or str(uuid.uuid4())
         request.state.trace_id = trace_id
 
+        start_time = time.perf_counter()
         with bind_trace_id(trace_id):
             response: Response = await call_next(request)
+            duration_seconds = time.perf_counter() - start_time
+            record_http_request(
+                method=request.method,
+                endpoint=request.url.path,
+                status_code=response.status_code,
+                duration_seconds=duration_seconds,
+            )
             span.set_attribute("http.status_code", response.status_code)
             response.headers["X-Request-ID"] = trace_id
             response.headers["X-Trace-ID"] = trace_id
@@ -118,6 +132,16 @@ register_error_handlers(app)
 # ------------------------------------------------------------------------------
 # API Routers Mount
 # ------------------------------------------------------------------------------
+
+
+@app.get("/metrics", tags=["Observability"], response_class=Response)
+async def metrics() -> Response:
+    """Export Prometheus metrics exposition text for platform scraping."""
+    return Response(
+        content=generate_latest_metrics(),
+        media_type=PROMETHEUS_CONTENT_TYPE,
+    )
+
 
 app.include_router(health_router)
 app.include_router(risk_router)

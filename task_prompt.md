@@ -1,6 +1,6 @@
 You have access to the project's authoritative documentation: `TASKS.md`, `CLAUDE.md`, `GEMINI.md`, `.agents/rules/`, and architecture specifications in `docs/` (`HLD_*.md`, `LLD_*.md`, `PRD_*.md`, `BRD_*.md`, `FRD_*.md`).
 
-Go ahead and complete **P16-2 · `Dockerfile.worker` — Celery worker image for background enrichment and Kafka consumer**, as defined in `TASKS.md`.
+Go ahead and complete **P16-3 · Terraform modules (`infrastructure/terraform/`) — EKS 1.30, Neptune, Aurora PG 16 Serverless v2, MSK 3-broker, OpenSearch, ElastiCache Redis, S3 Object Lock, KMS**, as defined in `TASKS.md`.
 
 ---
 

@@ -1,6 +1,7 @@
 # ==============================================================================
 # ApexMotion Supplier Risk Intelligence Platform - Worker Containerfile
-# Background worker for Kafka signal consumption and LangGraph orchestration
+# Background worker for Kafka signal consumption, enrichment, and LangGraph orchestration
+# Reference: TASKS.md (P16-2) & CLAUDE.md Sec 15
 # ==============================================================================
 
 FROM python:3.12-slim AS builder
@@ -15,14 +16,14 @@ ENV PYTHONUNBUFFERED=1 \
 # Install build dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
-    curl \
+    gcc \
     && rm -rf /var/lib/apt/lists/*
 
 # Install python dependencies
 COPY pyproject.toml CLAUDE.md ./
 COPY src/ ./src/
-RUN pip install --upgrade pip setuptools wheel && \
-    pip install .
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir .
 
 # ==============================================================================
 # Final Runtime Stage
@@ -35,7 +36,7 @@ ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONPATH="/app"
 
-# Security: Create non-root system group and user
+# Security: Create non-root system group and user conforming to CIS Docker Benchmark
 RUN groupadd -g 10001 appgroup && \
     useradd -u 10001 -g appgroup -s /sbin/nologin -M appuser
 
@@ -43,8 +44,10 @@ RUN groupadd -g 10001 appgroup && \
 COPY --from=builder /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
 COPY --from=builder /usr/local/bin /usr/local/bin
 
-# Copy source code
+# Copy source code and configuration
 COPY src/ /app/src/
+COPY alembic.ini /app/alembic.ini
+COPY pyproject.toml /app/pyproject.toml
 
 # Set ownership to unprivileged user
 RUN chown -R appuser:appgroup /app
@@ -52,5 +55,9 @@ RUN chown -R appuser:appgroup /app
 # Switch to non-root user
 USER appuser
 
-# Launch worker loop
+# Container liveness health check
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+    CMD python3 -c "import src.kafka.consumer; print('worker ok')" || exit 1
+
+# Production worker entrypoint (Kafka signal consumer / Celery background enrichment)
 CMD ["python3", "-m", "src.kafka.consumer"]

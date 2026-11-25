@@ -31,11 +31,11 @@
 | **Phase 13 Progress** | 4 / 4 Tasks Completed (100%) | Completed ✅ |
 | **Phase 14 Progress** | 6 / 6 Tasks Completed (100%) | Completed ✅ |
 | **Phase 15 Progress** | 5 / 5 Tasks Completed (100%) | Completed ✅ |
-| **Phase 16 Progress** | 4 / 6 Tasks Completed (67%) | In Progress 🔄 |
-| **Total Test Suites** | 85 (71 Python suites + 14 Frontend suites) | PASSED ✅ |
-| **Total Test Cases** | 1,180 tests (1,064 Python [1,007 unit + 26 integration + 31 golden] + 116 Frontend unit) | 100% Passing (0 failures) |
+| **Phase 16 Progress** | 5 / 6 Tasks Completed (83%) | In Progress 🔄 |
+| **Total Test Suites** | 86 (72 Python suites + 14 Frontend suites) | PASSED ✅ |
+| **Total Test Cases** | 1,191 tests (1,075 Python [1,018 unit + 26 integration + 31 golden] + 116 Frontend unit) | 100% Passing (0 failures) |
 | **Code Coverage (`src/`)** | **95.22%** statement coverage | Exceeds 80% DoD gate |
-| **Active Branch** | `feature/kubernetes-manifests-keda` | In Progress 🔄 |
+| **Active Branch** | `feature/cd-pipeline-eks-deploy` | In Progress 🔄 |
 
 ---
 
@@ -1152,6 +1152,22 @@
 
 ---
 
+### Invariant 82: Zero-Downtime Blue-Green Continuous Delivery & OIDC Security (P16-5)
+- **Standard**: Automated enterprise delivery pipelines engineered with strict separation between staging and production environments, eliminating long-lived credentials and ensuring zero-downtime releases:
+  1. **Short-Lived AWS OIDC Authentication**: Both staging (`.github/workflows/cd-staging.yml`) and production (`.github/workflows/cd-production.yml`) workflows use `aws-actions/configure-aws-credentials@v4` with role assumption (`role-to-assume: ${{ secrets.AWS_ROLE_ARN_* }}`), eliminating static `AKIA` access keys.
+  2. **Automated Container Packaging & Registry Delivery**: Pre-flight validation gate and multi-stage Docker build/push actions publishing container images to Amazon ECR tagged with immutable Git SHAs (`staging-${{ github.sha }}`, `prod-${{ github.sha }}`) and semantic latest aliases.
+  3. **Continuous Delivery to Staging EKS**: Automated `kubectl apply -k infrastructure/kubernetes/` upon merge to `development`, rolling out API and worker images with automated rollout status verification.
+  4. **Production Pre-Flight Quality Gate**: Production releases to `main` require a successful pre-flight quality gate enforcing full offline pytest and golden evaluation suites (`tests/golden/`, `tests/unit/`, `--cov-fail-under=80`) before initiating any container build or cloud deployment.
+  5. **Zero-Downtime Blue-Green Cutover Automation (`infrastructure/kubernetes/blue_green_cutover.sh`)**:
+     - Probes target color revision (`/health`) pre-flight until verified healthy before traffic switch.
+     - Atomically patches primary Service selector (`spec.selector.deployment_color: <target_color>`) via `kubectl patch service`.
+     - Verifies live traffic status post-cutover.
+     - Enforces an automated Bash `trap rollback EXIT` that immediately reverts the service selector back to previous active color on any step failure.
+     - Retains previous active color at reduced replica count during stabilization window for instantaneous recovery.
+- **Verification**: `tests/unit/test_cd_pipeline.py` (11 unit tests, 100% pass rate).
+
+---
+
 ## 5. Next Planned Tasks
 - **Phase 11 — FastAPI API Routes**: Completed ✅ (6/6 tasks done)
 - **Phase 12 — React Frontend**: Completed ✅ (6/6 tasks done)
@@ -1163,13 +1179,13 @@
   - **P15-3**: Prometheus metrics export — counter, gauge, and histogram metrics (`feature/observability-prometheus-metrics`). Completed ✅
   - **P15-4**: Grafana dashboard JSON (`feature/observability-grafana-dashboard`). Completed ✅
   - **P15-5**: CloudWatch alarms (`feature/observability-cloudwatch-alarms`). Completed ✅
-- **Phase 16 — Infrastructure & Delivery**: In Progress 🔄 (4/6 tasks done, 67%)
+- **Phase 16 — Infrastructure & Delivery**: In Progress 🔄 (5/6 tasks done, 83%)
   - **P16-1**: `Dockerfile.api` — FastAPI + Uvicorn image (Python 3.12-slim, non-root user, health check) (`feature/docker-api-image`). Completed ✅
   - **P16-2**: `Dockerfile.worker` — Celery worker image for background enrichment and Kafka consumer (`feature/docker-worker-image`). Completed ✅
   - **P16-3**: Terraform modules (`infrastructure/terraform/`) — EKS 1.30, Neptune, Aurora PG 16 Serverless v2, MSK 3-broker, OpenSearch, ElastiCache Redis, S3 Object Lock, KMS (`feature/terraform-aws-infrastructure`). Completed ✅
   - **P16-4**: Kubernetes manifests (`infrastructure/kubernetes/`) — Deployments, Services, KEDA `ScaledObject` for Kafka consumer, HPA for API pods (`feature/kubernetes-manifests-keda`). Completed ✅
-  - **P16-5**: GitHub Actions CD pipeline — build → push ECR → `kubectl apply` → blue-green cutover; separate workflows for `staging` and `production` (`feature/cd-pipeline-eks-deploy`). Next 🔄
-  - **P16-6**: Deployment hygiene checks — no `.env` committed, no static AWS credentials, S3 Object Lock compliance mode verified, WORM 7-year hold confirmed (`feature/tests-deployment-hygiene`). Pending ❌
+  - **P16-5**: GitHub Actions CD pipeline — build → push ECR → `kubectl apply` → blue-green cutover; separate workflows for `staging` and `production` (`feature/cd-pipeline-eks-deploy`). Completed ✅
+  - **P16-6**: Deployment hygiene checks — no `.env` committed, no static AWS credentials, S3 Object Lock compliance mode verified, WORM 7-year hold confirmed (`feature/tests-deployment-hygiene`). Next 🔄
 
 
 

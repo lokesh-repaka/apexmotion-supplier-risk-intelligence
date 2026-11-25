@@ -1,6 +1,6 @@
 You have access to the project's authoritative documentation: `TASKS.md`, `CLAUDE.md`, `GEMINI.md`, `.agents/rules/`, and architecture specifications in `docs/` (`HLD_*.md`, `LLD_*.md`, `PRD_*.md`, `BRD_*.md`, `FRD_*.md`).
 
-Go ahead and complete **P16-5 · GitHub Actions CD pipeline — build → push ECR → `kubectl apply` → blue-green cutover; separate workflows for `staging` and `production`**, as defined in `TASKS.md`.
+Go ahead and complete **P16-6 · Deployment hygiene checks — no `.env` committed, no static AWS credentials, S3 Object Lock compliance mode verified, WORM 7-year hold confirmed**, as defined in `TASKS.md`.
 
 ---
 

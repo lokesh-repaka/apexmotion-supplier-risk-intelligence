@@ -1,6 +1,6 @@
 You have access to the project's authoritative documentation: `TASKS.md`, `CLAUDE.md`, `GEMINI.md`, `.agents/rules/`, and architecture specifications in `docs/` (`HLD_*.md`, `LLD_*.md`, `PRD_*.md`, `BRD_*.md`, `FRD_*.md`).
 
-Go ahead and complete **P15-2 · Langfuse callback integration — `CallbackHandler` on every LangGraph agent run; records tokens used, latency, and cost per investigation**, as defined in `TASKS.md`.
+Go ahead and complete **P15-3 · Prometheus metrics export — counter, gauge, and histogram metrics: request latency, agent run duration, token count, cost accumulation, and circuit breaker trip count**, as defined in `TASKS.md`.
 
 ---
 

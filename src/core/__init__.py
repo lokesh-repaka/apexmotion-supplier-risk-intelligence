@@ -34,6 +34,12 @@ from src.core.hitl_tokens import (
     get_spend_tier,
     get_token_ttl,
 )
+from src.core.langfuse import (
+    INVESTIGATION_COST_BUDGET_USD,
+    ApexLangfuseCallbackHandler,
+    calculate_llm_cost,
+    get_langfuse_callback_handler,
+)
 from src.core.logging import bind_trace_id, get_logger, get_trace_id, setup_logging
 from src.core.security import (
     ROLE_HIERARCHY,
@@ -128,4 +134,8 @@ __all__ = [
     "get_actor_audit_trail",
     "coerce_uuid",
     "sanitize_audit_payload",
+    "INVESTIGATION_COST_BUDGET_USD",
+    "ApexLangfuseCallbackHandler",
+    "calculate_llm_cost",
+    "get_langfuse_callback_handler",
 ]

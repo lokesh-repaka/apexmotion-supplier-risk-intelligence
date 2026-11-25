@@ -62,8 +62,9 @@ class AgentRunRepository(BaseRepository[AgentRun]):
         duration_ms: int,
         tokens_used: int | None = None,
         cost_usd: Decimal | None = None,
+        langfuse_trace_id: str | None = None,
     ) -> AgentRun | None:
-        """Finalize agent execution recording latency, status, tokens, and cost."""
+        """Finalize agent execution recording latency, status, tokens, cost, and trace."""
         run = await self.get_by_id(run_id)
         if run is None:
             return None
@@ -74,5 +75,7 @@ class AgentRunRepository(BaseRepository[AgentRun]):
             run.tokens_used = tokens_used
         if cost_usd is not None:
             run.cost_usd = cost_usd
+        if langfuse_trace_id is not None:
+            run.langfuse_trace_id = langfuse_trace_id
 
         return await self.update(run)

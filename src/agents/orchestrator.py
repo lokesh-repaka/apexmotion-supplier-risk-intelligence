@@ -29,6 +29,10 @@ from src.agents.state import (
     WorkflowStatus,
     create_initial_state,
 )
+from src.core.langfuse import (
+    ApexLangfuseCallbackHandler,
+    get_langfuse_callback_handler,
+)
 from src.core.logging import get_logger
 from src.core.telemetry import trace_span
 
@@ -55,8 +59,40 @@ class InvestigationOrchestrator:
         }
         with trace_span("investigation_workflow_execute", attributes=init_attrs) as span:
             logger.info("Executing investigation workflow for alert: %s", state.get("alert_id"))
-            result = await self.graph.ainvoke(state, config=config)
+
+            # Attach Langfuse CallbackHandler for LLM telemetry & token accounting (P15-2)
+            active_config: dict[str, Any] = dict(config) if config else {}
+            raw_callbacks = active_config.get("callbacks")
+            existing_callbacks: list[Any] = (
+                list(raw_callbacks) if isinstance(raw_callbacks, list) else []
+            )
+            langfuse_handler: ApexLangfuseCallbackHandler | None = None
+            for cb in existing_callbacks:
+                if isinstance(cb, ApexLangfuseCallbackHandler):
+                    langfuse_handler = cb
+                    break
+            if langfuse_handler is None:
+                langfuse_handler = get_langfuse_callback_handler(
+                    alert_id=state.get("alert_id"),
+                    investigation_id=state.get("case_id"),
+                    metadata={
+                        "supplier_id": state.get("supplier_id"),
+                        "component_sku": state.get("component_sku"),
+                    },
+                )
+                existing_callbacks.append(langfuse_handler)
+                active_config["callbacks"] = existing_callbacks
+
+            result = await self.graph.ainvoke(state, config=cast(RunnableConfig, active_config))
             res_dict = cast(SupplierRiskState, result)
+            if langfuse_handler is not None:
+                langfuse_handler.flush()
+                metrics = langfuse_handler.get_metrics()
+                meta = dict(res_dict.get("metadata") or {})
+                meta["llm_metrics"] = metrics
+                meta["langfuse_trace_id"] = metrics["trace_id"]
+                res_dict["metadata"] = meta
+
             if res_dict.get("workflow_status"):
                 span.set_attribute("workflow_status", str(res_dict["workflow_status"]))
             return res_dict
@@ -74,22 +110,46 @@ class InvestigationOrchestrator:
         }
         with trace_span("investigation_workflow_resume", attributes=init_attrs) as span:
             logger.info("Resuming investigation thread %s with HITL approval decision", thread_id)
-            active_config = config or cast(
-                RunnableConfig, {"configurable": {"thread_id": thread_id}}
+            active_config: dict[str, Any] = (
+                dict(config) if config else {"configurable": {"thread_id": thread_id}}
             )
+            raw_callbacks = active_config.get("callbacks")
+            existing_callbacks: list[Any] = (
+                list(raw_callbacks) if isinstance(raw_callbacks, list) else []
+            )
+            langfuse_handler: ApexLangfuseCallbackHandler | None = None
+            for cb in existing_callbacks:
+                if isinstance(cb, ApexLangfuseCallbackHandler):
+                    langfuse_handler = cb
+                    break
+            if langfuse_handler is None:
+                langfuse_handler = get_langfuse_callback_handler(
+                    investigation_id=thread_id,
+                    metadata={"action": "resume_investigation"},
+                )
+                existing_callbacks.append(langfuse_handler)
+                active_config["callbacks"] = existing_callbacks
 
             # Update checkpointed state with approved HITL decision
             await self.graph.aupdate_state(
-                active_config,
+                cast(RunnableConfig, active_config),
                 {"hitl_decision": hitl_decision},
             )
 
             # Re-invoke to process approval through hitl_gate and action nodes
             result = await self.graph.ainvoke(
                 {"hitl_decision": hitl_decision},
-                config=active_config,
+                config=cast(RunnableConfig, active_config),
             )
             res_dict = cast(SupplierRiskState, result)
+            if langfuse_handler is not None:
+                langfuse_handler.flush()
+                metrics = langfuse_handler.get_metrics()
+                meta = dict(res_dict.get("metadata") or {})
+                meta["llm_metrics"] = metrics
+                meta["langfuse_trace_id"] = metrics["trace_id"]
+                res_dict["metadata"] = meta
+
             if res_dict.get("workflow_status"):
                 span.set_attribute("workflow_status", str(res_dict["workflow_status"]))
             return res_dict

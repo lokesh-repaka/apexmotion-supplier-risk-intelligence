@@ -30,11 +30,11 @@
 | **Phase 12 Progress** | 6 / 6 Tasks Completed (100%) | Completed ✅ |
 | **Phase 13 Progress** | 4 / 4 Tasks Completed (100%) | Completed ✅ |
 | **Phase 14 Progress** | 6 / 6 Tasks Completed (100%) | Completed ✅ |
-| **Phase 15 Progress** | 1 / 5 Tasks Completed (20%) | In Progress 🔄 |
-| **Total Test Suites** | 76 (62 Python suites + 14 Frontend suites) | PASSED ✅ |
-| **Total Test Cases** | 1,099 tests (983 Python [926 unit + 26 integration + 31 golden] + 116 Frontend unit) | 100% Passing (0 failures) |
+| **Phase 15 Progress** | 2 / 5 Tasks Completed (40%) | In Progress 🔄 |
+| **Total Test Suites** | 77 (63 Python suites + 14 Frontend suites) | PASSED ✅ |
+| **Total Test Cases** | 1,111 tests (995 Python [938 unit + 26 integration + 31 golden] + 116 Frontend unit) | 100% Passing (0 failures) |
 | **Code Coverage (`src/`)** | **95.76%** statement coverage (100% on input_sanitizer.py, hitl_tokens.py, spend_tier_router.py & calculator.py) | Exceeds 80% DoD gate |
-| **Active Branch** | `feature/observability-otel-setup` | In Progress 🔄 |
+| **Active Branch** | `feature/observability-langfuse-tracing` | In Progress 🔄 |
 
 ---
 
@@ -1027,15 +1027,28 @@
 
 ---
 
+### Invariant 74: Langfuse CallbackHandler Integration & LLM Cost Governance (P15-2)
+- **Standard**: `ApexLangfuseCallbackHandler` instrumented across every LangGraph investigation run, recording tokens used (prompt, completion, total), end-to-end step latency, and exact monetary costs calculated strictly with `Decimal` precision (BR-RULE-001) against model pricing tiers, enforcing investigation budget limits ($\le \$0.15$ USD per CLAUDE.md Section 13) and persisting trace correlation to `agent_runs` database records.
+- **Verification**: `tests/unit/test_langfuse_callback.py` (12 unit tests, 94% telemetry module coverage, 95.76% project-wide coverage).
+- **Enforcement Rules**:
+  1. **CallbackHandler Heritage**: `ApexLangfuseCallbackHandler` subclasses `langfuse.langchain.CallbackHandler`, intercepting `on_llm_start`, `on_llm_end`, `on_llm_error`, `on_chain_start`, `on_chain_end`, and `flush`.
+  2. **Model Pricing Tiers & Decimal Arithmetic**: Exact pricing table for Claude 3.5 Sonnet ($3.00 prompt / $15.00 completion per 1M), Claude 3.5 Haiku ($0.80 prompt / $4.00 completion per 1M), and self-hosted Llama 3.1 70B ($0.00 direct API cost), quantized to 4 decimal places using `ROUND_HALF_UP`. Standard IEEE 754 float types are strictly prohibited.
+  3. **Investigation Budget SLO**: Hard threshold verification `is_cost_within_budget = cost_usd <= Decimal("0.1500")` flags runaway inference loops or context bloat per CLAUDE.md Section 13.
+  4. **Automated Orchestrator Attachment**: `InvestigationOrchestrator.run_investigation` and `resume_investigation` automatically instantiate and inject `ApexLangfuseCallbackHandler(trace_name=f"investigation.{alert_id}")` (CLAUDE.md Sec 8.1) if not passed in `config["callbacks"]`, attaching `llm_metrics` and `langfuse_trace_id` to state metadata.
+  5. **Database AgentRun Synchronization**: `InvestigationService._execute_workflow` extracts telemetry metrics and commits `duration_ms`, `tokens_used`, `cost_usd`, and `langfuse_trace_id` to Aurora PostgreSQL `agent_runs` via `AgentRunRepository.complete_run`.
+  6. **Strict Offline Isolation**: When `USE_MOCK_LLM=true` or missing live API keys, handler defaults to offline isolation mode, bypassing external Langfuse cloud calls and guaranteeing deterministic, zero-network test execution.
+
+---
+
 ## 5. Next Planned Tasks
 - **Phase 11 — FastAPI API Routes**: Completed ✅ (6/6 tasks done)
 - **Phase 12 — React Frontend**: Completed ✅ (6/6 tasks done)
 - **Phase 13 — Supplier Seed Data & Golden Datasets**: Completed ✅ (4/4 tasks done)
 - **Phase 14 — Unit & Golden Test Hardening**: Completed ✅ (6/6 tasks done)
-- **Phase 15 — Observability**: In Progress 🔄 (1/5 tasks done)
+- **Phase 15 — Observability**: In Progress 🔄 (2/5 tasks done)
   - **P15-1**: OpenTelemetry setup — @vercel/otel-style span instrumentation on all FastAPI routes and agent nodes; trace_id propagated to every log line (`feature/observability-otel-setup`). Completed ✅
-  - **P15-2**: Langfuse callback integration — CallbackHandler on every LangGraph agent run; records tokens used, latency, and cost per investigation (`feature/observability-langfuse-tracing`). Next 🔄
-  - **P15-3**: Prometheus metrics export (`feature/observability-prometheus-metrics`). Pending ❌
+  - **P15-2**: Langfuse callback integration — CallbackHandler on every LangGraph agent run; records tokens used, latency, and cost per investigation (`feature/observability-langfuse-tracing`). Completed ✅
+  - **P15-3**: Prometheus metrics export — counter, gauge, and histogram metrics (`feature/observability-prometheus-metrics`). Next 🔄
   - **P15-4**: Grafana dashboard JSON (`feature/observability-grafana-dashboard`). Pending ❌
   - **P15-5**: CloudWatch alarms (`feature/observability-cloudwatch-alarms`). Pending ❌
 

@@ -156,6 +156,19 @@ class ApexLangfuseCallbackHandler(CallbackHandler):
         additional_cost = calculate_llm_cost(prompt_tokens, completion_tokens, model=model)
         self.cost_usd += additional_cost
 
+        # Record Prometheus token and cost metrics (P15-3)
+        try:
+            from src.core.metrics import record_llm_cost, record_llm_tokens
+
+            record_llm_tokens(
+                prompt_tokens=prompt_tokens,
+                completion_tokens=completion_tokens,
+                model=model or "claude-3-5-sonnet",
+            )
+            record_llm_cost(cost_usd=additional_cost, model=model or "claude-3-5-sonnet")
+        except Exception as exc:
+            logger.debug("Failed to record Prometheus LLM metrics: %s", exc)
+
     def on_llm_start(
         self,
         serialized: dict[str, Any] | None,

@@ -1040,16 +1040,37 @@
 
 ---
 
+### Invariant 75: Prometheus Metrics Export & Operational Health Monitoring (P15-3)
+- **Standard**: Centralized Prometheus metrics collection and exposition via `src/core/metrics.py`, adhering strictly to `apexmotion_` namespace conventions, exposing an unauthenticated `/metrics` endpoint returning Prometheus exposition format (`PROMETHEUS_CONTENT_TYPE`), with calibrated histogram buckets for HTTP requests, investigations (tracking the 90s SLA limit), and deterministic risk calculations, counters for requests, completions, LLM tokens/costs (with exact `Decimal` precision per BR-RULE-001), circuit breaker trips, security injections blocked, and KMS tokens minted, and gauges for Kafka consumer lag and pending HITL approvals.
+- **Verification**: `tests/unit/test_prometheus_metrics.py` (8 unit tests, 97% module coverage, 95.20% project-wide coverage across 946 Python unit tests).
+- **Enforcement Rules**:
+  1. **Namespace & Naming Conventions**: All metrics strictly use the `apexmotion_` prefix (e.g., `apexmotion_http_requests_total`, `apexmotion_investigation_duration_seconds`, `apexmotion_llm_tokens_total`, `apexmotion_circuit_breaker_trips_total`).
+  2. **Calibrated Histogram Buckets**:
+     - `apexmotion_http_request_duration_seconds`: `[0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0]`
+     - `apexmotion_investigation_duration_seconds`: `[5.0, 10.0, 30.0, 60.0, 75.0, 90.0, 120.0, 180.0]` (explicitly monitoring the p95 $\le$ 90s SLA boundary)
+     - `apexmotion_deterministic_calculation_duration_seconds`: `[0.001, 0.002, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5]`
+  3. **Strict Decimal Precision Invariant (BR-RULE-001)**: `record_llm_cost` takes `Decimal | float` and converts strictly through `float(Decimal(cost_usd))` to prevent float drift before Prometheus counter accumulation.
+  4. **FastAPI Middleware Integration**: `trace_and_request_id_middleware` automatically measures route latency with `time.perf_counter()`, normalizes path templates (avoiding cardinality explosion), and updates `apexmotion_http_requests_total` and `apexmotion_http_request_duration_seconds`.
+  5. **Unauthenticated /metrics Scraping**: Mounted on `GET /metrics` returning `PROMETHEUS_CONTENT_TYPE` (`text/plain; version=0.0.4; charset=utf-8`), bypassing Keycloak JWT authentication for Prometheus scrapers and Kubernetes probes.
+  6. **Multi-Domain Instrumentation**:
+     - `InvestigationService`: records `apexmotion_investigations_total` and latency upon workflow termination/failure.
+     - `ApexLangfuseCallbackHandler`: records `apexmotion_llm_tokens_total` and `apexmotion_llm_cost_usd_total` in `record_tokens`.
+     - Gauges: `set_kafka_consumer_lag` and `set_hitl_pending_count`.
+     - Security Counters: `record_circuit_breaker_trip`, `record_quarantined_injection`, `record_approval_token_minted`.
+  7. **Test Isolation**: `reset_metrics()` utility clears internal collector label dictionaries between test runs to guarantee zero test pollution.
+
+---
+
 ## 5. Next Planned Tasks
 - **Phase 11 — FastAPI API Routes**: Completed ✅ (6/6 tasks done)
 - **Phase 12 — React Frontend**: Completed ✅ (6/6 tasks done)
 - **Phase 13 — Supplier Seed Data & Golden Datasets**: Completed ✅ (4/4 tasks done)
 - **Phase 14 — Unit & Golden Test Hardening**: Completed ✅ (6/6 tasks done)
-- **Phase 15 — Observability**: In Progress 🔄 (2/5 tasks done)
+- **Phase 15 — Observability**: In Progress 🔄 (3/5 tasks done)
   - **P15-1**: OpenTelemetry setup — @vercel/otel-style span instrumentation on all FastAPI routes and agent nodes; trace_id propagated to every log line (`feature/observability-otel-setup`). Completed ✅
   - **P15-2**: Langfuse callback integration — CallbackHandler on every LangGraph agent run; records tokens used, latency, and cost per investigation (`feature/observability-langfuse-tracing`). Completed ✅
-  - **P15-3**: Prometheus metrics export — counter, gauge, and histogram metrics (`feature/observability-prometheus-metrics`). Next 🔄
-  - **P15-4**: Grafana dashboard JSON (`feature/observability-grafana-dashboard`). Pending ❌
+  - **P15-3**: Prometheus metrics export — counter, gauge, and histogram metrics (`feature/observability-prometheus-metrics`). Completed ✅
+  - **P15-4**: Grafana dashboard JSON (`feature/observability-grafana-dashboard`). Next 🔄
   - **P15-5**: CloudWatch alarms (`feature/observability-cloudwatch-alarms`). Pending ❌
 
 

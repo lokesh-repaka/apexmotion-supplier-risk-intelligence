@@ -15,7 +15,6 @@ Implements:
 """
 
 import hashlib
-import html
 import re
 from collections.abc import Sequence
 from dataclasses import dataclass
@@ -25,6 +24,10 @@ from litellm.utils import token_counter
 
 from src.core.audit import write_audit_log
 from src.core.logging import get_logger, get_trace_id
+from src.guardrails.input_sanitizer import (
+    InputSanitizer,
+    get_input_sanitizer,
+)
 
 logger = get_logger("apexmotion.llm.quarantined_reader")
 
@@ -109,6 +112,7 @@ class PromptInjectionDetectedError(Exception):
         message: str = "Input payload contained blacklisted instruction sequences. Text has been quarantined.",
         injection_score: float = 0.0,
         payload: SanitizedPayload | None = None,
+        result: Any = None,
     ) -> None:
         super().__init__(message)
         self.message = message
@@ -116,6 +120,7 @@ class PromptInjectionDetectedError(Exception):
         self.error_code = "SEC_422_INJECTION"
         self.injection_score = injection_score
         self.payload = payload
+        self.result = result
 
 
 # ------------------------------------------------------------------------------
@@ -181,9 +186,11 @@ class QuarantinedReader:
         self,
         default_max_tokens: int = DEFAULT_MAX_TOKENS,
         model: str = DEFAULT_FALLBACK_MODEL,
+        sanitizer: InputSanitizer | None = None,
     ) -> None:
         self.default_max_tokens = default_max_tokens
         self.model = model
+        self.sanitizer = sanitizer or get_input_sanitizer()
 
     def sanitize(
         self,
@@ -196,13 +203,14 @@ class QuarantinedReader:
         """Sanitize an untrusted text payload synchronously.
 
         Steps:
-        1. Strips non-printable ASCII control characters.
-        2. Normalizes and unescapes HTML entities, then strips script blocks and HTML tags.
-        3. Strips delimiter breakout attempts to preserve quarantine encapsulation.
-        4. Detects prompt injection signatures, computes injection score, and redacts directives.
-        5. Enforces max token budget and truncates if necessary.
-        6. Computes SHA-256 hashes of raw and sanitized text.
-        7. Enforces passive XML structural encapsulation in `<untrusted_supplier_data>`.
+        1. Strips non-printable ASCII control and invisible/bidi Unicode characters.
+        2. Normalizes fullwidth characters via NFKC and unwraps CDATA/comments.
+        3. Strips HTML/XML tags and delimiter breakout attempts to preserve quarantine.
+        4. Neutralizes dangerous markdown executable links and images.
+        5. Detects prompt injection signatures (with homoglyph normalization), scores, and redacts.
+        6. Enforces max token budget and truncates if necessary.
+        7. Computes SHA-256 hashes of raw and sanitized text.
+        8. Enforces passive XML structural encapsulation in `<untrusted_supplier_data>`.
         """
         budget = max_tokens if max_tokens is not None else self.default_max_tokens
         raw_hash = hashlib.sha256((raw_text or "").encode("utf-8")).hexdigest()
@@ -228,31 +236,11 @@ class QuarantinedReader:
                 audit_logged=False,
             )
 
-        # 1. Strip non-printable ASCII control characters
-        cleaned = CONTROL_CHARS_REGEX.sub("", raw_text)
-
-        # 2. Decode HTML entities and strip script/style/XML blocks
-        decoded = html.unescape(cleaned)
-        no_scripts = SCRIPT_STYLE_BLOCKS_REGEX.sub("", decoded)
-        no_html = HTML_TAGS_REGEX.sub("", no_scripts)
-
-        # 3. Defend against tag breakout attempts inside the content
-        neutralized = DELIMITER_BREAKOUT_REGEX.sub("", no_html)
-
-        # 4. Check for adversarial injection signatures
-        matches = INJECTION_DIRECTIVES_REGEX.findall(neutralized)
-        injection_score = min(1.0, len(matches) * 0.45) if matches else 0.0
-        is_safe = injection_score < 0.40
-
-        # Redact malicious directives
-        redacted = INJECTION_DIRECTIVES_REGEX.sub(
-            "[REDACTED_ADVERSARIAL_DIRECTIVE]",
-            neutralized,
-        )
-
-        # Clean excess internal whitespace while preserving paragraph structure
-        lines = [line.strip() for line in redacted.splitlines()]
-        cleaned_body = "\n".join(line for line in lines if line)
+        # 1-4: Delegate deep sanitization to InputSanitizer guardrail
+        sanitization_result = self.sanitizer.sanitize(raw_text=raw_text, raise_on_injection=False)
+        cleaned_body = sanitization_result.cleaned_text
+        injection_score = sanitization_result.injection_score
+        is_safe = sanitization_result.is_safe
 
         # 5. Enforce max token budget
         truncated_body, token_count, is_truncated = _truncate_to_token_budget(
@@ -377,7 +365,7 @@ class QuarantinedReader:
 
     def extract(
         self,
-        documents: Sequence[str | dict[str, Any]],
+        documents: Sequence[str | dict[str, Any] | Any],
         max_tokens_per_doc: int | None = None,
     ) -> str:
         """Extract and quarantine evidence from a collection of documents/news/contracts.

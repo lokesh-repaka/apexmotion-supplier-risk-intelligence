@@ -29,11 +29,11 @@
 | **Phase 11 Progress** | 6 / 6 Tasks Completed (100%) | Completed ✅ |
 | **Phase 12 Progress** | 6 / 6 Tasks Completed (100%) | Completed ✅ |
 | **Phase 13 Progress** | 4 / 4 Tasks Completed (100%) | Completed ✅ |
-| **Phase 14 Progress** | 2 / 6 Tasks Completed (33.3%) | In Progress 🔄 |
+| **Phase 14 Progress** | 3 / 6 Tasks Completed (50.0%) | In Progress 🔄 |
 | **Total Test Suites** | 73 (59 Python suites + 14 Frontend suites) | PASSED ✅ |
-| **Total Test Cases** | 1,008 tests (892 Python [863 unit + 11 integration + 15 golden + 3 API] + 116 Frontend unit) | 100% Passing (0 failures) |
-| **Code Coverage (`src/`)** | **95.09%** statement coverage (7,391 statements, 363 missed; 100% on hitl_tokens.py & calculator.py) | Exceeds 80% DoD gate |
-| **Active Branch** | `feature/tests-unit-hitl-tokens` | In Progress 🔄 |
+| **Total Test Cases** | 1,043 tests (927 Python [898 unit + 11 integration + 15 golden + 3 API] + 116 Frontend unit) | 100% Passing (0 failures) |
+| **Code Coverage (`src/`)** | **95.28%** statement coverage (100% on input_sanitizer.py, hitl_tokens.py & calculator.py) | Exceeds 80% DoD gate |
+| **Active Branch** | `feature/tests-unit-quarantined-reader` | In Progress 🔄 |
 
 ---
 
@@ -927,6 +927,30 @@
     - **Comprehensive Test Suite**: 37 unit tests in `tests/unit/test_hitl_tokens.py` achieving **100.00% statement and branch coverage** on `src/core/hitl_tokens.py`, bringing total project test count to **1,008 passed tests** (892 Python + 116 Frontend across 73 test suites).
     - **Phase 14 (Unit & Integration Tests) progress is now 2/6 (33.3%).**
 
+69. **Input Sanitizer Guardrail & Quarantined Reader Prompt Injection Defense (SEC-071, BR-RULE-001, CLAUDE.md Sec 8.1 & Sec 14)**:
+    - **Dedicated Guardrail Architecture (`src/guardrails/input_sanitizer.py`)**: Engineered enterprise-grade input sanitizer guardrail component adhering to CLAUDE.md Section 14 coverage mandate, featuring `InputSanitizer`, `SanitizationResult`, `PromptInjectionDetectedError`, and functional helper `sanitize_input()`. Fully integrated with `QuarantinedReader` in `src/llm/quarantined_reader.py`.
+    - **Multi-Vector XML Injection Defense**:
+      - Neutralized delimiter closing tag breakout attempts (`</untrusted_supplier_data>`, `</untrusted_signal>`, `<system>`, `<instructions>`, `<prompt>`, `<admin>`), preventing prompt boundary escape.
+      - Stripped delimiter variations across mixed casing (`</UNTRUSTED_SUPPLIER_DATA>`), whitespace anomalies (`</  untrusted_supplier_data  >`), and injected attributes (`id='evil' role='admin'`).
+      - Unwrapped and cleansed CDATA sections (`<![CDATA[ ... ]]>`), stripped HTML/XML comments hiding injection payloads (`<!-- ... -->`), and eliminated XML declarations and XXE DOCTYPE blocks (`<?xml ... ?>`, `<!DOCTYPE ... [<!ENTITY ...>]>`).
+      - Handled malformed, nested, and self-closing tags without parser crashes.
+      - Enforced passive XML encapsulation with strictly unique `<untrusted_supplier_data>` opening and closing tags carrying source, safe, and SHA-256 hash attributes.
+    - **Markdown Protocol & Injection Defense**:
+      - Neutralized executable URI schemes in markdown links: `[text](javascript:...)`, `[text](data:...)`, and `[text](vbscript:...)` converted to `[text] [BLOCKED_URI_SCHEME]`.
+      - Neutralized executable image links: `![alt](javascript:...)` converted to `[BLOCKED_IMAGE: alt]`.
+      - Mitigated markdown header prompt hierarchy attacks (`# SYSTEM OVERRIDE`, `## Instructions`), while preserving benign code fences (triple backticks) and structured tables.
+    - **Unicode Bypass & Homoglyph Evasion Defense**:
+      - Stripped invisible zero-width characters and joiners (`\u200B` ZWSP, `\u200C` ZWNJ, `\u200D` ZWJ, `\u200E`/`\u200F` direction marks, `\uFEFF` BOM, `\u2060` word joiners, `\u00AD` soft hyphens).
+      - Stripped bidirectional override control characters (`\u202A`–`\u202E`, `\u2066`–`\u2069`) to defeat visual direction spoofing.
+      - Applied NFKC normalization (`unicodedata.normalize('NFKC')`) to collapse fullwidth characters (`Ｉｇｎｏｒｅ` -> `Ignore`).
+      - Mapped Cyrillic and Greek homoglyphs to Latin equivalents (`systеm ovеrridе` -> `system override`) prior to adversarial regex scanning, defeating character substitution evasion.
+    - **Clean Text Passthrough & Multilingual Preservation**:
+      - Proved zero false positives and zero corruption on clean multilingual supplier communications in German (umlauts/sharp s), French (accents), Spanish (ñ/accents), and Japanese (kanji/hiragana).
+      - Preserved financial symbols (`$`, `€`, `£`, `¥`), percentages, mathematical operators, and paragraph structures intact.
+      - Verified exact fidelity on canonical NanoCore golden scenario delivery notifications.
+    - **Comprehensive Test Suite**: 64 unit tests in `tests/unit/test_quarantined_reader.py` achieving **100.00% statement and branch coverage** on both `src/guardrails/input_sanitizer.py` (99 stmts) and `src/llm/quarantined_reader.py` (126 stmts), bringing total project test count to **1,043 passed tests** (927 Python + 116 Frontend across 73 test suites).
+    - **Phase 14 (Unit & Integration Tests) progress is now 3/6 (50.0%).**
+
 ---
 
 ## 5. Next Planned Tasks
@@ -937,10 +961,11 @@
   - **P13-2**: Neptune graph seed — supplier → component → plant edges, tier-chain links, 3 geopolitical risk nodes for NanoCore region (`feature/seed-graph-data`). Completed ✅
   - **P13-3**: Golden dataset (`tests/golden/`) — `nanocore_scenario.json` with exact inputs/expected outputs; 5 edge-case JSON files (`feature/seed-golden-datasets`). Completed ✅
   - **P13-4**: OpenSearch vector seed — 500 synthetic contract clauses chunked and embedded into `contracts-v1` index (`feature/seed-opensearch-vectors`). Completed ✅
-- **Phase 14 — Unit & Golden Test Hardening**: In Progress 🔄 (2/6 tasks done)
+- **Phase 14 — Unit & Golden Test Hardening**: In Progress 🔄 (3/6 tasks done)
   - **P14-1**: Risk calculator unit tests — NanoCore golden numbers, zero-stock edge case, zero-consumption guard, negative gap → zero shortage (`feature/tests-unit-risk-calculator`). Completed ✅
   - **P14-2**: HITL token unit tests — valid token, expired TTL, replay detection, wrong action binding, missing second signature (`feature/tests-unit-hitl-tokens`). Completed ✅
-  - **P14-3**: Quarantined Reader unit tests — XML injection, markdown injection, Unicode bypass, clean text passthrough (`feature/tests-unit-quarantined-reader`). Next 🔄
+  - **P14-3**: Quarantined Reader unit tests — XML injection, markdown injection, Unicode bypass, clean text passthrough (`feature/tests-unit-quarantined-reader`). Completed ✅
+  - **P14-4**: Integration test — full investigation flow: Kafka event → triage → risk calculator → HITL gate → approval → audit log (`feature/tests-integration-investigation-flow`). Next 🔄
 
 
 

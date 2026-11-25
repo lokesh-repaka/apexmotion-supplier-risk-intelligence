@@ -66,15 +66,26 @@ class InvestigationRecord:
     duration_ms: int | None = None
     tokens_used: int | None = None
     cost_usd: Decimal | None = None
+    langfuse_trace_id: str | None = None
     state: SupplierRiskState | None = None
     task: asyncio.Task[Any] | None = None
+
+    @property
+    def id(self) -> uuid.UUID:
+        """Expose investigation_id as UUID for repository compatibility."""
+        return uuid.UUID(self.investigation_id)
 
 
 class InvestigationService:
     """Coordinates lifecycle, execution, and polling of multi-agent investigations."""
 
-    def __init__(self, checkpointer: MemorySaver | None = None) -> None:
+    def __init__(
+        self,
+        checkpointer: MemorySaver | None = None,
+        session_factory: Any = None,
+    ) -> None:
         self.checkpointer = checkpointer or MemorySaver()
+        self.session_factory = session_factory
         self.orchestrator = InvestigationOrchestrator(checkpointer=self.checkpointer)
         self._active_investigations: dict[str, InvestigationRecord] = {}
         self._case_id_index: dict[str, str] = {}
@@ -206,6 +217,7 @@ class InvestigationService:
                 entity_id=investigation_id,
                 action="INVESTIGATION_STARTED",
                 actor_id=current_user.user_id,
+                session_factory=self.session_factory,
                 after_state={
                     "case_id": case_id,
                     "supplier_id": payload.supplier_id,
@@ -255,6 +267,13 @@ class InvestigationService:
                 else None
             )
 
+            # Extract LLM telemetry and Langfuse trace
+            meta = final_state.get("metadata") or {}
+            llm_metrics = meta.get("llm_metrics") or {}
+            langfuse_trace_id = meta.get("langfuse_trace_id") or llm_metrics.get("trace_id")
+            tokens_used = llm_metrics.get("tokens_used")
+            cost_usd = llm_metrics.get("cost_usd")
+
             record.status = status_str
             record.state = final_state
             record.current_node = final_state.get("current_node")
@@ -273,27 +292,37 @@ class InvestigationService:
             record.errors = list(final_state.get("errors") or [])
             record.completed_at = datetime.now(UTC)
             record.duration_ms = duration_ms
+            record.tokens_used = tokens_used
+            record.cost_usd = cost_usd
+            record.langfuse_trace_id = langfuse_trace_id
 
             # Synchronize AgentRun completion in database
             await self._sync_agent_run_completion(
                 investigation_id=investigation_id,
                 status="COMPLETED",
                 duration_ms=duration_ms,
+                tokens_used=tokens_used,
+                cost_usd=cost_usd,
+                langfuse_trace_id=langfuse_trace_id,
             )
 
             # Forensic audit log
-            await write_audit_log(
-                entity_type="INVESTIGATION",
-                entity_id=investigation_id,
-                action="INVESTIGATION_COMPLETED",
-                actor_id=actor_id,
-                after_state={
-                    "status": status_str,
-                    "duration_ms": duration_ms,
-                    "requires_hitl": record.requires_hitl,
-                    "governing_spend_tier": record.governing_spend_tier,
-                },
-            )
+            try:
+                await write_audit_log(
+                    entity_type="INVESTIGATION",
+                    entity_id=investigation_id,
+                    action="INVESTIGATION_COMPLETED",
+                    actor_id=actor_id,
+                    session_factory=self.session_factory,
+                    after_state={
+                        "status": status_str,
+                        "duration_ms": duration_ms,
+                        "requires_hitl": record.requires_hitl,
+                        "governing_spend_tier": record.governing_spend_tier,
+                    },
+                )
+            except Exception as audit_exc:
+                logger.warning("Audit write failed during investigation completion: %s", audit_exc)
 
         except Exception as exc:
             duration_ms = int((time.perf_counter() - start_time) * 1000)
@@ -321,6 +350,7 @@ class InvestigationService:
                     entity_id=investigation_id,
                     action="INVESTIGATION_FAILED",
                     actor_id=actor_id,
+                    session_factory=self.session_factory,
                     after_state={"error": str(exc), "duration_ms": duration_ms},
                 )
             except Exception as audit_exc:
@@ -331,17 +361,23 @@ class InvestigationService:
         investigation_id: str,
         status: str,
         duration_ms: int,
+        tokens_used: int | None = None,
+        cost_usd: Decimal | None = None,
+        langfuse_trace_id: str | None = None,
     ) -> None:
         """Update AgentRun record in database using an isolated session."""
         try:
             run_uuid = uuid.UUID(investigation_id)
-            session_factory = get_async_session_factory()
+            session_factory = self.session_factory or get_async_session_factory()
             async with session_factory() as db_sess:
                 repo = AgentRunRepository(db_sess)
                 await repo.complete_run(
                     run_id=run_uuid,
                     status=status,
                     duration_ms=duration_ms,
+                    tokens_used=tokens_used,
+                    cost_usd=cost_usd,
+                    langfuse_trace_id=langfuse_trace_id,
                 )
                 await db_sess.commit()
         except Exception as exc:
@@ -426,6 +462,7 @@ class InvestigationService:
                         duration_ms=run.duration_ms,
                         tokens_used=run.tokens_used,
                         cost_usd=run.cost_usd,
+                        langfuse_trace_id=run.langfuse_trace_id,
                     )
             except (ValueError, Exception) as exc:
                 logger.debug("Database fallback query failed for '%s': %s", clean_id, exc)

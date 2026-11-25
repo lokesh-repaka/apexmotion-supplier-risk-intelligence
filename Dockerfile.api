@@ -1,6 +1,7 @@
 # ==============================================================================
 # ApexMotion Supplier Risk Intelligence Platform - API Containerfile
 # Python 3.12-slim production image with unprivileged non-root execution
+# Reference: TASKS.md (P16-1) & CLAUDE.md Sec 15
 # ==============================================================================
 
 FROM python:3.12-slim AS builder
@@ -33,7 +34,6 @@ WORKDIR /app
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
-    PATH="/install/bin:${PATH}" \
     PYTHONPATH="/app"
 
 # Security: Create non-root system group and user
@@ -44,8 +44,10 @@ RUN groupadd -g 10001 appgroup && \
 COPY --from=builder /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
 COPY --from=builder /usr/local/bin /usr/local/bin
 
-# Copy source code
+# Copy source code and configuration
 COPY src/ /app/src/
+COPY alembic.ini /app/alembic.ini
+COPY pyproject.toml /app/pyproject.toml
 
 # Set ownership to unprivileged user
 RUN chown -R appuser:appgroup /app
@@ -55,7 +57,7 @@ USER appuser
 
 EXPOSE 8000
 
-# Container liveness health check
+# Container liveness health check (probes /health endpoint)
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
     CMD python3 -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')" || exit 1
 

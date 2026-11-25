@@ -1076,17 +1076,40 @@
 
 ---
 
+### Invariant 77: CloudWatch Operational Alarms & Automated Incident Escalation (P15-5)
+- **Standard**: Automated AWS CloudWatch metric alarms and alert escalation infrastructure managed via `src/core/cloudwatch.py`, declarative JSON alarm specifications (`monitoring/cloudwatch/alarms.json`), and production-ready Terraform HCL (`infrastructure/terraform/cloudwatch_alarms.tf`). Enforces hard thresholds for:
+  1. **p95 Investigation Latency Breach**: $> 90.0$s across 2 consecutive 60s evaluation periods (P1 Critical, PagerDuty alert per PRD Sec 14, FRD FR-DEC-001).
+  2. **API 5xx Error Rate Breach**: $> 1.0$% error rate across 2 consecutive periods (P1 Critical, PagerDuty alert via metric math `(m2 / m1) * 100`).
+  3. **Kafka Consumer Lag Breach**: $> 30.0$s estimated time lag / $> 5,000$ records across 3 evaluation periods (P2 High, triggers KEDA worker autoscaling per LLD Sec 8.3).
+  4. **Neptune OpenCypher Query Latency Breach**: $> 2.0$s query duration across 2 evaluation periods (P2 High, Platform Ops alert per LLD Sec 8.3).
+  5. **Deterministic Math Verification Failure**: $> 0$ calculation hash mismatches across 1 evaluation period (P0 Critical Emergency Halt of mitigation drafting pipeline per LLD Sec 8.3).
+  6. **Dead Letter Queue (DLQ) Accumulation**: $> 50$ rejected supplier disruption events across 2 evaluation periods (P3 Medium, alerts integration engineering per FRD FMEA-04).
+- **Verification**: `tests/unit/test_cloudwatch_alarms.py` (9 unit tests, 97% module coverage on `src/core/cloudwatch.py`, 95.22% project-wide coverage across 967 unit tests).
+- **Enforcement Rules**:
+  1. **Dual Routing & Severity Standards**: Alarms route to dedicated SNS topics (`p1_pagerduty` and `p2_platform_ops`) based on operational criticality.
+  2. **Offline Isolation & Resilience**: `CloudWatchAlarmManager` automatically honors `USE_LOCALSTACK=true` and suppresses transport failures in `emit_metric()` with structured logging to protect application workflows.
+  3. **Multi-Format Declarative Synchronization**: `monitoring/cloudwatch/alarms.json` (AWS CLI / API `PutMetricAlarm` schema) and `infrastructure/terraform/cloudwatch_alarms.tf` remain bit-for-bit synchronized in threshold parameters.
+
+---
+
 ## 5. Next Planned Tasks
 - **Phase 11 — FastAPI API Routes**: Completed ✅ (6/6 tasks done)
 - **Phase 12 — React Frontend**: Completed ✅ (6/6 tasks done)
 - **Phase 13 — Supplier Seed Data & Golden Datasets**: Completed ✅ (4/4 tasks done)
 - **Phase 14 — Unit & Golden Test Hardening**: Completed ✅ (6/6 tasks done)
-- **Phase 15 — Observability**: In Progress 🔄 (4/5 tasks done)
+- **Phase 15 — Observability**: Completed ✅ (5/5 tasks done, 100%)
   - **P15-1**: OpenTelemetry setup — @vercel/otel-style span instrumentation on all FastAPI routes and agent nodes; trace_id propagated to every log line (`feature/observability-otel-setup`). Completed ✅
   - **P15-2**: Langfuse callback integration — CallbackHandler on every LangGraph agent run; records tokens used, latency, and cost per investigation (`feature/observability-langfuse-tracing`). Completed ✅
   - **P15-3**: Prometheus metrics export — counter, gauge, and histogram metrics (`feature/observability-prometheus-metrics`). Completed ✅
   - **P15-4**: Grafana dashboard JSON (`feature/observability-grafana-dashboard`). Completed ✅
-  - **P15-5**: CloudWatch alarms (`feature/observability-cloudwatch-alarms`). Next 🔄
+  - **P15-5**: CloudWatch alarms (`feature/observability-cloudwatch-alarms`). Completed ✅
+- **Phase 16 — Infrastructure & Delivery**: In Progress 🔄 (0/6 tasks done)
+  - **P16-1**: `Dockerfile.api` — FastAPI + Uvicorn image (Python 3.12-slim, non-root user, health check) (`feature/docker-api-image`). Next 🔄
+  - **P16-2**: `Dockerfile.worker` — Celery worker image for background enrichment and Kafka consumer (`feature/docker-worker-image`). Pending ❌
+  - **P16-3**: Terraform modules (`infrastructure/terraform/`) — EKS 1.30, Neptune, Aurora PG 16 Serverless v2, MSK 3-broker, OpenSearch, ElastiCache Redis, S3 Object Lock, KMS (`feature/terraform-aws-infrastructure`). Pending ❌
+  - **P16-4**: Kubernetes manifests (`infrastructure/kubernetes/`) — Deployments, Services, KEDA `ScaledObject` for Kafka consumer, HPA for API pods (`feature/kubernetes-manifests-keda`). Pending ❌
+  - **P16-5**: KEDA autoscaling configuration for Kafka consumers (`feature/keda-autoscaling-kafka`). Pending ❌
+  - **P16-6**: GitHub Actions CI/CD pipeline (`feature/ci-cd-github-actions`). Pending ❌
 
 
 

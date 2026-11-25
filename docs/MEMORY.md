@@ -31,11 +31,11 @@
 | **Phase 13 Progress** | 4 / 4 Tasks Completed (100%) | Completed ✅ |
 | **Phase 14 Progress** | 6 / 6 Tasks Completed (100%) | Completed ✅ |
 | **Phase 15 Progress** | 5 / 5 Tasks Completed (100%) | Completed ✅ |
-| **Phase 16 Progress** | 3 / 6 Tasks Completed (50%) | In Progress 🔄 |
-| **Total Test Suites** | 84 (70 Python suites + 14 Frontend suites) | PASSED ✅ |
-| **Total Test Cases** | 1,169 tests (1,053 Python [996 unit + 26 integration + 31 golden] + 116 Frontend unit) | 100% Passing (0 failures) |
+| **Phase 16 Progress** | 4 / 6 Tasks Completed (67%) | In Progress 🔄 |
+| **Total Test Suites** | 85 (71 Python suites + 14 Frontend suites) | PASSED ✅ |
+| **Total Test Cases** | 1,180 tests (1,064 Python [1,007 unit + 26 integration + 31 golden] + 116 Frontend unit) | 100% Passing (0 failures) |
 | **Code Coverage (`src/`)** | **95.22%** statement coverage | Exceeds 80% DoD gate |
-| **Active Branch** | `feature/terraform-aws-infrastructure` | In Progress 🔄 |
+| **Active Branch** | `feature/kubernetes-manifests-keda` | In Progress 🔄 |
 
 ---
 
@@ -1139,6 +1139,19 @@
 
 ---
 
+### Invariant 81: Kubernetes Production Workload Security & KEDA Autoscaling (P16-4)
+- **Standard**: Enterprise-grade declarative Kubernetes manifests in `infrastructure/kubernetes/` formatted for production Amazon EKS 1.30 and bundled via Kustomize:
+  1. **Pod Security Standards (PSS) Restricted Namespace (`namespace.yaml`)**: Declares `apexmotion` namespace enforcing `pod-security.kubernetes.io/enforce: restricted`.
+  2. **Zero-Privilege Security Context**: Both `apexmotion-api` and `apexmotion-worker` pods enforce unprivileged non-root execution (`runAsUser: 10001`, `runAsGroup: 10001`, `fsGroup: 10001`), disable privilege escalation (`allowPrivilegeEscalation: false`), drop all capabilities (`capabilities.drop: ["ALL"]`), and apply `RuntimeDefault` seccomp profiles.
+  3. **Multi-AZ Resilience & Health Probes**: API deployment enforces `podAntiAffinity` across availability zones (`topology.kubernetes.io/zone`) with rolling update strategy (`maxSurge: 1`, `maxUnavailable: 0`), paired with HTTP `/health` liveness and readiness probes.
+  4. **Horizontal Pod Autoscaling (HPA) (`api-hpa.yaml`)**: Targets API deployment (`apexmotion-api`) scaling dynamically between 3 and 20 pods based on 70% CPU and 80% Memory utilization thresholds with 300s scale-down stabilization.
+  5. **KEDA Event-Driven Autoscaling (`worker-keda-scaledobject.yaml`)**: Targets worker deployment (`apexmotion-worker`), scaling dynamically between 4 and 32 pods (handling 1,285 ev/s peak bursts) based on MSK Kafka consumer group lag (`lagThreshold: 5000`, `activationLagThreshold: 1000`) on `supplier-events`.
+  6. **Prometheus Telemetry Scrape Annotations**: `apexmotion-api` Service (ClusterIP, port 80 -> 8000) declares Prometheus annotations for scraping `/metrics` on port 8000.
+  7. **Kustomize Bundling (`kustomization.yaml`)**: Unifies all 8 manifests under common labels and namespace for one-command deployment.
+- **Verification**: `tests/unit/test_kubernetes_manifests.py` (11 unit tests, 100% pass rate) and `kubectl kustomize infrastructure/kubernetes/`.
+
+---
+
 ## 5. Next Planned Tasks
 - **Phase 11 — FastAPI API Routes**: Completed ✅ (6/6 tasks done)
 - **Phase 12 — React Frontend**: Completed ✅ (6/6 tasks done)
@@ -1150,13 +1163,13 @@
   - **P15-3**: Prometheus metrics export — counter, gauge, and histogram metrics (`feature/observability-prometheus-metrics`). Completed ✅
   - **P15-4**: Grafana dashboard JSON (`feature/observability-grafana-dashboard`). Completed ✅
   - **P15-5**: CloudWatch alarms (`feature/observability-cloudwatch-alarms`). Completed ✅
-- **Phase 16 — Infrastructure & Delivery**: In Progress 🔄 (3/6 tasks done, 50%)
+- **Phase 16 — Infrastructure & Delivery**: In Progress 🔄 (4/6 tasks done, 67%)
   - **P16-1**: `Dockerfile.api` — FastAPI + Uvicorn image (Python 3.12-slim, non-root user, health check) (`feature/docker-api-image`). Completed ✅
   - **P16-2**: `Dockerfile.worker` — Celery worker image for background enrichment and Kafka consumer (`feature/docker-worker-image`). Completed ✅
   - **P16-3**: Terraform modules (`infrastructure/terraform/`) — EKS 1.30, Neptune, Aurora PG 16 Serverless v2, MSK 3-broker, OpenSearch, ElastiCache Redis, S3 Object Lock, KMS (`feature/terraform-aws-infrastructure`). Completed ✅
-  - **P16-4**: Kubernetes manifests (`infrastructure/kubernetes/`) — Deployments, Services, KEDA `ScaledObject` for Kafka consumer, HPA for API pods (`feature/kubernetes-manifests-keda`). Next 🔄
-  - **P16-5**: KEDA autoscaling configuration for Kafka consumers (`feature/keda-autoscaling-kafka`). Pending ❌
-  - **P16-6**: GitHub Actions CI/CD pipeline (`feature/ci-cd-github-actions`). Pending ❌
+  - **P16-4**: Kubernetes manifests (`infrastructure/kubernetes/`) — Deployments, Services, KEDA `ScaledObject` for Kafka consumer, HPA for API pods (`feature/kubernetes-manifests-keda`). Completed ✅
+  - **P16-5**: GitHub Actions CD pipeline — build → push ECR → `kubectl apply` → blue-green cutover; separate workflows for `staging` and `production` (`feature/cd-pipeline-eks-deploy`). Next 🔄
+  - **P16-6**: Deployment hygiene checks — no `.env` committed, no static AWS credentials, S3 Object Lock compliance mode verified, WORM 7-year hold confirmed (`feature/tests-deployment-hygiene`). Pending ❌
 
 
 

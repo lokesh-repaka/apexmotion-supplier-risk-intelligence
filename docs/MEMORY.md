@@ -29,10 +29,11 @@
 | **Phase 11 Progress** | 6 / 6 Tasks Completed (100%) | Completed ✅ |
 | **Phase 12 Progress** | 6 / 6 Tasks Completed (100%) | Completed ✅ |
 | **Phase 13 Progress** | 4 / 4 Tasks Completed (100%) | Completed ✅ |
+| **Phase 14 Progress** | 1 / 6 Tasks Completed (16.7%) | In Progress 🔄 |
 | **Total Test Suites** | 73 (59 Python suites + 14 Frontend suites) | PASSED ✅ |
-| **Total Test Cases** | 979 tests (863 Python [834 unit + 11 integration + 15 golden + 3 API] + 116 Frontend unit) | 100% Passing (0 failures) |
-| **Code Coverage (`src/`)** | **95.08%** statement coverage (7,379 statements, 363 missed; exceeds 80% DoD gate) | Exceeds 80% DoD gate |
-| **Active Branch** | `feature/seed-opensearch-vectors` | In Progress 🔄 |
+| **Total Test Cases** | 1,002 tests (886 Python [857 unit + 11 integration + 15 golden + 3 API] + 116 Frontend unit) | 100% Passing (0 failures) |
+| **Code Coverage (`src/`)** | **95.09%** statement coverage (7,391 statements, 363 missed; 100% on calculator.py) | Exceeds 80% DoD gate |
+| **Active Branch** | `feature/tests-unit-risk-calculator` | In Progress 🔄 |
 
 ---
 
@@ -893,6 +894,18 @@
     - **Comprehensive Test Suite**: 21 unit tests in `tests/unit/test_opensearch_seed.py` achieving **97.78% statement coverage** on `src/database/seed_opensearch.py`, bringing total project test count to 979 passed tests (863 Python + 116 Frontend across 73 test suites).
     - **Phase 13 (Supplier Seed Data & Golden Datasets) is now 100% complete (4/4 tasks).**
 
+67. **Deterministic Risk Engine Arithmetic Hardening, NaN/Infinity Numeric Poisoning Guard, and Exhaustive Edge-Case Validation (SEC-069, BR-RULE-001, FRD Section 3.1, CLAUDE.md Sec 14)**:
+    - **Strict Triad of Separation Enforcement (BR-RULE-001)**: Guaranteed 100% deterministic pure Python arithmetic for Days of Cover (`stock / daily_consumption_rate`), Coverage Gap (`max(0.00, eta - cover)`), Shortage Volume (`gap * rate`), and Financial Exposure (`shortage * unit_cost`). Strictly zero LLM math.
+    - **NaN & Infinity Injection Immunity**: Hardened `_to_decimal()` coercion utility to reject `float('nan')`, `float('inf')`, `float('-inf')`, `Decimal('NaN')`, and `Decimal('Infinity')` inputs with descriptive `InvalidInventoryInputError`, preventing floating-point corruption in downstream risk scoring.
+    - **Zero-Stock & Micro-Inventory Boundary Verification**: Proved that `current_stock=0` evaluates to exactly `0.00` days of cover with entire ETA representing shortage; micro-inventory (`1 unit` / `18,500` daily rate) quantizes to `0.00` days without numerical underflow.
+    - **Zero-Consumption Guard & Cap**: Verified that `daily_consumption_rate=0` emits a structured warning and caps days of cover at `999.00` (`DAYS_OF_COVER_MAX_CAP`), preventing `ZeroDivisionError` and guaranteeing zero shortage volume or financial exposure even under multi-year replenishment ETAs.
+    - **Negative Gap Clamping**: Proved that when replenishment arrives prior to stock exhaustion (`eta_days < days_of_cover`), raw differences (e.g. `-0.01` to `-178.00` days) are strictly clamped to `0.00` days, guaranteeing non-negative shortage volumes and zero false financial risk alerts.
+    - **Precision & Halfway Quantization (ROUND_HALF_UP)**: Validated exact boundary rounding (`.005` rounds up to `0.01`, `.004` rounds down to `0.00`) across inventory days, integer shortage units, and `NUMERIC(14,2)` currency.
+    - **Cross-Validation with All 6 Golden Scenarios**: 100% exact numerical agreement across `nanocore_scenario.json` (7.68d cover, 1.32d gap, 24,420 units, $2,448,105.00 exposure, €2,692,800.00 halt impact, $5,140,905.00 total) and all 5 edge-case benchmarks (`zero_stock.json`, `zero_gap.json`, `negative_gap.json`, `dual_approval_threshold.json`, `single_source_dependency.json`).
+    - **Cryptographic Anti-Tamper & Avalanche Effect**: Verified that a single 1-cent perturbation changes >25 hex characters across the 64-character SHA-256 calculation verification hash.
+    - **Comprehensive Test Suite**: 42 unit tests in `tests/unit/test_risk_calculator.py` achieving **100.00% statement coverage** on `src/services/risk/calculator.py`, bringing total project test count across the 1,000 threshold to **1,002 passed tests** (886 Python + 116 Frontend across 73 test suites).
+    - **Phase 14 (Unit & Integration Tests) progress is now 1/6 (16.7%).**
+
 ---
 
 ## 5. Next Planned Tasks
@@ -903,8 +916,9 @@
   - **P13-2**: Neptune graph seed — supplier → component → plant edges, tier-chain links, 3 geopolitical risk nodes for NanoCore region (`feature/seed-graph-data`). Completed ✅
   - **P13-3**: Golden dataset (`tests/golden/`) — `nanocore_scenario.json` with exact inputs/expected outputs; 5 edge-case JSON files (`feature/seed-golden-datasets`). Completed ✅
   - **P13-4**: OpenSearch vector seed — 500 synthetic contract clauses chunked and embedded into `contracts-v1` index (`feature/seed-opensearch-vectors`). Completed ✅
-- **Phase 14 — Unit & Golden Test Hardening**: Next 🔄 (0/5 tasks done)
-  - **P14-1**: Risk calculator unit tests — NanoCore golden numbers, zero-stock edge case, zero-consumption guard, negative gap → zero shortage (`feature/test-risk-calculator`). Next 🔄
+- **Phase 14 — Unit & Golden Test Hardening**: In Progress 🔄 (1/6 tasks done)
+  - **P14-1**: Risk calculator unit tests — NanoCore golden numbers, zero-stock edge case, zero-consumption guard, negative gap → zero shortage (`feature/tests-unit-risk-calculator`). Completed ✅
+  - **P14-2**: HITL token unit tests — valid token, expired TTL, replay detection, wrong action binding, missing second signature (`feature/tests-unit-hitl-tokens`). Next 🔄
 
 
 

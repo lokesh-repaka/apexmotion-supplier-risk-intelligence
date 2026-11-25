@@ -3,28 +3,6 @@
 # Reference: TASKS.md (P15-5), LLD Sec 8.3, and FRD FMEA-04
 # ==============================================================================
 
-terraform {
-  required_version = ">= 1.5.0"
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 5.0"
-    }
-  }
-}
-
-variable "environment" {
-  type        = string
-  description = "Target deployment environment (production, staging, dev)"
-  default     = "production"
-}
-
-variable "aws_region" {
-  type        = string
-  description = "AWS region for CloudWatch metric alarms"
-  default     = "us-east-1"
-}
-
 # ------------------------------------------------------------------------------
 # 1. Alert Notification SNS Topics (PagerDuty & Platform Ops)
 # ------------------------------------------------------------------------------

@@ -24,6 +24,7 @@ from litellm.utils import token_counter
 
 from src.core.audit import write_audit_log
 from src.core.logging import get_logger, get_trace_id
+from src.core.telemetry import trace_span
 from src.guardrails.input_sanitizer import (
     InputSanitizer,
     get_input_sanitizer,
@@ -215,84 +216,98 @@ class QuarantinedReader:
         budget = max_tokens if max_tokens is not None else self.default_max_tokens
         raw_hash = hashlib.sha256((raw_text or "").encode("utf-8")).hexdigest()
 
-        if not raw_text or not raw_text.strip():
-            empty_hash = hashlib.sha256(b"").hexdigest()
-            wrapped = (
-                f'<untrusted_supplier_data source="{source_id}" safe="true" hash="{empty_hash}">\n'
-                f"</untrusted_supplier_data>"
-                if wrap_tags
-                else ""
+        with trace_span(
+            "quarantined_reader.sanitize",
+            attributes={"input.chars": len(raw_text or ""), "source_id": source_id},
+        ) as span:
+            if not raw_text or not raw_text.strip():
+                empty_hash = hashlib.sha256(b"").hexdigest()
+                wrapped = (
+                    f'<untrusted_supplier_data source="{source_id}" safe="true" hash="{empty_hash}">\n'
+                    f"</untrusted_supplier_data>"
+                    if wrap_tags
+                    else ""
+                )
+                span.set_attribute("injection.score", 0.0)
+                span.set_attribute("is_safe", True)
+                span.set_attribute("is_truncated", False)
+                return SanitizedPayload(
+                    sanitized_text=wrapped,
+                    inner_text="",
+                    raw_hash=raw_hash,
+                    content_hash=empty_hash,
+                    injection_score=0.0,
+                    is_safe=True,
+                    token_count=0,
+                    is_truncated=False,
+                    source_id=source_id,
+                    audit_logged=False,
+                )
+
+            # 1-4: Delegate deep sanitization to InputSanitizer guardrail
+            sanitization_result = self.sanitizer.sanitize(
+                raw_text=raw_text, raise_on_injection=False
             )
-            return SanitizedPayload(
-                sanitized_text=wrapped,
-                inner_text="",
+            cleaned_body = sanitization_result.cleaned_text
+            injection_score = sanitization_result.injection_score
+            is_safe = sanitization_result.is_safe
+
+            # 5. Enforce max token budget
+            truncated_body, token_count, is_truncated = _truncate_to_token_budget(
+                cleaned_body,
+                max_tokens=budget,
+                model=self.model,
+            )
+
+            # 6. Compute cryptographic SHA-256 content hash
+            content_hash = hashlib.sha256(truncated_body.encode("utf-8")).hexdigest()
+
+            # 7. Structural encapsulation
+            safe_attr = "true" if is_safe else "false"
+            if wrap_tags:
+                encapsulated = (
+                    f'<untrusted_supplier_data source="{source_id}" safe="{safe_attr}" hash="{content_hash}">\n'
+                    f"{truncated_body}\n"
+                    f"</untrusted_supplier_data>"
+                )
+            else:
+                encapsulated = truncated_body
+
+            span.set_attribute("injection.score", float(injection_score))
+            span.set_attribute("is_safe", is_safe)
+            span.set_attribute("is_truncated", is_truncated)
+            span.set_attribute("token_count", token_count)
+
+            payload = SanitizedPayload(
+                sanitized_text=encapsulated,
+                inner_text=truncated_body,
                 raw_hash=raw_hash,
-                content_hash=empty_hash,
-                injection_score=0.0,
-                is_safe=True,
-                token_count=0,
-                is_truncated=False,
+                content_hash=content_hash,
+                injection_score=injection_score,
+                is_safe=is_safe,
+                token_count=token_count,
+                is_truncated=is_truncated,
                 source_id=source_id,
                 audit_logged=False,
             )
 
-        # 1-4: Delegate deep sanitization to InputSanitizer guardrail
-        sanitization_result = self.sanitizer.sanitize(raw_text=raw_text, raise_on_injection=False)
-        cleaned_body = sanitization_result.cleaned_text
-        injection_score = sanitization_result.injection_score
-        is_safe = sanitization_result.is_safe
-
-        # 5. Enforce max token budget
-        truncated_body, token_count, is_truncated = _truncate_to_token_budget(
-            cleaned_body,
-            max_tokens=budget,
-            model=self.model,
-        )
-
-        # 6. Compute cryptographic SHA-256 content hash
-        content_hash = hashlib.sha256(truncated_body.encode("utf-8")).hexdigest()
-
-        # 7. Structural encapsulation
-        safe_attr = "true" if is_safe else "false"
-        if wrap_tags:
-            encapsulated = (
-                f'<untrusted_supplier_data source="{source_id}" safe="{safe_attr}" hash="{content_hash}">\n'
-                f"{truncated_body}\n"
-                f"</untrusted_supplier_data>"
-            )
-        else:
-            encapsulated = truncated_body
-
-        payload = SanitizedPayload(
-            sanitized_text=encapsulated,
-            inner_text=truncated_body,
-            raw_hash=raw_hash,
-            content_hash=content_hash,
-            injection_score=injection_score,
-            is_safe=is_safe,
-            token_count=token_count,
-            is_truncated=is_truncated,
-            source_id=source_id,
-            audit_logged=False,
-        )
-
-        logger.info(
-            "Quarantined text sanitized: source=%s safe=%s score=%.2f tokens=%d truncated=%s hash=%s",
-            source_id,
-            is_safe,
-            injection_score,
-            token_count,
-            is_truncated,
-            content_hash[:12],
-        )
-
-        if not is_safe and raise_on_injection:
-            raise PromptInjectionDetectedError(
-                injection_score=injection_score,
-                payload=payload,
+            logger.info(
+                "Quarantined text sanitized: source=%s safe=%s score=%.2f tokens=%d truncated=%s hash=%s",
+                source_id,
+                is_safe,
+                injection_score,
+                token_count,
+                is_truncated,
+                content_hash[:12],
             )
 
-        return payload
+            if not is_safe and raise_on_injection:
+                raise PromptInjectionDetectedError(
+                    injection_score=injection_score,
+                    payload=payload,
+                )
+
+            return payload
 
     async def sanitize_async(
         self,

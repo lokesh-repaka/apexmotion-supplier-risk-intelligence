@@ -11,6 +11,7 @@ from typing import Any
 
 from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
+from opentelemetry.trace import SpanKind
 
 from src.api.routes.approval_routes import router as approval_router
 from src.api.routes.error_handlers import register_error_handlers
@@ -20,6 +21,13 @@ from src.api.routes.risk_routes import router as risk_router
 from src.api.routes.supplier_routes import router as supplier_router
 from src.api.routes.websocket_routes import router as websocket_router
 from src.core.logging import bind_trace_id, get_logger, setup_logging
+from src.core.telemetry import (
+    extract_trace_context,
+    get_current_trace_id,
+    inject_trace_context,
+    setup_telemetry,
+    trace_span,
+)
 
 logger = get_logger("apexmotion.api")
 
@@ -28,6 +36,7 @@ logger = get_logger("apexmotion.api")
 async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
     """Application lifespan manager initializing logging and shared resources."""
     setup_logging()
+    setup_telemetry()
     logger.info("ApexMotion Supplier Risk Intelligence Platform starting up")
     yield
     logger.info("ApexMotion Supplier Risk Intelligence Platform shutting down")
@@ -50,17 +59,35 @@ app = FastAPI(
 # Request ID and Trace Propagation Middleware
 @app.middleware("http")
 async def trace_and_request_id_middleware(request: Request, call_next: Any) -> Response:
-    """Extract or generate X-Request-ID and X-Trace-ID, bind to context, and attach to response."""
+    """Extract or generate W3C traceparent, X-Request-ID, and X-Trace-ID, bind to context, and attach to response."""
+    extracted_ctx = extract_trace_context(request.headers)
+    span_name = f"HTTP {request.method} {request.url.path}"
+    attributes: dict[str, Any] = {
+        "http.method": request.method,
+        "http.url": str(request.url),
+        "http.target": request.url.path,
+        "http.host": request.url.hostname or "localhost",
+        "http.scheme": request.url.scheme,
+        "http.client_ip": request.client.host if request.client else "unknown",
+        "http.user_agent": request.headers.get("user-agent", ""),
+    }
+
     incoming_id = request.headers.get("x-request-id") or request.headers.get("x-trace-id")
-    trace_id = incoming_id if incoming_id else str(uuid.uuid4())
 
-    request.state.trace_id = trace_id
+    with trace_span(
+        span_name, attributes=attributes, kind=SpanKind.SERVER, context=extracted_ctx
+    ) as span:
+        otel_trace_id = get_current_trace_id()
+        trace_id = incoming_id or otel_trace_id or str(uuid.uuid4())
+        request.state.trace_id = trace_id
 
-    with bind_trace_id(trace_id):
-        response: Response = await call_next(request)
-        response.headers["X-Request-ID"] = trace_id
-        response.headers["X-Trace-ID"] = trace_id
-        return response
+        with bind_trace_id(trace_id):
+            response: Response = await call_next(request)
+            span.set_attribute("http.status_code", response.status_code)
+            response.headers["X-Request-ID"] = trace_id
+            response.headers["X-Trace-ID"] = trace_id
+            inject_trace_context(response.headers)
+            return response
 
 
 # CORS Middleware Configuration
@@ -77,7 +104,7 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
-    expose_headers=["X-Request-ID", "X-Trace-ID"],
+    expose_headers=["X-Request-ID", "X-Trace-ID", "traceparent"],
 )
 
 

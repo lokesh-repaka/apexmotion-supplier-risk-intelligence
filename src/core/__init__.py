@@ -55,6 +55,18 @@ from src.core.spend_tier_router import (
     route_spend,
     validate_approval_signers,
 )
+from src.core.telemetry import (
+    extract_trace_context,
+    get_current_span_id,
+    get_current_trace_id,
+    get_in_memory_spans,
+    get_tracer,
+    inject_trace_context,
+    reset_telemetry,
+    setup_telemetry,
+    trace_agent_node,
+    trace_span,
+)
 
 __all__ = [
     "Settings",
@@ -63,6 +75,16 @@ __all__ = [
     "get_logger",
     "bind_trace_id",
     "get_trace_id",
+    "setup_telemetry",
+    "get_tracer",
+    "get_in_memory_spans",
+    "reset_telemetry",
+    "get_current_trace_id",
+    "get_current_span_id",
+    "inject_trace_context",
+    "extract_trace_context",
+    "trace_span",
+    "trace_agent_node",
     "UserRole",
     "ROLE_HIERARCHY",
     "AuthenticatedUser",

@@ -28,6 +28,7 @@ from typing import Any
 
 from src.api.exceptions import AppException
 from src.core.logging import get_logger
+from src.core.telemetry import trace_span
 
 logger = get_logger("apexmotion.services.risk.calculator")
 
@@ -287,74 +288,84 @@ class RiskCalculator:
                 f"Hourly halt rate cannot be negative: {input_data.factory_halt_cost_per_hour_eur}"
             )
 
-        # 1. Days of cover
-        days_of_cover = self.calculate_days_of_cover(
-            current_stock=input_data.current_stock,
-            daily_consumption_rate=input_data.daily_consumption_rate,
-        )
-
-        # 2. Shortage gap
-        gap_days = self.calculate_gap_days(
-            eta_days=input_data.eta_days,
-            days_of_cover=days_of_cover,
-        )
-
-        # 3. Shortage volume
-        shortage_volume = self.calculate_shortage_volume(
-            gap_days=gap_days,
-            daily_consumption_rate=input_data.daily_consumption_rate,
-        )
-
-        # 4. Direct component financial exposure
-        financial_exposure = self.calculate_financial_exposure(
-            shortage_volume=shortage_volume,
-            unit_cost_usd=input_data.unit_cost_usd,
-        )
-
-        # 5. Factory halt downtime impact (if configured)
-        downtime_hours = Decimal("0.00")
-        factory_halt_exposure = Decimal("0.00")
-        if input_data.factory_halt_cost_per_hour_eur is not None and gap_days > Decimal("0.00"):
-            hours_per_day = input_data.operating_hours_per_day
-            downtime_hours = (gap_days * hours_per_day).quantize(
-                PRECISION_DAYS, rounding=ROUND_HALF_UP
+        with trace_span(
+            "math_engine.calculate_coverage", attributes={"component": "RiskCalculator"}
+        ) as span:
+            # 1. Days of cover
+            days_of_cover = self.calculate_days_of_cover(
+                current_stock=input_data.current_stock,
+                daily_consumption_rate=input_data.daily_consumption_rate,
             )
-            factory_halt_exposure = self.calculate_downtime_exposure(
+
+            # 2. Shortage gap
+            gap_days = self.calculate_gap_days(
+                eta_days=input_data.eta_days,
+                days_of_cover=days_of_cover,
+            )
+
+            # 3. Shortage volume
+            shortage_volume = self.calculate_shortage_volume(
                 gap_days=gap_days,
-                operating_hours_per_day=hours_per_day,
-                hourly_rate=input_data.factory_halt_cost_per_hour_eur,
+                daily_consumption_rate=input_data.daily_consumption_rate,
             )
 
-        total_exposure = financial_exposure + factory_halt_exposure
-        is_shortage = gap_days > Decimal("0.00")
+            # 4. Direct component financial exposure
+            financial_exposure = self.calculate_financial_exposure(
+                shortage_volume=shortage_volume,
+                unit_cost_usd=input_data.unit_cost_usd,
+            )
 
-        # 6. Cryptographic calculation verification hash
-        hash_payload = {
-            "current_stock": int(input_data.current_stock),
-            "daily_consumption_rate": str(input_data.daily_consumption_rate),
-            "days_of_cover": str(days_of_cover),
-            "eta_days": str(input_data.eta_days),
-            "financial_exposure": str(financial_exposure),
-            "gap_days": str(gap_days),
-            "shortage_volume": shortage_volume,
-            "total_exposure": str(total_exposure),
-            "unit_cost_usd": str(input_data.unit_cost_usd),
-        }
-        calc_hash = hashlib.sha256(
-            json.dumps(hash_payload, sort_keys=True).encode("utf-8")
-        ).hexdigest()
+            # 5. Factory halt downtime impact (if configured)
+            downtime_hours = Decimal("0.00")
+            factory_halt_exposure = Decimal("0.00")
+            if input_data.factory_halt_cost_per_hour_eur is not None and gap_days > Decimal("0.00"):
+                hours_per_day = input_data.operating_hours_per_day
+                downtime_hours = (gap_days * hours_per_day).quantize(
+                    PRECISION_DAYS, rounding=ROUND_HALF_UP
+                )
+                factory_halt_exposure = self.calculate_downtime_exposure(
+                    gap_days=gap_days,
+                    operating_hours_per_day=hours_per_day,
+                    hourly_rate=input_data.factory_halt_cost_per_hour_eur,
+                )
 
-        return RiskAssessmentResult(
-            days_of_cover=days_of_cover,
-            gap_days=gap_days,
-            shortage_volume=shortage_volume,
-            financial_exposure=financial_exposure,
-            downtime_hours=downtime_hours,
-            factory_halt_exposure=factory_halt_exposure,
-            total_exposure=total_exposure,
-            is_shortage=is_shortage,
-            calculation_hash=calc_hash,
-        )
+            total_exposure = financial_exposure + factory_halt_exposure
+            is_shortage = gap_days > Decimal("0.00")
+
+            # 6. Cryptographic calculation verification hash
+            hash_payload = {
+                "current_stock": int(input_data.current_stock),
+                "daily_consumption_rate": str(input_data.daily_consumption_rate),
+                "days_of_cover": str(days_of_cover),
+                "eta_days": str(input_data.eta_days),
+                "financial_exposure": str(financial_exposure),
+                "gap_days": str(gap_days),
+                "shortage_volume": shortage_volume,
+                "total_exposure": str(total_exposure),
+                "unit_cost_usd": str(input_data.unit_cost_usd),
+            }
+            calc_hash = hashlib.sha256(
+                json.dumps(hash_payload, sort_keys=True).encode("utf-8")
+            ).hexdigest()
+
+            span.set_attribute("days_of_cover", str(days_of_cover))
+            span.set_attribute("shortage_gap", str(gap_days))
+            span.set_attribute("shortage_volume", str(shortage_volume))
+            span.set_attribute("financial_exposure", str(financial_exposure))
+
+            return RiskAssessmentResult(
+                days_of_cover=days_of_cover,
+                gap_days=gap_days,
+                shortage_volume=shortage_volume,
+                financial_exposure=financial_exposure,
+                downtime_hours=downtime_hours,
+                factory_halt_exposure=factory_halt_exposure,
+                total_exposure=total_exposure,
+                is_shortage=is_shortage,
+                calculation_hash=calc_hash,
+            )
+
+    calculate_risk = calculate
 
     def calculate_from_params(
         self,

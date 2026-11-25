@@ -29,6 +29,7 @@ from src.agents.state import (
     WorkflowStatus,
 )
 from src.core.logging import get_logger
+from src.core.telemetry import trace_agent_node
 from src.services.dual_approval_enforcer import get_dual_approval_enforcer
 
 logger = get_logger("apexmotion.agents.graph")
@@ -148,6 +149,7 @@ def route_after_hitl_gate(state: SupplierRiskState) -> str:
 # ------------------------------------------------------------------------------
 
 
+@trace_agent_node(NODE_HITL_GATE)
 def hitl_gate_node(state: SupplierRiskState) -> dict[str, Any]:
     """Node 6: Enforce cryptographic Human-In-The-Loop gate based on spend tier."""
     logger.info("HITL gate node checking authorization status for alert: %s", state.get("alert_id"))
@@ -192,6 +194,7 @@ def hitl_gate_node(state: SupplierRiskState) -> dict[str, Any]:
     }
 
 
+@trace_agent_node(NODE_ACTION)
 def action_node(state: SupplierRiskState) -> dict[str, Any]:
     """Node 7: Execute approved procurement action and append cryptographic audit record."""
     logger.info("Action node executing approved mitigation for alert: %s", state.get("alert_id"))
@@ -226,6 +229,7 @@ def action_node(state: SupplierRiskState) -> dict[str, Any]:
     }
 
 
+@trace_agent_node(NODE_DISMISS)
 def dismiss_node(state: SupplierRiskState) -> dict[str, Any]:
     """Node 8: Record zero-impact event and close investigation without expenditure."""
     logger.info("Dismiss node closing zero-risk case for alert: %s", state.get("alert_id"))
@@ -275,11 +279,13 @@ def build_investigation_graph(
     builder = StateGraph(SupplierRiskState)
 
     # 1. Register All Nodes
-    builder.add_node(NODE_TRIAGE, triage_node)
-    builder.add_node(NODE_RESEARCH, research_node)
-    builder.add_node(NODE_CONTRACT, contract_node)
-    builder.add_node(NODE_RISK, risk_node)
-    builder.add_node(NODE_RECOMMENDATION, recommendation_node)
+    builder.add_node(NODE_TRIAGE, trace_agent_node(NODE_TRIAGE)(triage_node))
+    builder.add_node(NODE_RESEARCH, trace_agent_node(NODE_RESEARCH)(research_node))
+    builder.add_node(NODE_CONTRACT, trace_agent_node(NODE_CONTRACT)(contract_node))
+    builder.add_node(NODE_RISK, trace_agent_node(NODE_RISK)(risk_node))
+    builder.add_node(
+        NODE_RECOMMENDATION, trace_agent_node(NODE_RECOMMENDATION)(recommendation_node)
+    )
     builder.add_node(NODE_HITL_GATE, hitl_gate_node)
     builder.add_node(NODE_ACTION, action_node)
     builder.add_node(NODE_DISMISS, dismiss_node)

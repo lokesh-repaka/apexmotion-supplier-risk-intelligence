@@ -33,8 +33,19 @@ _BEARER_TOKEN_REGEX = re.compile(
 
 
 def get_trace_id() -> str | None:
-    """Return the active trace_id in current context."""
-    return _TRACE_ID_VAR.get()
+    """Return the active trace_id in current context or from active OpenTelemetry span."""
+    trace_id = _TRACE_ID_VAR.get()
+    if trace_id:
+        return trace_id
+    try:
+        from src.core.telemetry import get_current_trace_id
+
+        otel_id = get_current_trace_id()
+        if otel_id:
+            return otel_id
+    except Exception:
+        pass
+    return None
 
 
 def set_trace_id(trace_id: str | None) -> None:

@@ -1,0 +1,26 @@
+# ==============================================================================
+# Prometheus Scrape Configuration for ApexMotion Platform
+# Reference: CLAUDE.md Sec 8.1 & LLD Sec 8.2
+# ==============================================================================
+
+global:
+  scrape_interval: 5s
+  evaluation_interval: 5s
+  external_labels:
+    environment: local-dev
+    cluster: apexmotion-primary
+
+scrape_configs:
+  - job_name: "apexmotion-api"
+    metrics_path: "/metrics"
+    scheme: "http"
+    scrape_interval: 5s
+    scrape_timeout: 4s
+    static_configs:
+      - targets:
+          - "host.docker.internal:8000"
+          - "api:8000"
+        labels:
+          app: "apexmotion-api"
+          tier: "backend"
+          service: "fastapi"

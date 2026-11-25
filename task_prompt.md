@@ -1,6 +1,6 @@
 You have access to the project's authoritative documentation: `TASKS.md`, `CLAUDE.md`, `GEMINI.md`, `.agents/rules/`, and architecture specifications in `docs/` (`HLD_*.md`, `LLD_*.md`, `PRD_*.md`, `BRD_*.md`, `FRD_*.md`).
 
-Go ahead and complete **P15-4 · Grafana dashboard JSON — SLO panels: p95 investigation latency ≤ 90s, Kafka lag, HITL queue depth, LLM cost/day**, as defined in `TASKS.md`.
+Go ahead and complete **P15-5 · CloudWatch alarms — p95 latency breach, error rate > 1%, Kafka consumer lag > 30s, Neptune query > 2s**, as defined in `TASKS.md`.
 
 ---
 

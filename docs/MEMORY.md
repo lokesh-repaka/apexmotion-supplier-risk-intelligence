@@ -1061,17 +1061,32 @@
 
 ---
 
+### Invariant 76: Grafana SLO Dashboard & Operational Observability Provisioning (P15-4)
+- **Standard**: Declarative Grafana dashboard JSON (`monitoring/grafana/dashboards/supplier_risk_overview.json`) conforming to Grafana schemaVersion 38, integrating core Service Level Objective (SLO) panels: investigation duration ($p95 \le 90$s SLA boundary with 75s warning and 90s error thresholds), Kafka consumer lag ($>5,000$ critical alert boundary triggering KEDA autoscaling per LLD Sec 8.3), HITL queue depths by spend tier (`CATEGORY_MGR`, `PROC_DIRECTOR`, `DUAL_VP`), daily LLM cost accumulation ($0.15/investigation budget gate) and token burn rates, FastAPI HTTP request duration percentiles ($p95/p99$) and status rates, deterministic calculation engine duration, circuit breaker trips, prompt injections neutralized, and KMS ECDSA approval tokens minted. Fully automated with Grafana dashboard and Prometheus datasource provisioning YAMLs and docker-compose orchestration.
+- **Verification**: `tests/unit/test_grafana_dashboard.py` (12 unit tests, validating JSON validity, schema version, metadata, panel thresholds, 100% PromQL metric validity cross-checked against `src/core/metrics.py`, panel uniqueness, grid coordinates, and docker-compose provisioning).
+- **Enforcement Rules**:
+  1. **Strict PromQL Metric Validation**: 100% of metric names referenced across all dashboard panels (`apexmotion_investigation_duration_seconds`, `apexmotion_kafka_consumer_lag`, `apexmotion_hitl_pending_count`, `apexmotion_llm_cost_usd_total`, `apexmotion_llm_tokens_total`, `apexmotion_http_requests_total`, `apexmotion_http_request_duration_seconds`, `apexmotion_circuit_breaker_trips_total`, `apexmotion_deterministic_calculation_duration_seconds`, `apexmotion_quarantined_injections_blocked_total`, `apexmotion_approval_tokens_minted_total`) must correspond to declared collectors in `src/core/metrics.py`.
+  2. **SLO Threshold Alignment**:
+     - Investigation Latency: threshold lines at 75s (warning) and 90s (critical breach).
+     - Kafka Lag: threshold lines at 1,000 (warning) and 5,000 (critical, triggering KEDA scale-out).
+     - HITL Queue: threshold lines at 5 (warning) and 15 (critical backlog).
+  3. **Zero Secrets in Dashboards**: Dashboard JSON uses templated datasource variables (`${datasource}`) and contains zero hardcoded tokens, passwords, or credentials.
+  4. **Declarative Auto-Provisioning**: Dashboard provider config (`monitoring/grafana/provisioning/dashboards/dashboards.yaml`) and Prometheus datasource (`monitoring/grafana/provisioning/datasources/prometheus.yaml`) mount directly into the Grafana container.
+  5. **Docker Compose Integration**: `docker-compose.yml` mounts Prometheus on port 9090 and Grafana on port 3001 with pre-configured persistent volumes and scrape targets.
+
+---
+
 ## 5. Next Planned Tasks
 - **Phase 11 — FastAPI API Routes**: Completed ✅ (6/6 tasks done)
 - **Phase 12 — React Frontend**: Completed ✅ (6/6 tasks done)
 - **Phase 13 — Supplier Seed Data & Golden Datasets**: Completed ✅ (4/4 tasks done)
 - **Phase 14 — Unit & Golden Test Hardening**: Completed ✅ (6/6 tasks done)
-- **Phase 15 — Observability**: In Progress 🔄 (3/5 tasks done)
+- **Phase 15 — Observability**: In Progress 🔄 (4/5 tasks done)
   - **P15-1**: OpenTelemetry setup — @vercel/otel-style span instrumentation on all FastAPI routes and agent nodes; trace_id propagated to every log line (`feature/observability-otel-setup`). Completed ✅
   - **P15-2**: Langfuse callback integration — CallbackHandler on every LangGraph agent run; records tokens used, latency, and cost per investigation (`feature/observability-langfuse-tracing`). Completed ✅
   - **P15-3**: Prometheus metrics export — counter, gauge, and histogram metrics (`feature/observability-prometheus-metrics`). Completed ✅
-  - **P15-4**: Grafana dashboard JSON (`feature/observability-grafana-dashboard`). Next 🔄
-  - **P15-5**: CloudWatch alarms (`feature/observability-cloudwatch-alarms`). Pending ❌
+  - **P15-4**: Grafana dashboard JSON (`feature/observability-grafana-dashboard`). Completed ✅
+  - **P15-5**: CloudWatch alarms (`feature/observability-cloudwatch-alarms`). Next 🔄
 
 
 

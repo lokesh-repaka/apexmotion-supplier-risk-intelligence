@@ -5,17 +5,29 @@ import { InvestigationPage } from './pages/InvestigationPage';
 import { RiskDashboardPage } from './pages/RiskDashboardPage';
 import { SupplierGraphPage } from './pages/SupplierGraphPage';
 import { AuditTrailPage } from './pages/AuditTrailPage';
+import { LandingPage } from './components/LandingPage/LandingPage';
 
-export type AppView = 'dashboard' | 'graph' | 'investigation' | 'approvals' | 'audit';
+export type AppView = 'landing' | 'dashboard' | 'graph' | 'investigation' | 'approvals' | 'audit';
 
 export const App: React.FC = () => {
-  const [activeView, setActiveView] = useState<AppView>('dashboard');
+  const [activeView, setActiveView] = useState<AppView>('landing');
 
   return (
     <div className="min-h-screen bg-[#060911] text-slate-100 flex flex-col font-sans">
       {/* View Switcher Bar */}
       <nav className="bg-[#080d1a] border-b border-slate-800 px-6 py-2 flex items-center justify-between text-xs sticky top-0 z-40">
         <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={() => setActiveView('landing')}
+            className={`px-3 py-1.5 rounded-lg font-semibold transition-colors ${
+              activeView === 'landing'
+                ? 'bg-sky-600 text-white shadow-sm'
+                : 'text-slate-400 hover:text-white hover:bg-slate-800'
+            }`}
+          >
+            Overview &amp; Blueprint
+          </button>
           <button
             type="button"
             onClick={() => setActiveView('dashboard')}
@@ -83,7 +95,9 @@ export const App: React.FC = () => {
 
       {/* View Content */}
       <div className="flex-1">
-        {activeView === 'dashboard' ? (
+        {activeView === 'landing' ? (
+          <LandingPage onLaunchWorkbench={() => setActiveView('dashboard')} />
+        ) : activeView === 'dashboard' ? (
           <RiskDashboardPage onNavigateToInvestigation={() => setActiveView('investigation')} />
         ) : activeView === 'graph' ? (
           <SupplierGraphPage

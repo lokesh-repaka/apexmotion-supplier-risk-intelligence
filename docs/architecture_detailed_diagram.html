@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ApexMotion — Supplier Risk Intelligence & Governance Platform</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; background-color: #060911; color: #e2e8f0; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    .glow-sky { box-shadow: 0 0 50px -10px rgba(14, 165, 233, 0.25); }
+    .glow-indigo { box-shadow: 0 0 50px -10px rgba(99, 102, 241, 0.25); }
+    .glow-amber { box-shadow: 0 0 50px -10px rgba(245, 158, 11, 0.25); }
+    .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scroll::-webkit-scrollbar-track { background: #0a1224; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 3px; }
+  </style>
+</head>
+<body class="bg-[#060911] text-slate-100 antialiased selection:bg-sky-600 selection:text-white min-w-[1280px]">
+
+  <!-- ================= TOP NAVIGATION BAR ================= -->
+  <nav class="sticky top-0 z-50 backdrop-blur-xl bg-[#080d1a]/90 border-b border-slate-800/80 px-6 py-3.5 transition-all">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      
+      <!-- Brand & Status -->
+      <div class="flex items-center gap-3.5">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-500 via-indigo-600 to-cyan-400 flex items-center justify-center text-white shadow-lg shadow-sky-500/30 font-black">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+          </svg>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-lg font-extrabold tracking-tight text-white">ApexMotion <span class="text-sky-400">Risk Intelligence</span></span>
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              AWS US-East-1 Production Live
+            </span>
+          </div>
+          <p class="text-[11px] text-slate-400 font-medium">Multi-Agent Supply Chain Risk &amp; Governance Platform</p>
+        </div>
+      </div>
+
+      <!-- Navigation Links -->
+      <div class="flex items-center gap-6 text-xs font-semibold text-slate-300">
+        <a href="#about" class="hover:text-sky-400 transition-colors">Overview</a>
+        <a href="#nanocore" class="hover:text-sky-400 transition-colors">The NanoCore Incident</a>
+        <a href="#triad" class="hover:text-sky-400 transition-colors">The Triad Principle</a>
+        <a href="#architecture" class="hover:text-sky-400 transition-colors">Architecture Blueprint</a>
+        <a href="#agents" class="hover:text-sky-400 transition-colors">Multi-Agent Swarm</a>
+        <a href="#hitl" class="hover:text-sky-400 transition-colors">HITL Governance</a>
+      </div>
+
+      <!-- Actions -->
+      <div class="flex items-center gap-3">
+        <a href="https://github.com/lokesh-repaka/apexmotion-supplier-risk-intelligence" target="_blank" rel="noopener noreferrer" class="px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:text-white bg-slate-900 hover:bg-slate-800 border border-slate-700/80 transition-all flex items-center gap-1.5">
+          <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+          <span>GitHub</span>
+        </a>
+      </div>
+
+    </div>
+  </nav>
+
+  <!-- ================= HERO SECTION ================= -->
+  <header id="about" class="relative pt-16 pb-20 overflow-hidden border-b border-slate-800/80 bg-gradient-to-b from-[#0a1224] via-[#080d1a] to-[#060911]">
+    <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[350px] bg-sky-600/10 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute top-1/3 left-1/4 w-[400px] h-[250px] bg-indigo-600/10 rounded-full blur-3xl pointer-events-none"></div>
+
+    <div class="max-w-7xl mx-auto px-6 relative z-10">
+      
+      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-sky-500/10 border border-sky-500/20 text-sky-400 text-xs font-semibold mb-6">
+        <span class="w-2 h-2 rounded-full bg-sky-400 animate-ping"></span>
+        <span>Production Release 1.0.0 • 1,202 Offline Tests (100% Passed) • Forward Deployed Engineering Deliverable</span>
+      </div>
+
+      <h1 class="text-4xl lg:text-6xl font-extrabold tracking-tight text-white max-w-4xl leading-[1.15]">
+        Autonomous Supplier Risk Intelligence for <span class="bg-gradient-to-r from-sky-400 via-indigo-300 to-cyan-400 bg-clip-text text-transparent">Global Manufacturing</span>
+      </h1>
+
+      <p class="mt-6 text-base lg:text-lg text-slate-300 max-w-3xl leading-relaxed">
+        Engineered for <strong class="text-white">ApexMotion</strong> (Tier-1 EV parts, battery, and electronics manufacturer with 4,500 suppliers across 38 countries and 65,000 SKUs). It replaces blind manual supplier monitoring with a <strong class="text-sky-400">multi-agent LangGraph swarm</strong>, multi-tier Neptune graph traversal, deterministic Python risk math, and cryptographically signed human spend approval gates.
+      </p>
+
+      <!-- Key Metrics Strip -->
+      <div class="mt-10 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl">
+        <div class="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 backdrop-blur-sm">
+          <div class="text-2xl font-black text-sky-400">1,202 / 1,202</div>
+          <div class="text-xs text-slate-400 mt-1 font-medium">Tests Passed (1,086 Pytest + 116 Vitest)</div>
+        </div>
+        <div class="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 backdrop-blur-sm">
+          <div class="text-2xl font-black text-emerald-400">$18M / Year</div>
+          <div class="text-xs text-slate-400 mt-1 font-medium">Supplier Disruption Loss Target Mitigated</div>
+        </div>
+        <div class="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 backdrop-blur-sm">
+          <div class="text-2xl font-black text-amber-400">100% Deterministic</div>
+          <div class="text-xs text-slate-400 mt-1 font-medium">Days of Cover &amp; Exposure (Zero LLM Math)</div>
+        </div>
+        <div class="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 backdrop-blur-sm">
+          <div class="text-2xl font-black text-cyan-400">ECDSA P-256</div>
+          <div class="text-xs text-slate-400 mt-1 font-medium">AWS KMS Dual-Approval HITL Spend Gating</div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="mt-8 flex flex-wrap items-center gap-4">
+        <a href="#architecture" class="px-6 py-3.5 rounded-xl text-sm font-semibold text-slate-200 bg-slate-900 hover:bg-slate-800 border border-slate-700 transition-all flex items-center gap-2">
+          <span>🏛️ Inspect Architecture Blueprint</span>
+        </a>
+        <a href="https://github.com/lokesh-repaka/apexmotion-supplier-risk-intelligence" target="_blank" rel="noopener noreferrer" class="px-6 py-3.5 rounded-xl text-sm font-semibold text-slate-300 hover:text-white bg-transparent hover:bg-slate-800/40 border border-slate-700/60 transition-all flex items-center gap-2">
+          <span>💻 View GitHub Repository</span>
+        </a>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ================= THE NANOCORE BENCHMARK ================= -->
+  <section id="nanocore" class="py-20 border-b border-slate-800/80 bg-[#060911]">
+    <div class="max-w-7xl mx-auto px-6">
+      
+      <div class="max-w-3xl mb-12">
+        <span class="text-xs font-bold tracking-widest text-amber-400 uppercase">Canonical Ground-Truth Benchmark</span>
+        <h2 class="text-3xl font-extrabold text-white mt-2">The NanoCore Semiconductor Disruption</h2>
+        <p class="text-sm text-slate-400 mt-3 leading-relaxed">
+          ApexMotion’s canonical benchmark incident: A fire at NanoCore Microelectronics (Tier-1 MCU supplier) halts delivery of microcontrollers for ApexMotion Battery Management Systems.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div class="p-6 rounded-2xl bg-[#0a1224] border border-slate-800">
+          <div class="text-xs font-mono uppercase text-sky-400 font-bold">Current Stock</div>
+          <div class="text-2xl font-black text-white mt-2">142,000 Units</div>
+          <p class="text-xs text-slate-400 mt-2">Daily consumption rate: 18,500 units/day across 3 EV assembly lines.</p>
+        </div>
+
+        <div class="p-6 rounded-2xl bg-[#0a1224] border border-slate-800">
+          <div class="text-xs font-mono uppercase text-amber-400 font-bold">Days of Cover</div>
+          <div class="text-2xl font-black text-amber-400 mt-2">7.68 Days</div>
+          <p class="text-xs text-slate-400 mt-2 font-mono">142,000 / 18,500 = 7.6756 days (deterministic float precision).</p>
+        </div>
+
+        <div class="p-6 rounded-2xl bg-[#0a1224] border border-slate-800">
+          <div class="text-xs font-mono uppercase text-red-400 font-bold">Production Gap</div>
+          <div class="text-2xl font-black text-red-400 mt-2">1.32 Days</div>
+          <p class="text-xs text-slate-400 mt-2">9-day supplier shipment delay leaves a 24,420 unit deficit.</p>
+        </div>
+
+        <div class="p-6 rounded-2xl bg-[#0a1224] border border-slate-800">
+          <div class="text-xs font-mono uppercase text-emerald-400 font-bold">Financial Exposure</div>
+          <div class="text-2xl font-black text-emerald-400 mt-2">$2,448,105.00</div>
+          <p class="text-xs text-slate-400 mt-2 font-mono">24,420 units × $100.25 BOM plant cost per unit.</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ================= THE TRIAD PRINCIPLE ================= -->
+  <section id="triad" class="py-20 border-b border-slate-800/80 bg-[#080d1a]">
+    <div class="max-w-7xl mx-auto px-6">
+      
+      <div class="text-center max-w-3xl mx-auto mb-16">
+        <span class="text-xs font-bold tracking-widest text-sky-400 uppercase">Architectural Invariant</span>
+        <h2 class="text-3xl font-extrabold text-white mt-2">The Triad of Responsibility</h2>
+        <p class="text-sm text-slate-400 mt-3">Non-negotiable architectural separation: AI reasons over evidence, Python computes all numbers, Humans authorize all dollars.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        
+        <div class="p-8 rounded-3xl bg-slate-900/60 border border-sky-500/30">
+          <div class="w-12 h-12 rounded-2xl bg-sky-500/20 text-sky-400 flex items-center justify-center mb-6 text-xl font-bold">🤖</div>
+          <h3 class="text-lg font-bold text-white mb-2">1. AI / LLM Domain</h3>
+          <p class="text-xs text-sky-400 font-semibold mb-4">Evidence Synthesis &amp; Parsing</p>
+          <ul class="space-y-3 text-xs text-slate-300">
+            <li>✓ Gathers unstructured signals from maritime AIS, news &amp; SEC filings.</li>
+            <li>✓ Extracts force majeure, penalty clauses &amp; lead times from supplier contracts.</li>
+            <li>✓ Synthesizes risk dossiers with zero arithmetic permissions.</li>
+            <li class="text-red-400 font-semibold">✕ ZERO math calculations or financial decisions permitted.</li>
+          </ul>
+        </div>
+
+        <div class="p-8 rounded-3xl bg-slate-900/60 border border-emerald-500/30">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center mb-6 text-xl font-bold">⚙️</div>
+          <h3 class="text-lg font-bold text-white mb-2">2. Deterministic Domain</h3>
+          <p class="text-xs text-emerald-400 font-semibold mb-4">100% Python Arithmetic</p>
+          <ul class="space-y-3 text-xs text-slate-300">
+            <li>✓ Computes exact Days of Cover (current stock / daily rate).</li>
+            <li>✓ Computes Shortage Volume down to individual SKU units.</li>
+            <li>✓ Calculates Financial Exposure ($2,448,105.00 for NanoCore).</li>
+            <li class="text-emerald-400 font-semibold">✓ Guaranteed zero-hallucination arithmetic compliance.</li>
+          </ul>
+        </div>
+
+        <div class="p-8 rounded-3xl bg-slate-900/60 border border-amber-500/30">
+          <div class="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center mb-6 text-xl font-bold">🛡️</div>
+          <h3 class="text-lg font-bold text-white mb-2">3. Human Authority</h3>
+          <p class="text-xs text-amber-400 font-semibold mb-4">Cryptographic HITL Spend Gate</p>
+          <ul class="space-y-3 text-xs text-slate-300">
+            <li>✓ Category Manager approval required for spend &le; $100k.</li>
+            <li>✓ VP Supply Chain dual-signature required for spend &gt; $100k.</li>
+            <li>✓ AWS KMS ECDSA P-256 cryptographic token minting &amp; replay protection.</li>
+            <li class="text-amber-400 font-semibold">✓ Zero autonomous purchase orders or PO releases.</li>
+          </ul>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ================= SYSTEM ARCHITECTURE BLUEPRINT ================= -->
+  <section id="architecture" class="py-20 border-b border-slate-800/80 bg-[#060911]">
+    <div class="max-w-7xl mx-auto px-6">
+      
+      <div class="flex flex-col md:flex-row md:items-end justify-between mb-12">
+        <div>
+          <span class="text-xs font-bold tracking-widest text-sky-400 uppercase">System Topology</span>
+          <h2 class="text-3xl lg:text-4xl font-extrabold text-white mt-2">C4 Level-2 Component Blueprint</h2>
+          <p class="text-sm text-slate-400 mt-2 max-w-2xl">
+            End-to-end integration: React 18 SPA, Kafka event streaming, Quarantined Reader prompt firewall, LangGraph multi-agent swarm, Amazon Neptune knowledge graph, and S3 WORM archive.
+          </p>
+        </div>
+        <div class="mt-4 md:mt-0 flex items-center gap-3">
+          <a href="apexmotion_architecture.jpg" target="_blank" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-200 bg-slate-900 hover:bg-slate-800 border border-slate-700 transition-all flex items-center gap-1.5">
+            <span>Open High-Res Blueprint</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Architecture Image Card -->
+      <div class="rounded-3xl border border-slate-800 bg-[#0a1224] p-4 lg:p-6 shadow-2xl relative overflow-hidden group">
+        <div class="relative rounded-2xl overflow-hidden border border-slate-800/80 bg-[#060911]">
+          <img src="apexmotion_architecture.jpg" alt="ApexMotion End-to-End System Architecture Blueprint" class="w-full h-auto object-contain transition-transform duration-500 group-hover:scale-[1.01]" />
+        </div>
+        <div class="mt-4 flex items-center justify-between text-xs text-slate-400 px-2">
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+            <span class="font-mono text-sky-400">Figure 1.0: ApexMotion Supplier Risk Intelligence &amp; Governance Topology</span>
+          </div>
+          <span>Built on AWS EKS, Amazon Neptune, Apache Kafka, Aurora PostgreSQL, OpenSearch &amp; React 18</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ================= FOOTER ================= -->
+  <footer class="py-8 bg-[#04060c] border-t border-slate-900 text-xs text-slate-500">
+    <div class="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-2">
+        <span class="font-bold text-slate-300">ApexMotion Supplier Risk Intelligence Platform</span>
+        <span>&bull;</span>
+        <span>EURON Consulting FDE Deliverable</span>
+      </div>
+      <div class="flex items-center gap-6">
+        <a href="https://github.com/lokesh-repaka/apexmotion-supplier-risk-intelligence" target="_blank" class="hover:text-sky-400 transition">GitHub Repository</a>
+        <a href="apexmotion_architecture.jpg" target="_blank" class="hover:text-sky-400 transition">Architecture Blueprint</a>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

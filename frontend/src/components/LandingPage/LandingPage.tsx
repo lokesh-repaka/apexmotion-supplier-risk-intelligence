@@ -7,13 +7,15 @@ import {
   CheckCircle2,
   Lock,
   Activity,
+  Menu,
 } from 'lucide-react';
 
 interface LandingPageProps {
   onLaunchWorkbench: () => void;
+  onOpenSidebar?: () => void;
 }
 
-export const LandingPage: React.FC<LandingPageProps> = ({ onLaunchWorkbench }) => {
+export const LandingPage: React.FC<LandingPageProps> = ({ onLaunchWorkbench, onOpenSidebar }) => {
   const [isDiagramModalOpen, setIsDiagramModalOpen] = useState(false);
 
   return (
@@ -52,6 +54,17 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLaunchWorkbench }) =
 
           {/* Actions */}
           <div className="flex items-center gap-3">
+            {onOpenSidebar && (
+              <button
+                type="button"
+                onClick={onOpenSidebar}
+                className="px-3 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:text-white bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 transition-all flex items-center gap-1.5 cursor-pointer"
+                title="Open Workbench Navigation Sidebar"
+              >
+                <Menu className="w-3.5 h-3.5 text-sky-400" />
+                <span className="hidden sm:inline">Workbench Modules</span>
+              </button>
+            )}
             <a
               href="https://github.com/lokesh-repaka/apexmotion-supplier-risk-intelligence"
               target="_blank"

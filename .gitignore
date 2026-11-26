@@ -78,3 +78,5 @@ yarn-error.log*
 
 # Antigravity runtime logs
 .gemini/
+.vercel
+.env*
